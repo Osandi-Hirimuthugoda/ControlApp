@@ -15,10 +15,12 @@ namespace ControlApp.API.Controllers
             _controlService = controlService;
         }
 
+        
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls()
+        public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls([FromQuery] string? search = null)
         {
-            var controls = await _controlService.GetAllControlsAsync();
+            
+            var controls = await _controlService.GetAllControlsAsync(search);
             return Ok(controls);
         }
 
@@ -51,6 +53,9 @@ namespace ControlApp.API.Controllers
         {
             try
             {
+                if (id != updateControlDto.ControlId)
+                    return BadRequest("Control ID mismatch");
+
                 var control = await _controlService.UpdateControlAsync(id, updateControlDto);
                 if (control == null)
                     return NotFound($"Control with ID {id} not found.");
@@ -60,6 +65,10 @@ namespace ControlApp.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error updating control: {ex.Message}");
             }
         }
 
@@ -72,6 +81,19 @@ namespace ControlApp.API.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("add-all-employees")]
+        public async Task<ActionResult<IEnumerable<ControlDto>>> AddAllEmployeesToControls()
+        {
+            try
+            {
+                var controls = await _controlService.AddAllEmployeesToControlsAsync();
+                return Ok(controls);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error adding employees to controls: {ex.Message}");
+            }
+        }
     }
 }
-

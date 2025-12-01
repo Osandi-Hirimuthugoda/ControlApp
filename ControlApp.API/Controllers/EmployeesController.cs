@@ -18,8 +18,15 @@ namespace ControlApp.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAllEmployees()
         {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            return Ok(employees);
+            try
+            {
+                var employees = await _employeeService.GetAllEmployeesAsync();
+                return Ok(employees);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error loading employees: {ex.Message}. Inner exception: {ex.InnerException?.Message}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -32,11 +39,31 @@ namespace ControlApp.API.Controllers
             return Ok(employee);
         }
 
+        
         [HttpPost]
-        public async Task<ActionResult<EmployeeDto>> CreateEmployee([FromBody] CreateEmployeeDto createEmployeeDto)
+        public async Task<ActionResult<EmployeeDto>> CreateEmployee([FromBody] CreateEmployeeWithControlDto createDto)
         {
-            var employee = await _employeeService.CreateEmployeeAsync(createEmployeeDto);
-            return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
+            try
+            {
+                if (createDto == null)
+                    return BadRequest(new { message = "Employee data is required." });
+
+                if (string.IsNullOrWhiteSpace(createDto.EmployeeName))
+                    return BadRequest(new { message = "Employee name is required." });
+
+                
+                var employee = await _employeeService.CreateEmployeeWithControlAsync(createDto);
+                
+                return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error creating employee: {ex.Message}" });
+            }
         }
 
         [HttpPut("{id}")]
@@ -52,12 +79,19 @@ namespace ControlApp.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var deleted = await _employeeService.DeleteEmployeeAsync(id);
-            if (!deleted)
-                return NotFound($"Employee with ID {id} not found.");
+            try
+            {
+                var deleted = await _employeeService.DeleteEmployeeAsync(id);
+                if (!deleted)
+                    return NotFound($"Employee with ID {id} not found.");
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
     }
 }
-

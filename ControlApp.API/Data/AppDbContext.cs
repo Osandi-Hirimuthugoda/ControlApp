@@ -57,6 +57,11 @@ namespace ControlApp.API
             modelBuilder.Entity<Employee>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                
+                entity.HasOne(e => e.Type)
+                    .WithMany()
+                    .HasForeignKey(e => e.TypeId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             

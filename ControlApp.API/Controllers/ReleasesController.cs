@@ -60,4 +60,3 @@ namespace ControlApp.API.Controllers
         }
     }
 }
-

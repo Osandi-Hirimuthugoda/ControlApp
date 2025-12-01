@@ -11,4 +11,3 @@ namespace ControlApp.API.DTOs
         public string StatusName { get; set; } = null!;
     }
 }
-

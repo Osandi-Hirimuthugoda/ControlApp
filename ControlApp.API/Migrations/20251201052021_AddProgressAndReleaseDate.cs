@@ -11,19 +11,6 @@ namespace ControlApp.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // --- ALREADY EXISTS IN DB: Commented out ---
-            // migrationBuilder.AddColumn<string>(
-            //     name: "Description",
-            //     table: "Employees",
-            //     type: "nvarchar(max)",
-            //     nullable: true);
-
-            // --- ALREADY EXISTS IN DB: Commented out ---
-            // migrationBuilder.AddColumn<int>(
-            //     name: "TypeId",
-            //     table: "Employees",
-            //     type: "int",
-            //     nullable: true);
 
             migrationBuilder.AlterColumn<int>(
                 name: "StatusId",
@@ -57,7 +44,7 @@ namespace ControlApp.API.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
 
-            // --- THIS IS THE NEW PART YOU NEED ---
+            
             migrationBuilder.AddColumn<int>(
                 name: "Progress",
                 table: "Controls",
@@ -70,22 +57,6 @@ namespace ControlApp.API.Migrations
                 table: "Controls",
                 type: "datetime2",
                 nullable: true);
-            // -------------------------------------
-
-            // --- ALREADY EXISTS IN DB: Commented out to fix error 1913 ---
-            // migrationBuilder.CreateIndex(
-            //     name: "IX_Employees_TypeId",
-            //     table: "Employees",
-            //     column: "TypeId");
-
-            // migrationBuilder.AddForeignKey(
-            //     name: "FK_Employees_ControlTypes_TypeId",
-            //     table: "Employees",
-            //     column: "TypeId",
-            //     principalTable: "ControlTypes",
-            //     principalColumn: "ControlTypeId",
-            //     onDelete: ReferentialAction.SetNull);
-            // -------------------------------------------------------------
         }
 
         /// <inheritdoc />

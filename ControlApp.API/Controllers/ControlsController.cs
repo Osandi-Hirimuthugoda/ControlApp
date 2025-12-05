@@ -15,7 +15,7 @@ namespace ControlApp.API.Controllers
             _controlService = controlService;
         }
 
-        
+         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls([FromQuery] string? search = null)
         {

@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+ 
 // Register Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IControlRepository, ControlRepository>();

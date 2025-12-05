@@ -98,8 +98,7 @@ namespace ControlApp.API.Services
             }
             catch (Exception ex)
             {
-                // If control creation fails, we should still have the employee created
-                // But log the error for debugging
+                
                 Console.WriteLine($"Warning: Failed to create control for employee {createdEmployee.Id}: {ex.Message}");
                 
                 if (ex is InvalidOperationException)
@@ -135,7 +134,7 @@ namespace ControlApp.API.Services
             
             await _employeeRepository.UpdateAsync(employee);
             
-            // Reload with details to get Type name
+            
             var employeeWithDetails = await _employeeRepository.GetEmployeeWithDetailsByIdAsync(id);
             return employeeWithDetails != null ? MapToDto(employeeWithDetails) : MapToDto(employee);
         }

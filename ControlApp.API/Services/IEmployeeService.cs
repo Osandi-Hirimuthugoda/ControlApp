@@ -12,10 +12,3 @@ namespace ControlApp.API.Services
         Task<bool> DeleteEmployeeAsync(int id);
     }
 }
-
-
-
-
-
-
-

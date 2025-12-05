@@ -103,14 +103,14 @@
                                         <th style="width:25%">Comments</th>
                                         <th style="width:8%">Prog %</th> 
                                         <th style="width:10%">Status</th>
-                                        <th style="width:15%">Release Date</th> 
+                                        <th style="width:15%">Release</th> 
                                         <th style="width:12%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody ng-repeat="employee in vm.employees track by employee.id"
                                        style="border-top: 3px solid #6c757d;">
                                     
-                                    <tr ng-repeat="control in vm.getFilteredEmployeeControls(employee.id) | orderBy:'-controlId'">
+                                    <tr ng-repeat="control in vm.getFilteredEmployeeControls(employee.id) | orderBy:'-controlId' track by control.controlId">
                                         <!-- Type -->
                                         <td class="text-center"><span class="badge bg-secondary">{{control.typeName}}</span></td>
                                         
@@ -135,7 +135,7 @@
                                             <textarea ng-if="control.editing" class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea>
                                         </td>
                                         
-                                        <!-- NEW: Progress % -->
+                                        <!--  Progress % -->
                                         <td class="text-center">
                                             <div ng-if="!control.editing">
                                                 <div class="progress" style="height: 20px;">
@@ -161,12 +161,14 @@
                                         <td>
                                             <div ng-if="!control.editing">
                                                 <div class="text-muted small" ng-if="control.releaseDate">
-                                                    <i class="fas fa-calendar-alt"></i> {{control.releaseDate | date:'yyyy-MM-dd'}}
+                                                    <i class="fas fa-calendar-alt"></i> {{vm.formatReleaseDate(control.releaseDate)}}
                                                 </div>
                                                 <span ng-if="!control.releaseDate" class="text-muted">-</span>
                                             </div>
                                             <div ng-if="control.editing">
-                                                <input type="date" class="form-control form-control-sm" ng-model="control.editReleaseDate">
+                                                <select class="form-select form-select-sm" ng-model="control.editReleaseId" ng-options="r.releaseId as vm.formatReleaseDate(r.releaseDate) for r in vm.upcomingReleases">
+                                                    <option value="">-- Select Release --</option>
+                                                </select>
                                             </div>
                                         </td>
                                         

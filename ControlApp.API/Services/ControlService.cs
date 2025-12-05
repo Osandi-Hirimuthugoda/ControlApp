@@ -89,8 +89,19 @@ namespace ControlApp.API.Services
             control.Progress = updateControlDto.Progress;
             
 
-            control.ReleaseDate = updateControlDto.ReleaseDate;
-            control.ReleaseId = null; 
+            // Handle ReleaseId and ReleaseDate
+            if (updateControlDto.ReleaseId.HasValue && updateControlDto.ReleaseId.Value > 0)
+            {
+                var releaseExists = await _context.Set<Release>().AnyAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
+                if (!releaseExists) throw new ArgumentException($"Invalid Release ID");
+                control.ReleaseId = updateControlDto.ReleaseId.Value;
+            }
+            else
+            {
+                control.ReleaseId = null;
+            }
+            
+            control.ReleaseDate = updateControlDto.ReleaseDate; 
 
             
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)

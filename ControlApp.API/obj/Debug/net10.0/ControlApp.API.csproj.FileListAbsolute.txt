@@ -214,5 +214,5 @@ C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\ref\C
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\ControlApp.API.sourcelink.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net10.0\ControlApp.API.staticwebassets.runtime.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\compressed\uorrtlzjnl-{0}-r42q0fxpqy-r42q0fxpqy.gz
-C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\compressed\ziq3lhotaz-{0}-df8rw1s9ey-df8rw1s9ey.gz
-C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\compressed\v1za2nnf2n-{0}-wmjoghlvli-wmjoghlvli.gz
+C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\compressed\v1za2nnf2n-{0}-ih8czxqett-ih8czxqett.gz
+C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net10.0\compressed\ziq3lhotaz-{0}-n9r3veplwn-n9r3veplwn.gz

@@ -51,7 +51,6 @@ namespace ControlApp.API.Controllers
                 if (string.IsNullOrWhiteSpace(createDto.EmployeeName))
                     return BadRequest(new { message = "Employee name is required." });
 
-                
                 var employee = await _employeeService.CreateEmployeeWithControlAsync(createDto);
                 
                 return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);

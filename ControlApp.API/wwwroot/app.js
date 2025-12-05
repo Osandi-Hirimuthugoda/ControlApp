@@ -25,15 +25,25 @@ function MainController($http, $timeout, $scope, $q) {
         console.log('Initializing...');
         var p1 = vm.loadControlTypes();
         var p2 = vm.loadStatuses();
-        
+        var p3 = vm.loadReleases();
 
-        $q.all([p1, p2]).then(function() {
+        // Load releases first, then load controls so release matching works
+        $q.all([p1, p2, p3]).then(function() {
+            console.log('Control types, statuses, and releases loaded');
             return vm.loadEmployees();
         }).then(function() {
+            console.log('Employees loaded');
             return vm.loadAllControls();
         }).then(function() {
+            console.log('All controls loaded');
             vm.applyFilters();
-            $timeout(function() { if(!$scope.$$phase) $scope.$apply(); }, 100);
+            $timeout(function() { 
+                if(!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            }, 100);
+        }).catch(function(error) {
+            console.error('Error during initialization:', error);
         });
     };
 
@@ -50,14 +60,40 @@ function MainController($http, $timeout, $scope, $q) {
         return $http.get(apiBaseUrl + '/controls').then(function(r) {
             vm.allControls = r.data || [];
             vm.allControls.forEach(function(c) {
-                if(c.releaseDate) c.releaseDate = new Date(c.releaseDate);
+                // Ensure releaseDate is properly converted to Date object
+                if(c.releaseDate) {
+                    c.releaseDate = new Date(c.releaseDate);
+                    // Validate the date
+                    if(isNaN(c.releaseDate.getTime())) {
+                        console.warn('Invalid release date for control', c.controlId, c.releaseDate);
+                        c.releaseDate = null;
+                    } else {
+                        console.log('Loaded control', c.controlId, 'Release date:', c.releaseDate, 'Formatted:', vm.formatReleaseDate(c.releaseDate));
+                    }
+                } else {
+                    c.releaseDate = null;
+                }
+                
                 c.editing = false;
                 
                 if(c.statusId && vm.statuses.length > 0) {
                     var s = vm.statuses.find(x => x.id == c.statusId);
                     if(s) c.statusName = s.statusName;
                 }
+                
+                // Ensure release name is set
+                if(c.releaseId && vm.releases.length > 0) {
+                    var release = vm.releases.find(x => x.releaseId == c.releaseId);
+                    if(release) c.releaseName = release.releaseName;
+                }
             });
+            
+            // Force Angular update
+            $timeout(function() {
+                if(!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            }, 0);
         });
     };
 
@@ -77,7 +113,111 @@ function MainController($http, $timeout, $scope, $q) {
 
     vm.loadControlTypes = function() { return $http.get(apiBaseUrl + '/controltypes').then(function(r) { vm.controlTypes = r.data; }); };
     vm.loadStatuses = function() { return $http.get(apiBaseUrl + '/statuses').then(function(r) { vm.statuses = r.data; }); };
-    vm.loadReleases = function() { return $http.get(apiBaseUrl + '/releases').then(function(r) { vm.releases = r.data; }); };
+    
+    vm.loadReleases = function() { 
+        return $http.get(apiBaseUrl + '/releases').then(function(r) { 
+            vm.releases = r.data || [];
+        }).catch(function(error) {
+            console.warn('Error loading releases from API:', error);
+            vm.releases = [];
+        }).then(function() {
+            
+            var today = new Date();
+            var currentYear = today.getFullYear();
+            
+            
+            var defaultReleases = [
+                {
+                    releaseId: 999991,
+                    releaseName: "Release 26.01",
+                    releaseDate: new Date(currentYear, 0, 26), 
+                    description: "Release 26.01"
+                },
+                {
+                    releaseId: 999992,
+                    releaseName: "Release 25.12",
+                    releaseDate: new Date(currentYear, 11, 25), 
+                    description: "Release 25.12"
+                }
+            ];
+            
+            
+            if (defaultReleases[0].releaseDate < today) {
+                defaultReleases[0].releaseDate = new Date(currentYear + 1, 0, 26);
+            }
+            if (defaultReleases[1].releaseDate < today) {
+                defaultReleases[1].releaseDate = new Date(currentYear + 1, 11, 25);
+            }
+            
+            
+            var releaseMap = {};
+            if (vm.releases && vm.releases.length > 0) {
+                vm.releases.forEach(function(r) {
+                    var date = new Date(r.releaseDate);
+                    var key = date.getMonth() + '_' + date.getDate();
+                    releaseMap[key] = r;
+                });
+            }
+            
+            
+            defaultReleases.forEach(function(defRelease) {
+                var defDate = new Date(defRelease.releaseDate);
+                var defKey = defDate.getMonth() + '_' + defDate.getDate();
+                if (!releaseMap[defKey]) {
+                    if (!vm.releases) vm.releases = [];
+                    vm.releases.push(defRelease);
+                }
+            });
+            
+            
+            today.setHours(0, 0, 0, 0);
+            vm.upcomingReleases = (vm.releases || []).filter(function(release) {
+                var releaseDate = new Date(release.releaseDate);
+                releaseDate.setHours(0, 0, 0, 0);
+                return releaseDate >= today;
+            });
+            
+            
+            defaultReleases.forEach(function(defRelease) {
+                var defMonth = defRelease.releaseDate.getMonth();
+                var defDay = defRelease.releaseDate.getDate();
+                
+                
+                var exists = vm.upcomingReleases.some(function(r) {
+                    var rDate = new Date(r.releaseDate);
+                    return rDate.getMonth() === defMonth && rDate.getDate() === defDay;
+                });
+                
+                
+                if (!exists) {
+                    vm.upcomingReleases.push(defRelease);
+                }
+            });
+            
+            
+            vm.upcomingReleases.sort(function(a, b) {
+                return new Date(a.releaseDate) - new Date(b.releaseDate);
+            });
+        }); 
+    };
+    
+    
+    vm.formatReleaseDate = function(date) {
+        if (!date) return '';
+        
+        
+        var d = date instanceof Date ? date : new Date(date);
+        
+        
+        if (isNaN(d.getTime())) {
+            console.warn('Invalid date passed to formatReleaseDate:', date);
+            return '';
+        }
+        
+        var day = ('0' + d.getDate()).slice(-2);
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        return day + '.' + month;
+    };
 
     
     vm.getFilteredEmployeeControls = function(empId) {
@@ -159,10 +299,18 @@ function MainController($http, $timeout, $scope, $q) {
 
         c.editProgress = c.progress || 0; 
         
+        
         if(c.releaseDate) {
-            c.editReleaseDate = c.releaseDate;
+            var releaseDate = new Date(c.releaseDate);
+            releaseDate.setHours(0, 0, 0, 0);
+            var matchingRelease = vm.upcomingReleases.find(function(r) {
+                var rDate = new Date(r.releaseDate);
+                rDate.setHours(0, 0, 0, 0);
+                return rDate.getTime() === releaseDate.getTime();
+            });
+            c.editReleaseId = matchingRelease ? matchingRelease.releaseId : null;
         } else {
-             c.editReleaseDate = null;
+            c.editReleaseId = null;
         }
     };
 
@@ -182,6 +330,49 @@ function MainController($http, $timeout, $scope, $q) {
             return parseInt(val);
         };
 
+        
+        var selectedReleaseDate = null;
+        var selectedReleaseId = null;
+        
+        if(c.editReleaseId) {
+            var selectedRelease = vm.upcomingReleases.find(function(r) {
+                return r.releaseId == c.editReleaseId;
+            });
+            
+            if(selectedRelease) {
+                
+                if(selectedRelease.releaseDate) {
+                    var dateObj = new Date(selectedRelease.releaseDate);
+                    selectedReleaseDate = dateObj.toISOString();
+                }
+                
+                
+                if(selectedRelease.releaseId >= 999990) {
+                    
+                    var matchingDbRelease = vm.releases.find(function(r) {
+                        if(r.releaseId < 999990) { 
+                            var rDate = new Date(r.releaseDate);
+                            var selDate = new Date(selectedRelease.releaseDate);
+                            rDate.setHours(0, 0, 0, 0);
+                            selDate.setHours(0, 0, 0, 0);
+                            return rDate.getTime() === selDate.getTime();
+                        }
+                        return false;
+                    });
+                    
+                    if(matchingDbRelease) {
+                        selectedReleaseId = matchingDbRelease.releaseId;
+                    } else {
+                        
+                        selectedReleaseId = null;
+                    }
+                } else {
+                    
+                    selectedReleaseId = selectedRelease.releaseId;
+                }
+            }
+        }
+
         var data = {
             controlId: c.controlId, 
             employeeId: c.employeeId,
@@ -194,25 +385,44 @@ function MainController($http, $timeout, $scope, $q) {
             progress: getProgressInt(c.editProgress),
             statusId: getIntOrNull(c.editStatusId),
 
-            releaseId: null, 
-            releaseDate: c.editReleaseDate
+            releaseId: getIntOrNull(selectedReleaseId), 
+            releaseDate: selectedReleaseDate
         };
         
-        console.log('🚀 Sending Payload:', data);
+        console.log('Sending Payload:', data);
 
         $http.put(apiBaseUrl + '/controls/' + c.controlId, data).then(function(r) {
             var updated = r.data;
+            
+            console.log('Saved control data:', updated);
+            console.log('Release data from server - ReleaseId:', updated.releaseId, 'ReleaseDate:', updated.releaseDate);
+            
+        
+            var oldReleaseDate = c.releaseDate;
+            var oldReleaseId = c.releaseId;
             
             c.description = updated.description;
             c.comments = updated.comments;
             c.progress = updated.progress;
             c.statusId = updated.statusId;
-            c.releaseId = null; 
+            c.releaseId = updated.releaseId || null; 
             
-            if(updated.releaseDate) c.releaseDate = new Date(updated.releaseDate);
-            else c.releaseDate = null;
+            
+            if(updated.releaseDate) {
+                var newReleaseDate = new Date(updated.releaseDate);
+                
+                if(!oldReleaseDate || oldReleaseDate.getTime() !== newReleaseDate.getTime()) {
+                    c.releaseDate = newReleaseDate;
+                    console.log('Release date changed from', oldReleaseDate, 'to', c.releaseDate, 'Formatted:', vm.formatReleaseDate(c.releaseDate));
+                }
+            } else {
+                if(c.releaseDate !== null) {
+                    c.releaseDate = null;
+                    console.log('Release date cleared');
+                }
+            }
 
-            
+        
             if(updated.statusName) {
                 c.statusName = updated.statusName;
             } else if(c.statusId) {
@@ -222,9 +432,100 @@ function MainController($http, $timeout, $scope, $q) {
                 c.statusName = '';
             }
            
-            c.releaseName = '';
-
+            
+            c.releaseName = updated.releaseName || '';
+            
             c.editing = false;
+            
+            
+            var controlIndex = vm.allControls.findIndex(function(ctrl) {
+                return ctrl.controlId === c.controlId;
+            });
+            
+            if(controlIndex >= 0) {
+                
+                vm.allControls[controlIndex].description = c.description;
+                vm.allControls[controlIndex].comments = c.comments;
+                vm.allControls[controlIndex].progress = c.progress;
+                vm.allControls[controlIndex].statusId = c.statusId;
+                vm.allControls[controlIndex].statusName = c.statusName;
+                vm.allControls[controlIndex].releaseId = c.releaseId;
+                vm.allControls[controlIndex].releaseName = c.releaseName;
+                vm.allControls[controlIndex].releaseDate = c.releaseDate;
+                vm.allControls[controlIndex].editing = false;
+                
+                console.log(' Control updated in array at index', controlIndex);
+                console.log(' Array control release date:', vm.allControls[controlIndex].releaseDate, 'Formatted:', vm.formatReleaseDate(vm.allControls[controlIndex].releaseDate));
+            }
+            
+            
+            $http.get(apiBaseUrl + '/controls/' + c.controlId).then(function(response) {
+                var reloadedControl = response.data;
+                console.log('🔄 Reloaded control from server:', reloadedControl);
+                
+                
+                var reloadIndex = vm.allControls.findIndex(function(ctrl) {
+                    return ctrl.controlId === reloadedControl.controlId;
+                });
+                
+                if(reloadIndex >= 0 && reloadedControl) {
+                    
+                    if(reloadedControl.releaseDate) {
+                        reloadedControl.releaseDate = new Date(reloadedControl.releaseDate);
+                    }
+                    
+                    vm.allControls[reloadIndex] = {
+                        controlId: reloadedControl.controlId,
+                        description: reloadedControl.description,
+                        comments: reloadedControl.comments,
+                        progress: reloadedControl.progress,
+                        statusId: reloadedControl.statusId,
+                        statusName: reloadedControl.statusName || '',
+                        releaseId: reloadedControl.releaseId || null,
+                        releaseName: reloadedControl.releaseName || '',
+                        releaseDate: reloadedControl.releaseDate || null,
+                        employeeId: reloadedControl.employeeId,
+                        employeeName: reloadedControl.employeeName,
+                        typeId: reloadedControl.typeId,
+                        typeName: reloadedControl.typeName,
+                        editing: false
+                    };
+                    
+                    console.log('Control object replaced in array at index', reloadIndex);
+                    console.log('New release date:', vm.allControls[reloadIndex].releaseDate, 'Formatted:', vm.formatReleaseDate(vm.allControls[reloadIndex].releaseDate));
+                    
+                    
+                    Object.assign(c, vm.allControls[reloadIndex]);
+                }
+            }).catch(function(err) {
+                console.warn('Could not reload control:', err);
+            }).finally(function() {
+                
+                $timeout(function() {
+                    
+                    vm.applyFilters();
+                    
+                    
+                    if($scope.$root.$$phase !== '$apply' && $scope.$root.$$phase !== '$digest') {
+                        $scope.$apply(function() {
+                            console.log('🔄 View updated via $apply. Current release date:', c.releaseDate, 'Formatted:', vm.formatReleaseDate(c.releaseDate));
+                        });
+                    } else {
+                        
+                        $scope.$evalAsync(function() {
+                            console.log('🔄 View updated via $evalAsync. Current release date:', c.releaseDate, 'Formatted:', vm.formatReleaseDate(c.releaseDate));
+                        });
+                    }
+                }, 50);
+                
+                 
+                $timeout(function() {
+                    if(!$scope.$$phase) {
+                        $scope.$apply();
+                    }
+                }, 200);
+            });
+            
             vm.showMessage('Saved successfully!', 'success');
         }).catch(function(err) {
             console.error('Update Error:', err);

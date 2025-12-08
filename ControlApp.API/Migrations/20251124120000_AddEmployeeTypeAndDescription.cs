@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ControlApp.API.Migrations
 {
-    /// <inheritdoc />
+    
+    
     public partial class AddEmployeeTypeAndDescription : Migration
     {
-        /// <inheritdoc />
+        
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -36,7 +38,7 @@ namespace ControlApp.API.Migrations
                 onDelete: ReferentialAction.SetNull);
         }
 
-        /// <inheritdoc />
+
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -57,6 +59,9 @@ namespace ControlApp.API.Migrations
         }
     }
 }
+
+
+
 
 
 

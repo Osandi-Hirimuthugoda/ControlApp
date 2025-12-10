@@ -121,7 +121,7 @@ app.service('ApiService', function($http, $q) {
         return $http.delete(apiBaseUrl + '/controls/' + controlId);
     };
 
-    // Helper, Release Processing Logic
+    //  Helper, Release Processing Logic
     self._processReleases = function() {
         var today = new Date();
         var currentYear = today.getFullYear();

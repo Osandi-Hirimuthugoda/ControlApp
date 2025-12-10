@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/vJc7oA49TA=",
+  "dgSpecHash": "PocDm6hxNbA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
+  "projectFilePath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.Api\\ControlApp.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ASUS\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
@@ -68,9 +68,9 @@
       "code": "NU1510",
       "level": "Warning",
       "message": "PackageReference Microsoft.AspNetCore.Cors will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
-      "projectPath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
+      "projectPath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.Api\\ControlApp.API.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
+      "filePath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.Api\\ControlApp.API.csproj",
       "libraryId": "Microsoft.AspNetCore.Cors",
       "targetGraphs": [
         "net10.0"

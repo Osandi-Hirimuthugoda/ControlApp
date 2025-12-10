@@ -16,7 +16,6 @@ namespace ControlApp.API.Services
             _controlRepository = controlRepository;
             _context = context;
         }
-
     
         public async Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null)
         {
@@ -45,19 +44,15 @@ namespace ControlApp.API.Services
                 TypeId = createControlDto.TypeId,
                 EmployeeId = createControlDto.EmployeeId,
                 
-                
                 StatusId = (createControlDto.StatusId.HasValue && createControlDto.StatusId > 0) ? createControlDto.StatusId : null,
-                
                 
                 ReleaseId = null, 
                 
-                // Date එක save කිරීම
                 ReleaseDate = createControlDto.ReleaseDate,
                 Progress = createControlDto.Progress
             };
 
             var createdControl = await _controlRepository.AddAsync(control);
-            
             var controlWithDetails = await _controlRepository.GetControlWithDetailsByIdAsync(createdControl.ControlId);
             return controlWithDetails != null ? MapToDto(controlWithDetails) : MapToDto(createdControl);
         }
@@ -67,7 +62,6 @@ namespace ControlApp.API.Services
             var control = await _controlRepository.GetByIdAsync(id);
             if (control == null) return null;
 
-            
             if (updateControlDto.TypeId.HasValue)
             {
                  var typeExists = await _context.Set<ControlType>().AnyAsync(t => t.ControlTypeId == updateControlDto.TypeId);
@@ -75,21 +69,18 @@ namespace ControlApp.API.Services
                  control.TypeId = updateControlDto.TypeId.Value;
             }
 
-            
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
                 var statusExists = await _context.Set<Status>().AnyAsync(s => s.Id == updateControlDto.StatusId.Value);
                 if (!statusExists) throw new ArgumentException($"Invalid Status ID");
             }
 
-            
             control.Description = updateControlDto.Description;
             control.Comments = updateControlDto.Comments;
             control.EmployeeId = updateControlDto.EmployeeId;
             control.Progress = updateControlDto.Progress;
             
-
-            // Handle ReleaseId and ReleaseDate
+            
             if (updateControlDto.ReleaseId.HasValue && updateControlDto.ReleaseId.Value > 0)
             {
                 var releaseExists = await _context.Set<Release>().AnyAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
@@ -102,8 +93,7 @@ namespace ControlApp.API.Services
             }
             
             control.ReleaseDate = updateControlDto.ReleaseDate; 
-
-            
+     
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
                 control.StatusId = updateControlDto.StatusId.Value;

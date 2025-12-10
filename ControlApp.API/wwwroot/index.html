@@ -7,203 +7,46 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
 </head>
-<body ng-controller="MainController as vm" class="bg-light">
+<body class="bg-light">
     
-    <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1"><i class="fas fa-network-wired"></i> Control Management System</span>
-        </div>
-    </nav>
+    <!--Header Component -->
+    <app-navbar></app-navbar>
 
-    <div class="container-fluid">
-        <div class="row">
+    <div class="container-fluid" style="padding: 0 15px;">
+        <div class="row" style="align-items: flex-start; margin: 0;">
             
-            <div class="col-md-3">
-                <!-- Add Employee -->
-                <div class="card shadow-sm mb-3">
-                    <div class="card-header bg-primary text-white py-2"><h6 class="mb-0"><i class="fas fa-plus"></i> New Employee</h6></div>
-                    <div class="card-body">
-                        <form ng-submit="vm.addEmployee($event)">
-                            <div class="mb-2">
-                                <input type="text" class="form-control form-control-sm" ng-model="vm.newEmployee.employeeName" placeholder="Name" required>
-                            </div>
-                            <div class="mb-2">
-                                <select class="form-select form-select-sm" ng-model="vm.newEmployee.typeId" ng-options="t.controlTypeId as t.typeName for t in vm.controlTypes">
-                                    <option value="">-- Type --</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-primary w-100" ng-disabled="vm.isSaving">Add</button>
-                        </form>
-                    </div>
-                </div>
-                <!-- Employee List -->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary text-white py-2"><h6 class="mb-0">Employees</h6></div>
-                    <div class="card-body p-0">
-                        <div class="p-2"><input type="text" class="form-control form-control-sm" ng-model="vm.searchEmployee" placeholder="Search..."></div>
-                        <div style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-hover table-sm mb-0" style="font-size:0.9rem;">
-                                <tbody>
-                                    <tr ng-repeat="emp in vm.employees | filter:vm.searchEmployee">
-                                        <td>
-                                            <span ng-if="!emp.editing">{{emp.employeeName}}</span>
-                                            <input ng-if="emp.editing" class="form-control form-control-sm" ng-model="emp.editName">
-                                        </td>
-                                        <td class="text-end" style="width:70px;">
-                                            <i ng-if="!emp.editing" class="fas fa-pencil-alt text-warning me-2" style="cursor:pointer" ng-click="vm.startEditEmployee(emp)"></i>
-                                            <i ng-if="!emp.editing" class="fas fa-trash text-danger" style="cursor:pointer" ng-click="vm.deleteEmployee(emp)"></i>
-                                            <i ng-if="emp.editing" class="fas fa-check text-success me-2" style="cursor:pointer" ng-click="vm.saveEmployee(emp)"></i>
-                                            <i ng-if="emp.editing" class="fas fa-times text-secondary" style="cursor:pointer" ng-click="vm.cancelEditEmployee(emp)"></i>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <!-- Left Side: Employee Sidebar -->
+            <div class="col-md-3" style="display: flex; flex-direction: column; padding-left: 0; padding-right: 10px;">
+                <employee-sidebar></employee-sidebar>
             </div>
 
-            <!-- RIGHT: CONTROLS TABLE -->
-            <div class="col-md-9">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-success text-white py-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">Controls</h6>
-                            <div class="d-flex align-items-center gap-2">
-                                <!-- Search Bar - Smaller -->
-                                <div class="input-group input-group-sm" style="width: 250px;">
-                                    <span class="input-group-text bg-white">
-                                        <i class="fas fa-search" ng-if="!vm.isSearching"></i>
-                                        <i class="fas fa-spinner fa-spin" ng-if="vm.isSearching"></i>
-                                    </span>
-                                    <input type="text" class="form-control" ng-model="vm.searchControlText" 
-                                           ng-keyup="vm.searchControls()" 
-                                           placeholder="Search by name..." 
-                                           ng-change="vm.searchControls()"
-                                           ng-disabled="vm.isSearching">
-                                    <button class="btn btn-outline-light btn-sm" type="button" ng-click="vm.clearSearch()" ng-if="vm.searchControlText && !vm.isSearching">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <select class="form-select form-select-sm w-auto" ng-model="vm.selectedTypeFilter" ng-options="t.controlTypeId as t.typeName for t in vm.controlTypes">
-                                    <option value="">All Types</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive" style="height: 80vh;">
-                            <table class="table table-bordered table-sm mb-0 align-middle">
-                                <thead class="table-dark sticky-top">
-                                    <tr class="text-center">
-                                        <th style="width:5%">Type</th>
-                                        <th style="width:15%">Description</th>
-                                        <th style="width:10%">Employee</th>
-                                        <th style="width:25%">Comments</th>
-                                        <th style="width:8%">Prog %</th> 
-                                        <th style="width:10%">Status</th>
-                                        <th style="width:15%">Release</th> 
-                                        <th style="width:12%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody ng-repeat="employee in vm.employees track by employee.id"
-                                       style="border-top: 3px solid #6c757d;">
-                                    
-                                    <tr ng-repeat="control in vm.getFilteredEmployeeControls(employee.id) | orderBy:'-controlId' track by control.controlId">
-                                        <!-- Type -->
-                                        <td class="text-center"><span class="badge bg-secondary">{{control.typeName}}</span></td>
-                                        
-                                        <!-- Description -->
-                                        <td>
-                                            <span ng-if="!control.editing">{{control.description}}</span>
-                                            <textarea ng-if="control.editing" class="form-control form-control-sm" ng-model="control.editDescription" rows="2"></textarea>
-                                        </td>
-                                        
-                                        <!-- Employee -->
-                                        <td><strong>{{employee.employeeName}}</strong></td>
-                                        
-                                        <!-- Comments -->
-                                        <td>
-                                            <div ng-if="!control.editing">
-                                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
-                                                <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add..." ng-keyup="$event.keyCode === 13 && vm.addProgressComment(control)">
-                                                    <button class="btn btn-outline-secondary" ng-click="vm.addProgressComment(control)">+</button>
-                                                </div>
-                                            </div>
-                                            <textarea ng-if="control.editing" class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea>
-                                        </td>
-                                        
-                                        <!--  Progress % -->
-                                        <td class="text-center">
-                                            <div ng-if="!control.editing">
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar" role="progressbar" 
-                                                         ng-style="{'width': control.progress + '%'}" 
-                                                         aria-valuenow="{{control.progress}}" aria-valuemin="0" aria-valuemax="100">
-                                                        {{control.progress}}%
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <input ng-if="control.editing" type="number" min="0" max="100" class="form-control form-control-sm text-center" ng-model="control.editProgress">
-                                        </td>
-                                        
-                                        <!-- Status -->
-                                        <td class="text-center">
-                                            <span ng-if="!control.editing" class="badge bg-info">{{control.statusName}}</span>
-                                            <select ng-if="control.editing" class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in vm.statuses">
-                                                <option value="">- Select Status -</option>
-                                            </select>
-                                        </td>
-                                        
-                                       
-                                        <td>
-                                            <div ng-if="!control.editing">
-                                                <div class="text-muted small" ng-if="control.releaseDate">
-                                                    <i class="fas fa-calendar-alt"></i> {{vm.formatReleaseDate(control.releaseDate)}}
-                                                </div>
-                                                <span ng-if="!control.releaseDate" class="text-muted">-</span>
-                                            </div>
-                                            <div ng-if="control.editing">
-                                                <select class="form-select form-select-sm" ng-model="control.editReleaseId" ng-options="r.releaseId as vm.formatReleaseDate(r.releaseDate) for r in vm.upcomingReleases">
-                                                    <option value="">-- Select Release --</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        
-                                        <!-- Actions -->
-                                        <td class="text-center">
-                                            <button ng-if="!control.editing" class="btn btn-sm btn-warning mb-1" ng-click="vm.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
-                                            <div ng-if="control.editing">
-                                                <button class="btn btn-sm btn-success mb-1 w-100" ng-click="vm.saveControl(control)">Save</button>
-                                                <button class="btn btn-sm btn-secondary w-100" ng-click="vm.cancelEdit(control)">Cancel</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <!-- Empty Row -->
-                                    <tr ng-if="vm.getFilteredEmployeeControls(employee.id).length === 0" class="table-light">
-                                        <td colspan="8" class="text-center text-muted fst-italic py-2">No controls assigned</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <!--Right Side: Control Board -->
+            <div class="col-md-9" style="display: flex; flex-direction: column; padding-right: 0; padding-left: 10px;">
+                <control-board></control-board>
             </div>
+
         </div>
     </div>
     
-    <!-- Messages -->
-    <div ng-if="vm.message" class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-        <div class="toast show text-white" ng-class="{'bg-success': vm.messageType==='success', 'bg-danger': vm.messageType==='error'}">
+    <!-- Toast Notifications Container -->
+    <div ng-controller="ToastController as toast" ng-if="toast.message" class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        <div class="toast show text-white" ng-class="{'bg-success': toast.type==='success', 'bg-danger': toast.type==='error'}">
             <div class="d-flex">
-                <div class="toast-body">{{vm.message}}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="vm.message=''"></button>
+                <div class="toast-body">{{toast.message}}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toast.clear()"></button>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Scripts Loading -->
+    <script src="app.module.js"></script>
+    <script src="services/notification.service.js"></script>
+    <script src="services/api.service.js"></script>
+    <script src="components/navbar.component.js"></script>
+    <script src="components/employee-sidebar.component.js"></script>
+    <script src="components/control-board.component.js"></script>
+
 </body>
 </html>

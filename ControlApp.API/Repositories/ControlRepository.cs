@@ -10,7 +10,6 @@ namespace ControlApp.API.Repositories
         {
         }
 
-        
         public async Task<IEnumerable<Controls>> GetControlsWithDetailsAsync(string? searchTerm = null)
         {
             var query = _dbSet
@@ -20,7 +19,7 @@ namespace ControlApp.API.Repositories
                 .Include(c => c.Release) 
                 .AsQueryable();
 
-            // Search Logic: Primary focus on Employee Name, also search Description
+            
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();

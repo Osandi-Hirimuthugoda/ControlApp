@@ -6,11 +6,11 @@ namespace ControlApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ControlsController : ControllerBase
+    public class ControlsController : ControllerBase //inherit 
     {
         private readonly IControlService _controlService;
 
-        public ControlsController(IControlService controlService)
+        public ControlsController(IControlService controlService)// dependency 
         {
             _controlService = controlService;
         }

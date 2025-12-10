@@ -62,12 +62,14 @@ namespace ControlApp.API.Services
             var control = await _controlRepository.GetByIdAsync(id);
             if (control == null) return null;
 
+            // TypeId is required - if not provided in DTO, keep existing value, otherwise validate and update
             if (updateControlDto.TypeId.HasValue)
             {
-                 var typeExists = await _context.Set<ControlType>().AnyAsync(t => t.ControlTypeId == updateControlDto.TypeId);
-                 if (!typeExists) throw new ArgumentException($"Invalid Type ID");
+                 var typeExists = await _context.Set<ControlType>().AnyAsync(t => t.ControlTypeId == updateControlDto.TypeId.Value);
+                 if (!typeExists) throw new ArgumentException($"Invalid Type ID: {updateControlDto.TypeId.Value}");
                  control.TypeId = updateControlDto.TypeId.Value;
             }
+            // If TypeId is not provided, keep the existing TypeId (don't change it)
 
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
@@ -81,17 +83,27 @@ namespace ControlApp.API.Services
             control.Progress = updateControlDto.Progress;
             
             
+            // Handle ReleaseId - only set if it exists in database
             if (updateControlDto.ReleaseId.HasValue && updateControlDto.ReleaseId.Value > 0)
             {
                 var releaseExists = await _context.Set<Release>().AnyAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
-                if (!releaseExists) throw new ArgumentException($"Invalid Release ID");
-                control.ReleaseId = updateControlDto.ReleaseId.Value;
+                if (releaseExists)
+                {
+                    control.ReleaseId = updateControlDto.ReleaseId.Value;
+                }
+                else
+                {
+                    // ReleaseId doesn't exist in database (might be a default release)
+                    // Set ReleaseId to null but keep ReleaseDate if provided
+                    control.ReleaseId = null;
+                }
             }
             else
             {
                 control.ReleaseId = null;
             }
             
+            // Set ReleaseDate (can be set even if ReleaseId is null for default releases)
             control.ReleaseDate = updateControlDto.ReleaseDate; 
      
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)

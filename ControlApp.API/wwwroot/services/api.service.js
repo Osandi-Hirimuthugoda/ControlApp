@@ -45,8 +45,8 @@ app.service('ApiService', function($http, $q) {
             self.data.controlTypes = [];
             return $q.when(self.data.controlTypes);
         });
-    };
-
+    }; 
+ 
     self.loadStatuses = function() {
         return $http.get(apiBaseUrl + '/statuses').then(function(r) {
             self.data.statuses = r.data || [];
@@ -62,7 +62,7 @@ app.service('ApiService', function($http, $q) {
             self._processReleases();
         });
     };
-
+ 
     self.loadAllControls = function() {
         return $http.get(apiBaseUrl + '/controls').then(function(r) {
             self.data.allControls = r.data || [];
@@ -114,7 +114,14 @@ app.service('ApiService', function($http, $q) {
     };
 
     self.updateControl = function(controlId, payload) {
-        return $http.put(apiBaseUrl + '/controls/' + controlId, payload);
+        console.log('Updating control:', controlId, payload);
+        return $http.put(apiBaseUrl + '/controls/' + controlId, payload).catch(function(error) {
+            console.error('Update control error:', error);
+            if(error.data) {
+                console.error('Error details:', error.data);
+            }
+            throw error;
+        });
     };
 
     self.deleteControl = function(controlId) {

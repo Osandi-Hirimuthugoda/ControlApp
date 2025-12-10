@@ -53,8 +53,11 @@ namespace ControlApp.API.Controllers
         {
             try
             {
+                if (updateControlDto == null)
+                    return BadRequest("Request body is required");
+
                 if (id != updateControlDto.ControlId)
-                    return BadRequest("Control ID mismatch");
+                    return BadRequest($"Control ID mismatch. URL ID: {id}, Body ID: {updateControlDto.ControlId}");
 
                 var control = await _controlService.UpdateControlAsync(id, updateControlDto);
                 if (control == null)
@@ -64,11 +67,11 @@ namespace ControlApp.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error updating control: {ex.Message}");
+                return StatusCode(500, new { message = $"Error updating control: {ex.Message}" });
             }
         }
 

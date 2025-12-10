@@ -267,17 +267,58 @@ app.component('controlBoard', {
             // Find selected release object
             var selectedRelease = c.editReleaseId ? ctrl.store.upcomingReleases.find(r => r.releaseId == c.editReleaseId) : null;
             
+            // Convert empty string or undefined to null for optional fields
+            var statusId = c.editStatusId && c.editStatusId !== '' && c.editStatusId !== null ? parseInt(c.editStatusId) : null;
+            
+            // Handle ReleaseId and ReleaseDate
+            // Check if the release exists in the actual database releases (not default ones)
+            var releaseId = null;
+            var releaseDate = null;
+            
+            if(selectedRelease) {
+                // Check if this release exists in the database (not a default release)
+                var existsInDb = ctrl.store.releases.some(function(r) {
+                    return r.releaseId == selectedRelease.releaseId;
+                });
+                
+                // Only send ReleaseId if it exists in database, otherwise just send ReleaseDate
+                if(existsInDb) {
+                    releaseId = selectedRelease.releaseId;
+                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                } else {
+                    // Default release (999991, 999992) - only send ReleaseDate, not ReleaseId
+                    releaseId = null;
+                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                }
+            }
+            
+            // Ensure typeId is always a valid integer (use existing if not provided)
+            var typeId = (c.typeId && !isNaN(parseInt(c.typeId))) ? parseInt(c.typeId) : null;
+            if(!typeId) {
+                NotificationService.show('Type ID is required', 'error');
+                return;
+            }
+            
+            // Ensure employeeId is valid
+            var employeeId = (c.employeeId && !isNaN(parseInt(c.employeeId))) ? parseInt(c.employeeId) : null;
+            if(!employeeId) {
+                NotificationService.show('Employee ID is required', 'error');
+                return;
+            }
+            
             var payload = {
-                controlId: c.controlId,
-                employeeId: c.employeeId,
-                typeId: c.typeId,
-                description: c.editDescription,
-                comments: c.editComments,
+                controlId: parseInt(c.controlId),
+                employeeId: employeeId,
+                typeId: typeId,
+                description: c.editDescription || null,
+                comments: c.editComments || null,
                 progress: parseInt(c.editProgress || 0),
-                statusId: c.editStatusId,
-                releaseId: selectedRelease ? selectedRelease.releaseId : null,
-                releaseDate: selectedRelease ? new Date(selectedRelease.releaseDate).toISOString() : null
+                statusId: statusId,
+                releaseId: releaseId,
+                releaseDate: releaseDate
             };
+            
+            console.log('Saving control with payload:', payload);
 
             ApiService.updateControl(c.controlId, payload).then(function(r) {
                 var updated = r.data;
@@ -295,8 +336,24 @@ app.component('controlBoard', {
 
                 c.editing = false;
                 NotificationService.show('Saved successfully', 'success');
-            }).catch(function() {
-                NotificationService.show('Error saving', 'error');
+            }).catch(function(error) {
+                console.error('Error saving control:', error);
+                console.error('Error response:', error.response || error.data);
+                var errorMsg = 'Error saving';
+                if(error && error.data) {
+                    if(typeof error.data === 'string') {
+                        errorMsg = error.data;
+                    } else if(error.data.message) {
+                        errorMsg = error.data.message;
+                    } else if(error.data.title) {
+                        errorMsg = error.data.title;
+                    }
+                } else if(error && error.statusText) {
+                    errorMsg = 'Error: ' + error.statusText;
+                } else if(error && error.message) {
+                    errorMsg = error.message;
+                }
+                NotificationService.show(errorMsg, 'error');
             });
         };
 

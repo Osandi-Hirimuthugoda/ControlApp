@@ -45,15 +45,20 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Add OpenAPI
-builder.Services.AddOpenApi();
+
+// add SWAGGER SERVICES
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    
+    // SWAGGER MIDDLEWARE 
+    app.UseSwagger();
+    app.UseSwaggerUI(); 
 }
 
 // Enable CORS
@@ -188,7 +193,6 @@ using (var scope = app.Services.CreateScope())
         
         context.ControlTypes.Remove(typeToRemove);
     }
-    
     
     var remainingTypes = context.ControlTypes.Select(t => t.TypeName).ToList();
     

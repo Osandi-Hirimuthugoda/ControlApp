@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\components\\control-board.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-type-sidebar.component.js",
+      "PackagePath": "staticwebassets\\components\\control-type-sidebar.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
       "PackagePath": "staticwebassets\\components\\employee-sidebar.component.js"
     },

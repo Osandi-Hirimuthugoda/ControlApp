@@ -80,7 +80,6 @@ namespace ControlApp.API.Services
             control.Description = updateControlDto.Description;
             control.Comments = updateControlDto.Comments;
             control.EmployeeId = updateControlDto.EmployeeId;
-            control.Progress = updateControlDto.Progress;
             
             
             // Handle ReleaseId - only set if it exists in database
@@ -93,8 +92,7 @@ namespace ControlApp.API.Services
                 }
                 else
                 {
-                    // ReleaseId doesn't exist in database (might be a default release)
-                    // Set ReleaseId to null but keep ReleaseDate if provided
+                    
                     control.ReleaseId = null;
                 }
             }
@@ -106,14 +104,49 @@ namespace ControlApp.API.Services
             // Set ReleaseDate (can be set even if ReleaseId is null for default releases)
             control.ReleaseDate = updateControlDto.ReleaseDate; 
      
+            // Handle StatusId and auto-update Progress based on Status
+            // Always save the progress value provided by the user (frontend handles auto-update when status changes)
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
+                // Check if status is changing BEFORE updating it
+                var statusChanged = control.StatusId != updateControlDto.StatusId.Value;
                 control.StatusId = updateControlDto.StatusId.Value;
+                
+                // If status changed, check if we should auto-update progress
+                if (statusChanged)
+                {
+                    var status = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == updateControlDto.StatusId.Value);
+                    if (status != null)
+                    {
+                        var autoProgressValue = GetProgressByStatus(status.StatusName);
+                        // Only auto-update if progress is 0 (meaning it wasn't manually set)
+                        // Otherwise, use the provided progress value (user manually set it)
+                        if (autoProgressValue.HasValue && updateControlDto.Progress == 0)
+                        {
+                            control.Progress = autoProgressValue.Value;
+                        }
+                        else
+                        {
+                            // User manually set progress, save that value
+                            control.Progress = updateControlDto.Progress;
+                        }
+                    }
+                    else
+                    {
+                        control.Progress = updateControlDto.Progress;
+                    }
+                }
+                else
+                {
+                    // Status didn't change, always use provided progress (user manually set it)
+                    control.Progress = updateControlDto.Progress;
+                }
             }
             else
             {
-                
                 control.StatusId = null;
+                // Always save the provided progress value
+                control.Progress = updateControlDto.Progress;
             }
 
             await _controlRepository.UpdateAsync(control);
@@ -130,6 +163,18 @@ namespace ControlApp.API.Services
         public async Task<IEnumerable<ControlDto>> AddAllEmployeesToControlsAsync()
         {
              return new List<ControlDto>(); 
+        }
+
+        private static int? GetProgressByStatus(string statusName)
+        {
+            return statusName switch
+            {
+                "Analyze" => 25,
+                "Development" => 50,
+                "Dev Testing" => 75,
+                "QA" => 100,
+                _ => null
+            };
         }
 
         private static ControlDto MapToDto(Controls control)

@@ -76,16 +76,69 @@ app.MapControllers();
 // Default route to index.html
 app.MapFallbackToFile("index.html");
 
-// Seed Control Types (L3 and CR) - Remove duplicates and ensure only one of each
+// Remove duplicates and ensure only one of each
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
-    // Ensure database is created
-    context.Database.EnsureCreated();
+    // Apply migrations
+    try
+    {
+        context.Database.Migrate();
+        
+        // Check if Description and ReleaseDate columns exist, if not add them manually
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            connection.Open();
+        }
+        try
+        {
+            using var command = connection.CreateCommand();
+            
+            // Check if Description column exists
+            command.CommandText = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[ControlTypes]') AND name = 'Description')
+                BEGIN
+                    ALTER TABLE [ControlTypes] ADD [Description] nvarchar(max) NULL;
+                END";
+            command.ExecuteNonQuery();
+            
+            // Check if ReleaseDate column exists
+            command.CommandText = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[ControlTypes]') AND name = 'ReleaseDate')
+                BEGIN
+                    ALTER TABLE [ControlTypes] ADD [ReleaseDate] datetime2 NULL;
+                END";
+            command.ExecuteNonQuery();
+        }
+        finally
+        {
+            if (connection.State != System.Data.ConnectionState.Closed)
+            {
+                connection.Close();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Log error if migration fails, but continue startup
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
     
-    // Get all control types
-    var allControlTypes = context.ControlTypes.ToList();
+    // Get all control types - wrapped in try-catch to handle schema issues
+    List<ControlType> allControlTypes;
+    try
+    {
+        allControlTypes = context.ControlTypes.ToList();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Error loading control types. Skipping seeding.");
+        return; // Skip seeding if we can't load control types
+    }
     
     // Find duplicates for L3 and CR
     var l3Types = allControlTypes.Where(t => t.TypeName == "L3").ToList();
@@ -204,6 +257,40 @@ using (var scope = app.Services.CreateScope())
     if (!remainingTypes.Contains("CR"))
     {
         context.ControlTypes.Add(new ControlType { TypeName = "CR" });
+    }
+    
+    context.SaveChanges();
+    
+    // Seed Statuses: Analyze, Development, Dev Testing, QA
+    // Remove all statuses that are not in the required list
+    var requiredStatuses = new[] { "Analyze", "Development", "Dev Testing", "QA" };
+    var allStatuses = context.Statuses.ToList();
+    
+    // Delete statuses that are not in the required list
+    var statusesToDelete = allStatuses.Where(s => !requiredStatuses.Contains(s.StatusName)).ToList();
+    foreach (var statusToDelete in statusesToDelete)
+    {
+        // Check if any controls are using this status
+        var controlsUsingStatus = context.Set<Controls>().Where(c => c.StatusId == statusToDelete.Id).ToList();
+        if (controlsUsingStatus.Any())
+        {
+            // Set status to null for controls using deleted statuses
+            foreach (var control in controlsUsingStatus)
+            {
+                control.StatusId = null;
+            }
+        }
+        context.Statuses.Remove(statusToDelete);
+    }
+    
+    // Add required statuses if they don't exist
+    var existingStatusNames = context.Statuses.Select(s => s.StatusName).ToList();
+    foreach (var statusName in requiredStatuses)
+    {
+        if (!existingStatusNames.Contains(statusName))
+        {
+            context.Statuses.Add(new Status { StatusName = statusName });
+        }
     }
     
     context.SaveChanges();

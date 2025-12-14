@@ -1,18 +1,26 @@
 app.component('controlBoard', {
     template: `
     <div class="card shadow-sm" style="height: 80vh; display: flex; flex-direction: column;">
-        <div class="card-header bg-success text-white py-2">
+        <div class="card-header bg-success text-white py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Controls</h6>
-                <div class="d-flex align-items-center gap-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-list-check me-2"></i>Controls
+                </h6>
+                <div class="d-flex align-items-center" style="gap: 1rem;">
                     <!-- Search -->
-                    <div class="input-group input-group-sm" style="width: 250px;">
-                        <input type="text" class="form-control" ng-model="$ctrl.searchText" placeholder="Search name/desc...">
-                        <button class="btn btn-outline-light btn-sm" ng-click="$ctrl.searchText=''" ng-if="$ctrl.searchText"><i class="fas fa-times"></i></button>
+                    <div class="input-group input-group-sm" style="width: 280px;">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" ng-model="$ctrl.searchText" placeholder="Search controls...">
+                        <button class="btn btn-outline-light btn-sm" ng-click="$ctrl.searchText=''" ng-if="$ctrl.searchText">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <!-- Filter by Type -->
                     <select class="form-select form-select-sm w-auto" ng-model="$ctrl.selectedTypeFilter" 
-                            ng-options="t.controlTypeId as t.typeName for t in $ctrl.store.controlTypes">
+                            ng-options="t.controlTypeId as t.typeName for t in $ctrl.store.controlTypes"
+                            style="min-width: 150px;">
                         <option value="">All Types</option>
                     </select>
                 </div>
@@ -26,10 +34,10 @@ app.component('controlBoard', {
                             <th style="width:5%">Type</th>
                             <th style="width:15%">Description</th>
                             <th style="width:10%">Employee</th>
+                            <th style="width:15%">Release</th>
+                            <th style="width:10%">Status</th>
                             <th style="width:25%">Comments</th>
                             <th style="width:8%">Prog %</th> 
-                            <th style="width:10%">Status</th>
-                            <th style="width:15%">Release</th> 
                             <th style="width:12%">Action</th>
                         </tr>
                     </thead>
@@ -47,31 +55,7 @@ app.component('controlBoard', {
                             <!-- 3. Employee Name -->
                             <td><strong>{{$ctrl.getEmployeeName(control.employeeId)}}</strong></td>
                             
-                            <!-- 4. Comments -->
-                            <td ng-if="!control.editing">
-                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
-                                <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
-                                    <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
-                                </div>
-                            </td>
-                            <td ng-if="control.editing"><textarea class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea></td>
-
-                            <!-- 5. Progress -->
-                            <td class="text-center" ng-if="!control.editing">
-                                <div class="progress" style="height: 20px;"><div class="progress-bar" ng-style="{'width': control.progress + '%'}">{{control.progress}}%</div></div>
-                            </td>
-                            <td ng-if="control.editing"><input type="number" min="0" max="100" class="form-control form-control-sm text-center" ng-model="control.editProgress"></td>
-
-                            <!-- 6. Status -->
-                            <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
-                            <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
-                                    <option value="">- Status -</option>
-                                </select>
-                            </td>
-
-                            <!-- 7. Release -->
+                            <!-- 4. Release -->
                             <td ng-if="!control.editing">
                                 <div class="text-muted small" ng-if="control.releaseDate"><i class="fas fa-calendar-alt"></i> {{$ctrl.formatDate(control.releaseDate)}}</div>
                                 <span ng-if="!control.releaseDate">-</span>
@@ -81,13 +65,43 @@ app.component('controlBoard', {
                                     <option value="">-- Release --</option>
                                 </select>
                             </td>
+                            
+                            <!-- 5. Status -->
+                            <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
+                            <td ng-if="control.editing">
+                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses" ng-change="$ctrl.onStatusChange(control)">
+                                    <option value="">- Status -</option>
+                                </select>
+                            </td>
+                            
+                            <!-- 6. Comments -->
+                            <td ng-if="!control.editing">
+                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
+                                    <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
+                                </div>
+                            </td>
+                            <td ng-if="control.editing"><textarea class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea></td>
+
+                            <!-- 7. Progress -->
+                            <td class="text-center" ng-if="!control.editing">
+                                <div class="progress" style="height: 20px;"><div class="progress-bar" ng-style="{'width': control.progress + '%'}">{{control.progress}}%</div></div>
+                            </td>
+                            <td ng-if="control.editing"><input type="number" min="0" max="100" class="form-control form-control-sm text-center" ng-model="control.editProgress"></td>
 
                             <!-- 8. Actions -->
                             <td class="text-center">
-                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
-                                <div ng-if="control.editing">
-                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)">Save</button>
-                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false">Cancel</button>
+                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <div ng-if="control.editing" class="d-flex flex-column" style="gap: 0.25rem;">
+                                    <button class="btn btn-sm btn-success" ng-click="$ctrl.saveControl(control)">
+                                        <i class="fas fa-check me-1"></i>Save
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" ng-click="control.editing = false">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -116,31 +130,7 @@ app.component('controlBoard', {
                             <!-- 3. Employee Name -->
                             <td><strong>{{$ctrl.getEmployeeName(control.employeeId)}}</strong></td>
                             
-                            <!-- 4. Comments -->
-                            <td ng-if="!control.editing">
-                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
-                                <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
-                                    <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
-                                </div>
-                            </td>
-                            <td ng-if="control.editing"><textarea class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea></td>
-
-                            <!-- 5. Progress -->
-                            <td class="text-center" ng-if="!control.editing">
-                                <div class="progress" style="height: 20px;"><div class="progress-bar" ng-style="{'width': control.progress + '%'}">{{control.progress}}%</div></div>
-                            </td>
-                            <td ng-if="control.editing"><input type="number" min="0" max="100" class="form-control form-control-sm text-center" ng-model="control.editProgress"></td>
-
-                            <!-- 6. Status -->
-                            <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
-                            <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
-                                    <option value="">- Status -</option>
-                                </select>
-                            </td>
-
-                            <!-- 7. Release -->
+                            <!-- 4. Release -->
                             <td ng-if="!control.editing">
                                 <div class="text-muted small" ng-if="control.releaseDate"><i class="fas fa-calendar-alt"></i> {{$ctrl.formatDate(control.releaseDate)}}</div>
                                 <span ng-if="!control.releaseDate">-</span>
@@ -150,13 +140,43 @@ app.component('controlBoard', {
                                     <option value="">-- Release --</option>
                                 </select>
                             </td>
+                            
+                            <!-- 5. Status -->
+                            <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
+                            <td ng-if="control.editing">
+                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses" ng-change="$ctrl.onStatusChange(control)">
+                                    <option value="">- Status -</option>
+                                </select>
+                            </td>
+                            
+                            <!-- 6. Comments -->
+                            <td ng-if="!control.editing">
+                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
+                                    <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
+                                </div>
+                            </td>
+                            <td ng-if="control.editing"><textarea class="form-control form-control-sm" ng-model="control.editComments" rows="4"></textarea></td>
+
+                            <!-- 7. Progress -->
+                            <td class="text-center" ng-if="!control.editing">
+                                <div class="progress" style="height: 20px;"><div class="progress-bar" ng-style="{'width': control.progress + '%'}">{{control.progress}}%</div></div>
+                            </td>
+                            <td ng-if="control.editing"><input type="number" min="0" max="100" class="form-control form-control-sm text-center" ng-model="control.editProgress"></td>
 
                             <!-- 8. Actions -->
                             <td class="text-center">
-                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
-                                <div ng-if="control.editing">
-                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)">Save</button>
-                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false">Cancel</button>
+                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <div ng-if="control.editing" class="d-flex flex-column" style="gap: 0.25rem;">
+                                    <button class="btn btn-sm btn-success" ng-click="$ctrl.saveControl(control)">
+                                        <i class="fas fa-check me-1"></i>Save
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" ng-click="control.editing = false">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -261,6 +281,104 @@ app.component('controlBoard', {
             } else {
                 c.editReleaseId = null;
             }
+        };
+
+        ctrl.onStatusChange = function(c) {
+            if (!c.editStatusId) {
+                return;
+            }
+            
+            // Find the selected status
+            var selectedStatus = ctrl.store.statuses.find(s => s.id == c.editStatusId);
+            if (!selectedStatus) {
+                return;
+            }
+            
+            // Map status to progress percentage
+            var statusProgressMap = {
+                'Analyze': 25,
+                'Development': 50,
+                'Dev Testing': 75,
+                'QA': 100
+            };
+            
+            var statusName = selectedStatus.statusName;
+            if (statusProgressMap.hasOwnProperty(statusName)) {
+                c.editProgress = statusProgressMap[statusName];
+                
+                // Automatically save to database when status is selected
+                ctrl.autoSaveControl(c);
+            }
+        };
+
+        ctrl.autoSaveControl = function(c) {
+            // Find selected release object
+            var selectedRelease = c.editReleaseId ? ctrl.store.upcomingReleases.find(r => r.releaseId == c.editReleaseId) : null;
+            
+            // Convert empty string or undefined to null for optional fields
+            var statusId = c.editStatusId && c.editStatusId !== '' && c.editStatusId !== null ? parseInt(c.editStatusId) : null;
+            
+            // Handle ReleaseId and ReleaseDate
+            var releaseId = null;
+            var releaseDate = null;
+            
+            if(selectedRelease) {
+                var existsInDb = ctrl.store.releases.some(function(r) {
+                    return r.releaseId == selectedRelease.releaseId;
+                });
+                
+                if(existsInDb) {
+                    releaseId = selectedRelease.releaseId;
+                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                } else {
+                    releaseId = null;
+                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                }
+            }
+            
+            // Ensure typeId is always a valid integer
+            var typeId = (c.typeId && !isNaN(parseInt(c.typeId))) ? parseInt(c.typeId) : null;
+            if(!typeId) {
+                return; // Can't save without typeId
+            }
+            
+            // Ensure employeeId is valid
+            var employeeId = (c.employeeId && !isNaN(parseInt(c.employeeId))) ? parseInt(c.employeeId) : null;
+            if(!employeeId) {
+                return; // Can't save without employeeId
+            }
+            
+            var payload = {
+                controlId: parseInt(c.controlId),
+                employeeId: employeeId,
+                typeId: typeId,
+                description: c.editDescription || null,
+                comments: c.editComments || null,
+                progress: parseInt(c.editProgress || 0),
+                statusId: statusId,
+                releaseId: releaseId,
+                releaseDate: releaseDate
+            };
+            
+            ApiService.updateControl(c.controlId, payload).then(function(r) {
+                var updated = r.data;
+                // Update Local View
+                c.description = updated.description;
+                c.comments = updated.comments;
+                c.progress = updated.progress;
+                c.statusId = updated.statusId;
+                
+                var s = ctrl.store.statuses.find(x => x.id == c.statusId);
+                c.statusName = s ? s.statusName : '';
+                
+                if(updated.releaseDate) c.releaseDate = new Date(updated.releaseDate);
+                else c.releaseDate = null;
+                
+                NotificationService.show('Status and progress saved', 'success');
+            }).catch(function(error) {
+                console.error('Error auto-saving control:', error);
+                NotificationService.show('Error saving status', 'error');
+            });
         };
 
         ctrl.saveControl = function(c) {

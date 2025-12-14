@@ -1,8 +1,0 @@
-wwwroot\app.module.js
-wwwroot\components\control-board.component.js
-wwwroot\components\employee-sidebar.component.js
-wwwroot\components\navbar.component.js
-wwwroot\index.html
-wwwroot\services\api.service.js
-wwwroot\services\notification.service.js
-wwwroot\styles.css

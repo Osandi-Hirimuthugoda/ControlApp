@@ -72,7 +72,7 @@ app.service('ApiService', function($http, $q) {
                 
                 c.editing = false;
                 
-                // Map TypeName from controlTypes if not already set
+               
                 if(c.typeId && self.data.controlTypes.length > 0) {
                     var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
                     if(t) c.typeName = t.typeName;
@@ -158,6 +158,28 @@ app.service('ApiService', function($http, $q) {
             return rd >= today;
         }).sort(function(a, b) {
             return new Date(a.releaseDate) - new Date(b.releaseDate);
+        });
+    };
+
+    // Control Type CRUD
+    self.addControlType = function(controlTypeData) {
+        return $http.post(apiBaseUrl + '/controltypes', controlTypeData).then(function(r) {
+            self.data.controlTypes.push(r.data);
+            return r.data;
+        });
+    };
+
+    self.deleteControlType = function(controlTypeId) {
+        return $http.delete(apiBaseUrl + '/controltypes/' + controlTypeId).then(function() {
+            // Remove from local store
+            var idx = self.data.controlTypes.findIndex(t => t.controlTypeId == controlTypeId);
+            if (idx > -1) {
+                self.data.controlTypes.splice(idx, 1);
+            }
+            // Reload employees and controls to update type references
+            return self.loadEmployees().then(function() {
+                return self.loadAllControls();
+            });
         });
     };
 });

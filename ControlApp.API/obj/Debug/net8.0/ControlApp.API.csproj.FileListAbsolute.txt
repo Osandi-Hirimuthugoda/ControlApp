@@ -1,5 +1,6 @@
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\appsettings.json
+C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\global.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\ControlApp.API.staticwebassets.runtime.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\ControlApp.API.staticwebassets.endpoints.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\ControlApp.API.exe
@@ -134,7 +135,6 @@ C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\static
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.ControlApp.API.props
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.ControlApp.API.props
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets.pack.json
-C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\ControlA.FFD35F0C.Up2Date
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\ControlApp.API.dll
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\refint\ControlApp.API.dll

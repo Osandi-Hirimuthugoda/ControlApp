@@ -31,11 +31,13 @@ namespace ControlApp.API.Services
 
         public async Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeDto createEmployeeDto)
         {
+            // 1. Validate Input
             if (string.IsNullOrWhiteSpace(createEmployeeDto.EmployeeName))
             {
                 throw new ArgumentException("Employee name is required.");
             }
 
+            // 2. Create Employee Object
             var employee = new Employee
             {
                 EmployeeName = createEmployeeDto.EmployeeName.Trim(),
@@ -43,69 +45,60 @@ namespace ControlApp.API.Services
                 Description = createEmployeeDto.Description?.Trim()
             };
 
+            // Save Employee to Database
             var createdEmployee = await _employeeRepository.AddAsync(employee);
-            
-            
+
+            // Create Control Record
             try
             {
-                
-                int typeIdToUse;
+                // Check if a TypeId was selected
                 if (createdEmployee.TypeId.HasValue)
                 {
-                    
-                    var typeExists = await _context.Set<ControlType>()
-                        .AnyAsync(t => t.ControlTypeId == createdEmployee.TypeId.Value);
-                    
-                    if (typeExists)
+                    // Fetch the selected ControlType to get its Description and ReleaseDate
+                    var selectedType = await _context.Set<ControlType>()
+                        .FirstOrDefaultAsync(t => t.ControlTypeId == createdEmployee.TypeId.Value);
+
+                    if (selectedType != null)
                     {
-                        typeIdToUse = createdEmployee.TypeId.Value;
-                    }
-                    else
-                    {
-                        
-                        var defaultType = await _context.Set<ControlType>().FirstOrDefaultAsync();
-                        if (defaultType == null)
-                            throw new InvalidOperationException("No ControlType found in database. Please create at least one ControlType first.");
-                        typeIdToUse = defaultType.ControlTypeId;
+                        // Get default Status and Release for FK constraints
+                        var defaultStatus = await _context.Set<Status>().FirstOrDefaultAsync();
+                        var defaultRelease = await _context.Set<Release>().FirstOrDefaultAsync();
+
+                        // Create the Control object mapping data from the selected Type
+                        var control = new Controls
+                        {
+                            EmployeeId = createdEmployee.Id,
+                            TypeId = createdEmployee.TypeId.Value,
+                            
+                            //  AUTO FILL LOGIC
+                            
+                            Description = !string.IsNullOrWhiteSpace(selectedType.Description) 
+                                ? selectedType.Description 
+                                : (!string.IsNullOrWhiteSpace(createdEmployee.Description) 
+                                    ? createdEmployee.Description 
+                                    : $"Control for {createdEmployee.EmployeeName}"),
+                            
+                            // Use ControlType's ReleaseDate (can be null if not set)
+                            ReleaseDate = selectedType.ReleaseDate,
+                            
+                            StatusId = defaultStatus?.Id,
+                            ReleaseId = defaultRelease?.ReleaseId,
+                            Progress = 0,
+                            Comments = ""
+                        };
+
+                        await _context.Set<Controls>().AddAsync(control);
+                        await _context.SaveChangesAsync();
                     }
                 }
-                else
-                {
-                    var defaultType = await _context.Set<ControlType>().FirstOrDefaultAsync();
-                    if (defaultType == null)
-                        throw new InvalidOperationException("No ControlType found in database. Please create at least one ControlType first.");
-                    typeIdToUse = defaultType.ControlTypeId;
-                }
-
-                
-                var defaultStatus = await _context.Set<Status>().FirstOrDefaultAsync();
-                var defaultRelease = await _context.Set<Release>().FirstOrDefaultAsync();
-
-                var control = new Controls
-                {
-                    Description = createEmployeeDto.Description ?? $"Control for {createdEmployee.EmployeeName}",
-                    Comments = "",
-                    TypeId = typeIdToUse,
-                    EmployeeId = createdEmployee.Id,
-                    StatusId = defaultStatus?.Id, 
-                    ReleaseId = defaultRelease?.ReleaseId,
-                    Progress = 0, 
-                    ReleaseDate = null
-                };
-
-                await _context.Set<Controls>().AddAsync(control);
-                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                
-                Console.WriteLine($"Warning: Failed to create control for employee {createdEmployee.Id}: {ex.Message}");
-                
-                if (ex is InvalidOperationException)
-                    throw;
+                // Log the error but don't stop the request since Employee is already created
+                Console.WriteLine($"Warning: Failed to create auto-control for employee {createdEmployee.Id}: {ex.Message}");
             }
-            
-            
+
+            // Return the result
             var employeeWithDetails = await _employeeRepository.GetEmployeeWithDetailsByIdAsync(createdEmployee.Id);
             return employeeWithDetails != null ? MapToDto(employeeWithDetails) : MapToDto(createdEmployee);
         }
@@ -131,10 +124,9 @@ namespace ControlApp.API.Services
             employee.EmployeeName = updateEmployeeDto.EmployeeName;
             employee.TypeId = updateEmployeeDto.TypeId;
             employee.Description = updateEmployeeDto.Description;
-            
+
             await _employeeRepository.UpdateAsync(employee);
-            
-            
+
             var employeeWithDetails = await _employeeRepository.GetEmployeeWithDetailsByIdAsync(id);
             return employeeWithDetails != null ? MapToDto(employeeWithDetails) : MapToDto(employee);
         }

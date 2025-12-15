@@ -22,7 +22,7 @@ app.component('appNavbar', {
         var ctrl = this;
         
         ctrl.$onInit = function() {
-            ctrl.currentView = $rootScope.currentView || 'dashboard';
+            ctrl.currentView = $rootScope.currentView || 'controls';
             
             // Listen for view changes
             var listener = $rootScope.$on('viewChanged', function(event, view) {

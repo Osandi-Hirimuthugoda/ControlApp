@@ -3,7 +3,7 @@ var app = angular.module('controlApp', []);
 // Main Controller for View Switching
 app.controller('MainController', function($rootScope) {
     var vm = this;
-    vm.currentView = $rootScope.currentView || 'dashboard';
+    vm.currentView = $rootScope.currentView || 'controls';
     
     // Listen for view changes
     var listener = $rootScope.$on('viewChanged', function(event, view) {

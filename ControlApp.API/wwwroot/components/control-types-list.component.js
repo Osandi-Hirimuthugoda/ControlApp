@@ -40,15 +40,17 @@ app.component('controlTypesList', {
                                     <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(type)" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControlType(type)" title="Delete">
-                                        <i class="fas fa-trash"></i>
+                                    <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControlType(type)" ng-disabled="type.deleting" title="Delete">
+                                        <span ng-if="!type.deleting"><i class="fas fa-trash"></i></span>
+                                        <span ng-if="type.deleting"><i class="fas fa-spinner fa-spin"></i></span>
                                     </button>
                                 </div>
                                 <div ng-if="type.editing" style="white-space: nowrap;">
-                                    <button class="btn btn-sm btn-success me-1" ng-click="$ctrl.saveControlType(type)" title="Save">
-                                        <i class="fas fa-check"></i>
+                                    <button class="btn btn-sm btn-success me-1" ng-click="$ctrl.saveControlType(type)" ng-disabled="type.saving" title="Save">
+                                        <span ng-if="!type.saving"><i class="fas fa-check"></i></span>
+                                        <span ng-if="type.saving"><i class="fas fa-spinner fa-spin"></i></span>
                                     </button>
-                                    <button class="btn btn-sm btn-secondary" ng-click="$ctrl.cancelEdit(type)" title="Cancel">
+                                    <button class="btn btn-sm btn-secondary" ng-click="$ctrl.cancelEdit(type)" ng-disabled="type.saving" title="Cancel">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -105,7 +107,10 @@ app.component('controlTypesList', {
             if(!date) return '';
             var d = new Date(date);
             if(isNaN(d)) return '';
-            return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + '.' + d.getFullYear();
+            // Format: DD.MM (Day.Month) - e.g., 26.01, 25.12
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            return day + '.' + month;
         };
 
         ctrl.startEdit = function(type) {
@@ -133,6 +138,7 @@ app.component('controlTypesList', {
                 return;
             }
 
+            type.saving = true;
             var payload = {
                 typeName: type.editTypeName.trim(),
                 description: type.editDescription.trim(),
@@ -145,6 +151,7 @@ app.component('controlTypesList', {
                 type.description = updatedType.description;
                 type.releaseDate = updatedType.releaseDate;
                 type.editing = false;
+                type.saving = false;
                 
                 // Clean up edit fields
                 delete type.editTypeName;
@@ -156,6 +163,7 @@ app.component('controlTypesList', {
                 // Broadcast event to update dashboard and other components
                 $rootScope.$broadcast('controlTypesUpdated');
             }).catch(function(error) {
+                type.saving = false;
                 console.error('Error updating control type:', error);
                 var errorMsg = 'Error updating control type';
                 if(error && error.data) {
@@ -174,6 +182,7 @@ app.component('controlTypesList', {
                 return;
             }
 
+            type.deleting = true;
             ApiService.deleteControlType(type.controlTypeId).then(function() {
                 // Reload control types to get the updated list
                 ApiService.loadControlTypes().then(function(types) {
@@ -186,6 +195,7 @@ app.component('controlTypesList', {
                     }, 100);
                 });
             }).catch(function(error) {
+                type.deleting = false;
                 console.error('Error deleting control type:', error);
                 var errorMsg = 'Error deleting control type';
                 if(error && error.data && error.data.message) {
@@ -198,4 +208,3 @@ app.component('controlTypesList', {
         };
     }
 });
-

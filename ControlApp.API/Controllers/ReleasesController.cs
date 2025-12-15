@@ -35,18 +35,40 @@ namespace ControlApp.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ReleaseDto>> CreateRelease([FromBody] CreateReleaseDto createReleaseDto)
         {
-            var release = await _releaseService.CreateReleaseAsync(createReleaseDto);
-            return CreatedAtAction(nameof(GetReleaseById), new { id = release.ReleaseId }, release);
+            try
+            {
+                var release = await _releaseService.CreateReleaseAsync(createReleaseDto);
+                return CreatedAtAction(nameof(GetReleaseById), new { id = release.ReleaseId }, release);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error creating release: {ex.Message}" });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ReleaseDto>> UpdateRelease(int id, [FromBody] CreateReleaseDto updateReleaseDto)
         {
-            var release = await _releaseService.UpdateReleaseAsync(id, updateReleaseDto);
-            if (release == null)
-                return NotFound($"Release with ID {id} not found.");
+            try
+            {
+                var release = await _releaseService.UpdateReleaseAsync(id, updateReleaseDto);
+                if (release == null)
+                    return NotFound($"Release with ID {id} not found.");
 
-            return Ok(release);
+                return Ok(release);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error updating release: {ex.Message}" });
+            }
         }
 
         [HttpDelete("{id}")]

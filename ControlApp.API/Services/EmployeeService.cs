@@ -95,7 +95,8 @@ namespace ControlApp.API.Services
             catch (Exception ex)
             {
                 // Log the error but don't stop the request since Employee is already created
-                Console.WriteLine($"Warning: Failed to create auto-control for employee {createdEmployee.Id}: {ex.Message}");
+                // Note: Logging will be added via ILogger in production
+                System.Diagnostics.Debug.WriteLine($"Warning: Failed to create auto-control for employee {createdEmployee.Id}: {ex.Message}");
             }
 
             // Return the result

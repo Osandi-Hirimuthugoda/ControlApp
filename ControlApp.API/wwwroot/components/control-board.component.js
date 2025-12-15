@@ -66,9 +66,17 @@ app.component('controlBoard', {
                             <!-- 6. Status -->
                             <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
                             <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
+                                <select class="form-select form-select-sm" 
+                                        ng-model="control.editStatusId" 
+                                        ng-options="s.id as s.statusName for s in $ctrl.store.statuses"
+                                        ng-change="$ctrl.onStatusChange(control)"
+                                        ng-init="$ctrl.ensureStatusesLoaded()">
                                     <option value="">- Status -</option>
+                                    <option ng-if="!$ctrl.store.statuses || $ctrl.store.statuses.length === 0" disabled>Loading statuses...</option>
                                 </select>
+                                <small class="text-muted" ng-if="!$ctrl.store.statuses || $ctrl.store.statuses.length === 0">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                </small>
                             </td>
 
                             <!-- 7. Release -->
@@ -84,10 +92,19 @@ app.component('controlBoard', {
 
                             <!-- 8. Actions -->
                             <td class="text-center">
-                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
+                                <div ng-if="!control.editing" class="d-flex gap-1 justify-content-center">
+                                    <button class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControl(control)" ng-disabled="control.deleting">
+                                        <span ng-if="!control.deleting"><i class="fas fa-trash"></i></span>
+                                        <span ng-if="control.deleting"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
                                 <div ng-if="control.editing">
-                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)">Save</button>
-                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false">Cancel</button>
+                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)" ng-disabled="control.saving">
+                                        <span ng-if="!control.saving"><i class="fas fa-save"></i> Save</span>
+                                        <span ng-if="control.saving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false" ng-disabled="control.saving">Cancel</button>
                                 </div>
                             </td>
                         </tr>
@@ -135,9 +152,17 @@ app.component('controlBoard', {
                             <!-- 6. Status -->
                             <td class="text-center" ng-if="!control.editing"><span class="badge bg-info">{{control.statusName}}</span></td>
                             <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editStatusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
+                                <select class="form-select form-select-sm" 
+                                        ng-model="control.editStatusId" 
+                                        ng-options="s.id as s.statusName for s in $ctrl.store.statuses"
+                                        ng-change="$ctrl.onStatusChange(control)"
+                                        ng-init="$ctrl.ensureStatusesLoaded()">
                                     <option value="">- Status -</option>
+                                    <option ng-if="!$ctrl.store.statuses || $ctrl.store.statuses.length === 0" disabled>Loading statuses...</option>
                                 </select>
+                                <small class="text-muted" ng-if="!$ctrl.store.statuses || $ctrl.store.statuses.length === 0">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                </small>
                             </td>
 
                             <!-- 7. Release -->
@@ -153,10 +178,19 @@ app.component('controlBoard', {
 
                             <!-- 8. Actions -->
                             <td class="text-center">
-                                <button ng-if="!control.editing" class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
+                                <div ng-if="!control.editing" class="d-flex gap-1 justify-content-center">
+                                    <button class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControl(control)" ng-disabled="control.deleting">
+                                        <span ng-if="!control.deleting"><i class="fas fa-trash"></i></span>
+                                        <span ng-if="control.deleting"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
                                 <div ng-if="control.editing">
-                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)">Save</button>
-                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false">Cancel</button>
+                                    <button class="btn btn-sm btn-success w-100 mb-1" ng-click="$ctrl.saveControl(control)" ng-disabled="control.saving">
+                                        <span ng-if="!control.saving"><i class="fas fa-save"></i> Save</span>
+                                        <span ng-if="control.saving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary w-100" ng-click="control.editing = false" ng-disabled="control.saving">Cancel</button>
                                 </div>
                             </td>
                         </tr>
@@ -173,13 +207,28 @@ app.component('controlBoard', {
         ctrl.selectedTypeFilter = null;
 
         // Initialize Data on Load
-        ApiService.init();
+        ApiService.init().then(function() {
+            console.log('Control board initialized. Statuses available:', ctrl.store.statuses ? ctrl.store.statuses.length : 0);
+            console.log('Statuses:', ctrl.store.statuses);
+            
+            // If statuses are empty, try to reload them
+            if (!ctrl.store.statuses || ctrl.store.statuses.length === 0) {
+                console.warn('Statuses are empty, attempting to reload...');
+                ApiService.loadStatuses().then(function(statuses) {
+                    console.log('Statuses reloaded:', statuses.length);
+                    console.log('Reloaded statuses:', statuses);
+                });
+            }
+        });
 
         ctrl.formatDate = function(date) {
             if(!date) return '';
             var d = new Date(date);
             if(isNaN(d)) return '';
-            return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2);
+            // Format: DD.MM (Day.Month) - e.g., 26.01, 25.12
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            return day + '.' + month;
         };
 
         ctrl.getAllControls = function() {
@@ -198,15 +247,54 @@ app.component('controlBoard', {
         };
 
         ctrl.getFilteredTypes = function() {
-            if(!ctrl.store.controlTypes) return [];
+            if(!ctrl.store.controlTypes || !ctrl.store.allControls) return [];
+            
             // If type filter is selected, only show that type
             if(ctrl.selectedTypeFilter) {
                 return ctrl.store.controlTypes.filter(function(t) {
                     return t.controlTypeId == ctrl.selectedTypeFilter;
                 });
             }
-            // Otherwise show all types
-            return ctrl.store.controlTypes;
+            
+            // Otherwise, show only types that have controls (no duplicates)
+            // Get unique type IDs from controls - use Set to ensure uniqueness
+            var typeIdsWithControls = [];
+            var seenTypeIds = {};
+            var seenTypeNames = {}; // Also check by type name to prevent duplicates
+            
+            ctrl.store.allControls.forEach(function(control) {
+                if(control.typeId && !seenTypeIds[control.typeId]) {
+                    // Find the type to check its name
+                    var type = ctrl.store.controlTypes.find(function(t) {
+                        return t.controlTypeId == control.typeId;
+                    });
+                    
+                    // Only add if we haven't seen this type ID or type name before
+                    if(type && !seenTypeNames[type.typeName]) {
+                        seenTypeIds[control.typeId] = true;
+                        seenTypeNames[type.typeName] = true;
+                        typeIdsWithControls.push(control.typeId);
+                    }
+                }
+            });
+            
+            // Return types that have controls, sorted by type name (L3, CR, etc.)
+            var typesWithControls = [];
+            typeIdsWithControls.forEach(function(typeId) {
+                var type = ctrl.store.controlTypes.find(function(t) {
+                    return t.controlTypeId == typeId;
+                });
+                if(type) {
+                    typesWithControls.push(type);
+                }
+            });
+            
+            // Sort by type name to ensure consistent order (L3, CR, etc.)
+            typesWithControls.sort(function(a, b) {
+                return (a.typeName || '').localeCompare(b.typeName || '');
+            });
+            
+            return typesWithControls;
         };
 
         ctrl.getControlsByType = function(typeId) {
@@ -241,7 +329,25 @@ app.component('controlBoard', {
             return emp ? emp.employeeName : '';
         };
 
+        // Ensure statuses are loaded
+        ctrl.ensureStatusesLoaded = function() {
+            if (!ctrl.store.statuses || ctrl.store.statuses.length === 0) {
+                console.log('Statuses empty, reloading...');
+                ApiService.loadStatuses().then(function(statuses) {
+                    console.log('Statuses reloaded in ensureStatusesLoaded:', statuses.length);
+                });
+            }
+        };
+
         ctrl.startEdit = function(c) {
+            // Reload statuses if empty (in case they weren't loaded initially)
+            if (!ctrl.store.statuses || ctrl.store.statuses.length === 0) {
+                console.log('Statuses empty, reloading...');
+                ApiService.loadStatuses().then(function() {
+                    console.log('Statuses reloaded:', ctrl.store.statuses.length);
+                });
+            }
+            
             c.editing = true;
             c.editDescription = c.description;
             c.editComments = c.comments;
@@ -263,7 +369,42 @@ app.component('controlBoard', {
             }
         };
 
+        // Auto-update progress when status changes
+        ctrl.onStatusChange = function(control) {
+            if (!control.editStatusId) {
+                return;
+            }
+            
+            // Find the selected status
+            var selectedStatus = ctrl.store.statuses.find(function(s) {
+                return s.id == control.editStatusId;
+            });
+            
+            if (selectedStatus) {
+                // Map status name to progress value
+                var progressMap = {
+                    'Analyze': 25,
+                    'Development': 50,
+                    'Dev Testing': 75,
+                    'QA': 100
+                };
+                
+                var newProgress = progressMap[selectedStatus.statusName];
+                if (newProgress !== undefined) {
+                    control.editProgress = newProgress;
+                    console.log('Progress auto-updated to', newProgress, 'for status:', selectedStatus.statusName);
+                }
+            }
+        };
+
         ctrl.saveControl = function(c) {
+            // Validate progress value before saving
+            var progressValue = parseInt(c.editProgress);
+            if (isNaN(progressValue)) {
+                NotificationService.show('Invalid progress value. Please enter a number between 0 and 100.', 'error');
+                return;
+            }
+            
             // Find selected release object
             var selectedRelease = c.editReleaseId ? ctrl.store.upcomingReleases.find(r => r.releaseId == c.editReleaseId) : null;
             
@@ -306,26 +447,41 @@ app.component('controlBoard', {
                 return;
             }
             
+            // Ensure progress is a valid number between 0 and 100
+            var progressValue = parseInt(c.editProgress);
+            if (isNaN(progressValue) || progressValue < 0) {
+                progressValue = 0;
+            }
+            if (progressValue > 100) {
+                progressValue = 100;
+            }
+            
             var payload = {
                 controlId: parseInt(c.controlId),
                 employeeId: employeeId,
                 typeId: typeId,
                 description: c.editDescription || null,
                 comments: c.editComments || null,
-                progress: parseInt(c.editProgress || 0),
+                progress: progressValue,
                 statusId: statusId,
                 releaseId: releaseId,
                 releaseDate: releaseDate
             };
             
             console.log('Saving control with payload:', payload);
+            console.log('Progress value being saved:', progressValue);
+
+            // Set saving flag to disable buttons
+            c.saving = true;
 
             ApiService.updateControl(c.controlId, payload).then(function(r) {
                 var updated = r.data;
-                // Update Local View
+                console.log('Control updated successfully. Response:', updated);
+                
+                // Update Local View with all fields including progress
                 c.description = updated.description;
                 c.comments = updated.comments;
-                c.progress = updated.progress;
+                c.progress = updated.progress || 0; // Ensure progress is set
                 c.statusId = updated.statusId;
                 
                 var s = ctrl.store.statuses.find(x => x.id == c.statusId);
@@ -335,8 +491,17 @@ app.component('controlBoard', {
                 else c.releaseDate = null;
 
                 c.editing = false;
-                NotificationService.show('Saved successfully', 'success');
+                c.saving = false;
+                
+                // Reload controls to ensure UI is updated
+                ApiService.loadAllControls().then(function() {
+                    console.log('Controls reloaded after save. Progress:', c.progress);
+                });
+                
+                NotificationService.show('Saved successfully! Progress: ' + c.progress + '%', 'success');
             }).catch(function(error) {
+                // Reset saving flag on error
+                c.saving = false;
                 console.error('Error saving control:', error);
                 console.error('Error response:', error.response || error.data);
                 var errorMsg = 'Error saving';
@@ -372,6 +537,38 @@ app.component('controlBoard', {
                 c.comments = r.data.comments;
                 c.newProgressComment = '';
                 NotificationService.show('Comment added', 'success');
+            }).catch(function(error) {
+                console.error('Error adding comment:', error);
+                NotificationService.show('Error adding comment', 'error');
+            });
+        };
+
+        ctrl.deleteControl = function(control) {
+            if(!confirm('Are you sure you want to delete this control?\n\nControl ID: ' + control.controlId + '\nDescription: ' + (control.description || 'N/A'))) {
+                return;
+            }
+            
+            control.deleting = true;
+            ApiService.deleteControl(control.controlId).then(function() {
+                // Remove from local list
+                var index = ctrl.store.allControls.findIndex(c => c.controlId === control.controlId);
+                if(index > -1) {
+                    ctrl.store.allControls.splice(index, 1);
+                }
+                
+                NotificationService.show('Control deleted successfully', 'success');
+            }).catch(function(error) {
+                control.deleting = false;
+                console.error('Error deleting control:', error);
+                var errorMsg = 'Error deleting control';
+                if(error && error.data) {
+                    if(typeof error.data === 'string') {
+                        errorMsg = error.data;
+                    } else if(error.data.message) {
+                        errorMsg = error.data.message;
+                    }
+                }
+                NotificationService.show(errorMsg, 'error');
             });
         };
     }

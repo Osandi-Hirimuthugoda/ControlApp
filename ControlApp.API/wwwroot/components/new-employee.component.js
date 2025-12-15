@@ -125,4 +125,3 @@ app.component('newEmployee', {
     }
 });
 
-

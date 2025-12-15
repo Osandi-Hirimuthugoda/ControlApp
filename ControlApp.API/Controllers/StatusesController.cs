@@ -18,8 +18,18 @@ namespace ControlApp.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StatusDto>>> GetAllStatuses()
         {
-            var statuses = await _statusService.GetAllStatusesAsync();
-            return Ok(statuses);
+            try
+            {
+                var statuses = await _statusService.GetAllStatusesAsync();
+                // Log for debugging
+                System.Diagnostics.Debug.WriteLine($"GetAllStatuses: Returning {statuses.Count()} statuses");
+                return Ok(statuses);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetAllStatuses: {ex.Message}");
+                return StatusCode(500, new { message = $"Error loading statuses: {ex.Message}" });
+            }
         }
 
         [HttpGet("{id}")]
@@ -35,18 +45,40 @@ namespace ControlApp.API.Controllers
         [HttpPost]
         public async Task<ActionResult<StatusDto>> CreateStatus([FromBody] CreateStatusDto createStatusDto)
         {
-            var status = await _statusService.CreateStatusAsync(createStatusDto);
-            return CreatedAtAction(nameof(GetStatusById), new { id = status.Id }, status);
+            try
+            {
+                var status = await _statusService.CreateStatusAsync(createStatusDto);
+                return CreatedAtAction(nameof(GetStatusById), new { id = status.Id }, status);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error creating status: {ex.Message}" });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<StatusDto>> UpdateStatus(int id, [FromBody] CreateStatusDto updateStatusDto)
         {
-            var status = await _statusService.UpdateStatusAsync(id, updateStatusDto);
-            if (status == null)
-                return NotFound($"Status with ID {id} not found.");
+            try
+            {
+                var status = await _statusService.UpdateStatusAsync(id, updateStatusDto);
+                if (status == null)
+                    return NotFound($"Status with ID {id} not found.");
 
-            return Ok(status);
+                return Ok(status);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error updating status: {ex.Message}" });
+            }
         }
 
         [HttpDelete("{id}")]

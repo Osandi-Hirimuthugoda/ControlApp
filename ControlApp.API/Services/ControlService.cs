@@ -3,6 +3,7 @@ using ControlApp.API.DTOs;
 using ControlApp.API.Models;
 using ControlApp.API.Repositories;
 using ControlApp.API;
+using System.Linq;
 
 namespace ControlApp.API.Services
 {
@@ -112,33 +113,16 @@ namespace ControlApp.API.Services
                 var statusChanged = control.StatusId != updateControlDto.StatusId.Value;
                 control.StatusId = updateControlDto.StatusId.Value;
                 
-                // If status changed, check if we should auto-update progress
+                // If status changed, use the progress value from frontend (which already calculated it)
+                // The frontend handles the auto-update, so we trust the progress value it sends
                 if (statusChanged)
                 {
-                    var status = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == updateControlDto.StatusId.Value);
-                    if (status != null)
-                    {
-                        var autoProgressValue = GetProgressByStatus(status.StatusName);
-                        // Only auto-update if progress is 0 (meaning it wasn't manually set)
-                        // Otherwise, use the provided progress value (user manually set it)
-                        if (autoProgressValue.HasValue && updateControlDto.Progress == 0)
-                        {
-                            control.Progress = autoProgressValue.Value;
-                        }
-                        else
-                        {
-                            // User manually set progress, save that value
-                            control.Progress = updateControlDto.Progress;
-                        }
-                    }
-                    else
-                    {
-                        control.Progress = updateControlDto.Progress;
-                    }
+                    // Use the progress value provided by frontend (already calculated based on status)
+                    control.Progress = updateControlDto.Progress;
                 }
                 else
                 {
-                    // Status didn't change, always use provided progress (user manually set it)
+                    // Status didn't change, use provided progress (user manually set it)
                     control.Progress = updateControlDto.Progress;
                 }
             }
@@ -162,7 +146,82 @@ namespace ControlApp.API.Services
 
         public async Task<IEnumerable<ControlDto>> AddAllEmployeesToControlsAsync()
         {
-             return new List<ControlDto>(); 
+            // Get all employees
+            var allEmployees = await _context.Set<Employee>().ToListAsync();
+            
+            // Get employees that don't have controls yet
+            var employeesWithoutControls = allEmployees
+                .Where(e => !_context.Set<Controls>().Any(c => c.EmployeeId == e.Id))
+                .ToList();
+
+            if (!employeesWithoutControls.Any())
+            {
+                return new List<ControlDto>();
+            }
+
+            // Get default status and release for FK constraints
+            var defaultStatus = await _context.Set<Status>().FirstOrDefaultAsync();
+            var defaultRelease = await _context.Set<Release>().FirstOrDefaultAsync();
+
+            var createdControls = new List<Controls>();
+
+            foreach (var employee in employeesWithoutControls)
+            {
+                // Get control type if employee has one
+                ControlType? controlType = null;
+                if (employee.TypeId.HasValue)
+                {
+                    controlType = await _context.Set<ControlType>()
+                        .FirstOrDefaultAsync(t => t.ControlTypeId == employee.TypeId.Value);
+                }
+
+                // Create control for employee
+                var control = new Controls
+                {
+                    EmployeeId = employee.Id,
+                    TypeId = employee.TypeId ?? 0, // Use employee's type or default to first available type
+                    Description = !string.IsNullOrWhiteSpace(controlType?.Description)
+                        ? controlType.Description
+                        : (!string.IsNullOrWhiteSpace(employee.Description)
+                            ? employee.Description
+                            : $"Control for {employee.EmployeeName}"),
+                    ReleaseDate = controlType?.ReleaseDate,
+                    StatusId = defaultStatus?.Id,
+                    ReleaseId = defaultRelease?.ReleaseId,
+                    Progress = 0,
+                    Comments = ""
+                };
+
+                // If TypeId is 0, find first available control type
+                if (control.TypeId == 0)
+                {
+                    var firstType = await _context.Set<ControlType>().FirstOrDefaultAsync();
+                    if (firstType != null)
+                    {
+                        control.TypeId = firstType.ControlTypeId;
+                    }
+                    else
+                    {
+                        // Skip if no control types exist
+                        continue;
+                    }
+                }
+
+                createdControls.Add(control);
+            }
+
+            if (createdControls.Any())
+            {
+                await _context.Set<Controls>().AddRangeAsync(createdControls);
+                await _context.SaveChangesAsync();
+            }
+
+            // Return created controls with details
+            var controlIds = createdControls.Select(c => c.ControlId).ToList();
+            var controlsWithDetails = await _controlRepository.GetControlsWithDetailsAsync(null);
+            return controlsWithDetails
+                .Where(c => controlIds.Contains(c.ControlId))
+                .Select(MapToDto);
         }
 
         private static int? GetProgressByStatus(string statusName)

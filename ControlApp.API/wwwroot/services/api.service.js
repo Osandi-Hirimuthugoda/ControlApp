@@ -14,14 +14,20 @@ app.service('ApiService', function($http, $q) {
 
     //Initialization
     self.init = function() {
+        console.log('ApiService.init() called');
         var p1 = self.loadControlTypes(); 
         var p2 = self.loadStatuses();
         var p3 = self.loadReleases();
 
-        return $q.all([p1, p2, p3]).then(function() {
+        return $q.all([p1, p2, p3]).then(function(results) {
+            console.log('Initial data loaded. Statuses:', self.data.statuses.length);
             return self.loadEmployees();
         }).then(function() {
             return self.loadAllControls();
+        }).then(function() {
+            console.log('All data initialized. Final status count:', self.data.statuses.length);
+        }).catch(function(error) {
+            console.error('Error during initialization:', error);
         });
     };
 
@@ -52,7 +58,16 @@ app.service('ApiService', function($http, $q) {
  
     self.loadStatuses = function() {
         return $http.get(apiBaseUrl + '/statuses').then(function(r) {
-            self.data.statuses = r.data || [];
+            // Create a new array reference to ensure Angular detects the change
+            var newStatuses = r.data || [];
+            self.data.statuses = newStatuses;
+            console.log('Statuses loaded:', self.data.statuses.length);
+            console.log('Statuses:', self.data.statuses);
+            return self.data.statuses;
+        }).catch(function(error) {
+            console.error('Error loading statuses:', error);
+            self.data.statuses = [];
+            return $q.when(self.data.statuses);
         });
     };
 

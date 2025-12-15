@@ -106,7 +106,10 @@ app.component('controlTypeSidebar', {
             if(!date) return '';
             var d = new Date(date);
             if(isNaN(d)) return '';
-            return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + '.' + d.getFullYear();
+            // Format: DD.MM (Day.Month) - e.g., 26.01, 25.12
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            return day + '.' + month;
         };
 
         ctrl.addControlType = function(event) {
@@ -254,4 +257,3 @@ app.component('controlTypeSidebar', {
         };
     }
 });
-

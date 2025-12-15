@@ -12,14 +12,29 @@ app.component('employeeSidebar', {
                         <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newEmployee.employeeName" placeholder="Name" required>
                     </div>
                     <div class="mb-2">
-                        <!-- Control Type Selection -->
+                        <!-- Description Selection -->
+                        <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.25rem; color: var(--text-secondary);">Select Description</label>
                         <select class="form-select form-select-sm" 
-                                ng-model="$ctrl.newEmployee.typeId" 
-                                ng-options="t.controlTypeId as t.typeName for t in $ctrl.store.controlTypes" required>
-                            <option value="">-- Select Type (L3 / CR) --</option>
+                                ng-model="$ctrl.selectedType" 
+                                ng-options="type as (type.description || 'No Description') for type in $ctrl.getUniqueDescriptions()"
+                                ng-change="$ctrl.onDescriptionChange()"
+                                required>
+                            <option value="">-- Select Description --</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary w-100" ng-disabled="$ctrl.isSaving">Add</button>
+                    <div class="mb-2">
+                        <!-- Type Display (Auto-filled from Description) -->
+                        <div class="input-group">
+                            <span class="input-group-text bg-light" style="font-size: 0.85rem;">Type:</span>
+                            <input type="text" 
+                                   class="form-control form-control-sm" 
+                                   ng-model="$ctrl.selectedTypeName" 
+                                   readonly 
+                                   style="background-color: #f8f9fa; cursor: not-allowed;"
+                                   placeholder="Type will be auto-selected">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary w-100" ng-disabled="$ctrl.isSaving || !$ctrl.newEmployee.typeId">Add</button>
                 </form>
             </div>
         </div>
@@ -47,8 +62,20 @@ app.component('employeeSidebar', {
                                 <!-- Edit Mode -->
                                 <td ng-if="emp.editing">
                                     <input class="form-control form-control-sm mb-1" ng-model="emp.editName">
-                                    <select class="form-select form-select-sm" ng-model="emp.editTypeId" 
-                                            ng-options="t.controlTypeId as t.typeName for t in $ctrl.store.controlTypes"></select>
+                                    <select class="form-select form-select-sm mb-1" 
+                                            ng-model="emp.editSelectedType" 
+                                            ng-options="type as (type.description || 'No Description') for type in $ctrl.getUniqueDescriptions()"
+                                            ng-change="$ctrl.onEditDescriptionChange(emp)">
+                                        <option value="">-- Select Description --</option>
+                                    </select>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light" style="font-size: 0.75rem;">Type:</span>
+                                        <input type="text" 
+                                               class="form-control form-control-sm" 
+                                               ng-model="emp.editTypeName" 
+                                               readonly 
+                                               style="background-color: #f8f9fa; font-size: 0.85rem;">
+                                    </div>
                                 </td>
 
                                 <!-- Actions -->
@@ -66,11 +93,35 @@ app.component('employeeSidebar', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $q) {
+    controller: function(ApiService, NotificationService, $q, $rootScope, $scope) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.newEmployee = { employeeName: '', typeId: null };
+        ctrl.selectedType = null;
+        ctrl.selectedDescription = null;
+        ctrl.selectedTypeName = '';
         ctrl.isSaving = false;
+        
+        // Listen for control types updates
+        ctrl.$onInit = function() {
+            var listener = $rootScope.$on('controlTypesUpdated', function() {
+                console.log('Control types updated event received in employee-sidebar');
+                // Reload control types to get the latest list
+                ApiService.loadControlTypes().then(function(types) {
+                    console.log('Control types reloaded in employee-sidebar, count:', types.length);
+                    // Update store reference
+                    ctrl.store = ApiService.data;
+                    // Clear selected type to force refresh
+                    ctrl.selectedType = null;
+                });
+            });
+            
+            ctrl.$onDestroy = function() {
+                if(listener) {
+                    listener();
+                }
+            };
+        };
 
         // Helper to show Type Names
         ctrl.getTypeName = function(id) {
@@ -78,16 +129,63 @@ app.component('employeeSidebar', {
             return t ? t.typeName : '';
         };
 
+        // Get unique descriptions from control types
+        ctrl.getUniqueDescriptions = function() {
+            if (!ctrl.store.controlTypes || ctrl.store.controlTypes.length === 0) {
+                return [];
+            }
+            
+            // Group by description and get unique ones
+            var descriptionMap = {};
+            ctrl.store.controlTypes.forEach(function(type) {
+                if (type.description && type.description.trim() !== '') {
+                    // Use description as key, store the first type with this description
+                    if (!descriptionMap[type.description]) {
+                        descriptionMap[type.description] = type;
+                    }
+                }
+            });
+            
+            // Return array of unique types with descriptions
+            return Object.keys(descriptionMap).map(function(desc) {
+                return descriptionMap[desc];
+            }).sort(function(a, b) {
+                return (a.description || '').localeCompare(b.description || '');
+            });
+        };
+
+        // When description is selected, automatically set the type
+        ctrl.onDescriptionChange = function() {
+            if (!ctrl.selectedType) {
+                ctrl.newEmployee.typeId = null;
+                ctrl.selectedDescription = null;
+                ctrl.selectedTypeName = '';
+                return;
+            }
+
+            // Set the type from selected description
+            ctrl.newEmployee.typeId = ctrl.selectedType.controlTypeId;
+            ctrl.selectedDescription = ctrl.selectedType.description;
+            ctrl.selectedTypeName = ctrl.selectedType.typeName;
+        };
+
         ctrl.addEmployee = function(event) {
             if(event) event.preventDefault();
+            if (!ctrl.newEmployee.typeId) {
+                NotificationService.show('Please select a description first', 'error');
+                return;
+            }
             ctrl.isSaving = true;
             ApiService.addEmployee({
                 employeeName: ctrl.newEmployee.employeeName,
                 typeId: ctrl.newEmployee.typeId,
-                description: "New Employee"
+                description: ctrl.selectedDescription || "New Employee"
             }).then(function() {
                 NotificationService.show('Employee Added Successfully!', 'success');
                 ctrl.newEmployee = { employeeName: '', typeId: null };
+                ctrl.selectedType = null;
+                ctrl.selectedDescription = null;
+                ctrl.selectedTypeName = '';
             }).finally(function() { ctrl.isSaving = false; });
         };
 
@@ -106,14 +204,62 @@ app.component('employeeSidebar', {
             });
         };
 
-        ctrl.startEdit = function(e) { e.editing = true; e.editName = e.employeeName; e.editTypeId = e.typeId; };
-        ctrl.cancelEdit = function(e) { e.editing = false; };
+        ctrl.startEdit = function(e) { 
+            e.editing = true; 
+            e.editName = e.employeeName; 
+            e.editTypeId = e.typeId;
+            
+            // Find the type with current typeId and set selected description
+            if (e.typeId) {
+                var currentType = ctrl.store.controlTypes.find(function(t) {
+                    return t.controlTypeId == e.typeId;
+                });
+                if (currentType && currentType.description) {
+                    e.editSelectedType = ctrl.getUniqueDescriptions().find(function(t) {
+                        return t.description === currentType.description;
+                    });
+                    e.editTypeName = currentType.typeName;
+                } else {
+                    e.editSelectedType = null;
+                    e.editTypeName = '';
+                }
+            } else {
+                e.editSelectedType = null;
+                e.editTypeName = '';
+            }
+        };
+        
+        ctrl.cancelEdit = function(e) { 
+            e.editing = false;
+            e.editSelectedType = null;
+            e.editTypeName = '';
+        };
+        
+        ctrl.onEditDescriptionChange = function(e) {
+            if (!e.editSelectedType) {
+                e.editTypeId = null;
+                e.editTypeName = '';
+                return;
+            }
+            e.editTypeId = e.editSelectedType.controlTypeId;
+            e.editTypeName = e.editSelectedType.typeName;
+        };
         
         ctrl.saveEmployee = function(e) {
-            ApiService.updateEmployee(e.id, { employeeName: e.editName, typeId: e.editTypeId }).then(function(r) {
+            if (!e.editTypeId) {
+                NotificationService.show('Please select a description first', 'error');
+                return;
+            }
+            ApiService.updateEmployee(e.id, { 
+                employeeName: e.editName, 
+                typeId: e.editTypeId,
+                description: e.editSelectedType ? e.editSelectedType.description : null
+            }).then(function(r) {
                 e.employeeName = r.data.employeeName;
                 e.typeId = r.data.typeId;
                 e.editing = false;
+                e.editSelectedType = null;
+                e.editTypeName = '';
                 NotificationService.show('Employee Updated', 'success');
             });
         };

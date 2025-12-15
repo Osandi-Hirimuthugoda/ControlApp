@@ -31,10 +31,38 @@ namespace ControlApp.API.Services
 
         public async Task<ControlTypeDto> CreateControlTypeAsync(CreateControlTypeDto createControlTypeDto)
         {
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(createControlTypeDto.TypeName))
+            {
+                throw new ArgumentException("Type Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(createControlTypeDto.Description))
+            {
+                throw new ArgumentException("Description is required.");
+            }
+
+            // Check for duplicate type name AND description combination (case-insensitive)
+            // Load all control types and check in memory to ensure case-insensitive comparison works correctly
+            var trimmedTypeName = createControlTypeDto.TypeName.Trim();
+            var trimmedDescription = createControlTypeDto.Description.Trim();
+            
+            var allTypes = await _context.Set<ControlType>().ToListAsync();
+            var existingType = allTypes.FirstOrDefault(t => 
+                t.TypeName != null && 
+                t.TypeName.Trim().Equals(trimmedTypeName, StringComparison.OrdinalIgnoreCase) && 
+                t.Description != null && 
+                t.Description.Trim().Equals(trimmedDescription, StringComparison.OrdinalIgnoreCase));
+            
+            if (existingType != null)
+            {
+                throw new ArgumentException($"A control type with the name '{createControlTypeDto.TypeName}' and description '{createControlTypeDto.Description}' already exists. Please use a different description.");
+            }
+
             var controlType = new ControlType
             {
-                TypeName = createControlTypeDto.TypeName,
-                Description = createControlTypeDto.Description,
+                TypeName = createControlTypeDto.TypeName.Trim(),
+                Description = createControlTypeDto.Description.Trim(),
                 ReleaseDate = createControlTypeDto.ReleaseDate
             };
 
@@ -48,8 +76,37 @@ namespace ControlApp.API.Services
             if (controlType == null)
                 return null;
 
-            controlType.TypeName = updateControlTypeDto.TypeName;
-            controlType.Description = updateControlTypeDto.Description;
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(updateControlTypeDto.TypeName))
+            {
+                throw new ArgumentException("Type Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(updateControlTypeDto.Description))
+            {
+                throw new ArgumentException("Description is required.");
+            }
+
+            // Check for duplicate type name AND description combination (excluding current type)
+            // Load all control types and check in memory to ensure case-insensitive comparison works correctly
+            var trimmedTypeName = updateControlTypeDto.TypeName.Trim();
+            var trimmedDescription = updateControlTypeDto.Description.Trim();
+            
+            var allTypes = await _context.Set<ControlType>().ToListAsync();
+            var existingType = allTypes.FirstOrDefault(t => 
+                t.ControlTypeId != id &&
+                t.TypeName != null && 
+                t.TypeName.Trim().Equals(trimmedTypeName, StringComparison.OrdinalIgnoreCase) && 
+                t.Description != null && 
+                t.Description.Trim().Equals(trimmedDescription, StringComparison.OrdinalIgnoreCase));
+            
+            if (existingType != null)
+            {
+                throw new ArgumentException($"A control type with the name '{updateControlTypeDto.TypeName}' and description '{updateControlTypeDto.Description}' already exists. Please use a different description.");
+            }
+
+            controlType.TypeName = updateControlTypeDto.TypeName.Trim();
+            controlType.Description = updateControlTypeDto.Description.Trim();
             controlType.ReleaseDate = updateControlTypeDto.ReleaseDate;
             await _controlTypeRepository.UpdateAsync(controlType);
             return MapToDto(controlType);

@@ -5,6 +5,14 @@
       "PackagePath": "staticwebassets\\app.module.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\DASHBOARD_RESTORE_SUMMARY.md",
+      "PackagePath": "staticwebassets\\components\\DASHBOARD_RESTORE_SUMMARY.md"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\add-control-type.component.js",
+      "PackagePath": "staticwebassets\\components\\add-control-type.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-board.component.js",
       "PackagePath": "staticwebassets\\components\\control-board.component.js"
     },
@@ -13,12 +21,32 @@
       "PackagePath": "staticwebassets\\components\\control-type-sidebar.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-types-list.component.js",
+      "PackagePath": "staticwebassets\\components\\control-types-list.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-sidebar.component.js",
+      "PackagePath": "staticwebassets\\components\\controls-sidebar.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\dashboard.component.js",
+      "PackagePath": "staticwebassets\\components\\dashboard.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
       "PackagePath": "staticwebassets\\components\\employee-sidebar.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employees-list.component.js",
+      "PackagePath": "staticwebassets\\components\\employees-list.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\navbar.component.js",
       "PackagePath": "staticwebassets\\components\\navbar.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\new-employee.component.js",
+      "PackagePath": "staticwebassets\\components\\new-employee.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",

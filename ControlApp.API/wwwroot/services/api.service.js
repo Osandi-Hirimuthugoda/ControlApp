@@ -38,7 +38,10 @@ app.service('ApiService', function($http, $q) {
     // Load Control Types from API
     self.loadControlTypes = function() {
         return $http.get(apiBaseUrl + '/controltypes').then(function(r) {
-            self.data.controlTypes = r.data || [];
+            // Create a new array reference to ensure Angular detects the change
+            var newTypes = r.data || [];
+            self.data.controlTypes = newTypes;
+            console.log('Control types loaded:', self.data.controlTypes.length);
             return self.data.controlTypes;
         }).catch(function(error) {
             console.error('Error loading control types:', error);
@@ -65,6 +68,7 @@ app.service('ApiService', function($http, $q) {
  
     self.loadAllControls = function() {
         return $http.get(apiBaseUrl + '/controls').then(function(r) {
+            // API should return controls with typeName already included
             self.data.allControls = r.data || [];
             self.data.allControls.forEach(function(c) {
                 if(c.releaseDate) c.releaseDate = new Date(c.releaseDate);
@@ -72,21 +76,31 @@ app.service('ApiService', function($http, $q) {
                 
                 c.editing = false;
                 
-               
+                // Map typeName from controlTypes store if not already set by API
+                // This ensures newly added control types are properly mapped to controls
                 if(c.typeId && self.data.controlTypes.length > 0) {
                     var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
-                    if(t) c.typeName = t.typeName;
+                    if(t) {
+                        c.typeName = t.typeName;
+                    } else {
+                        // If type not found, log for debugging
+                        console.warn('Control type not found for typeId:', c.typeId, 'Control ID:', c.controlId);
+                    }
                 }
                 
-                if(c.statusId && self.data.statuses.length > 0) {
+                // Map statusName if not already set
+                if(c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses.length > 0) {
                     var s = self.data.statuses.find(x => x.id == c.statusId);
                     if(s) c.statusName = s.statusName;
                 }
-                if(c.releaseId && self.data.releases.length > 0) {
+                
+                // Map releaseName if not already set
+                if(c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
                     var r = self.data.releases.find(x => x.releaseId == c.releaseId);
                     if(r) c.releaseName = r.releaseName;
                 }
             });
+            console.log('Controls loaded:', self.data.allControls.length);
             return self.data.allControls;
         });
     };
@@ -121,6 +135,18 @@ app.service('ApiService', function($http, $q) {
                 console.error('Error details:', error.data);
             }
             throw error;
+        });
+    };
+
+    self.addControl = function(controlData) {
+        return $http.post(apiBaseUrl + '/controls', controlData).then(function(r) {
+            // Ensure control types are loaded first, then reload controls
+            return self.loadControlTypes().then(function() {
+                // Reload controls to get the new one with all details and proper type mapping
+                return self.loadAllControls().then(function() {
+                    return r.data;
+                });
+            });
         });
     };
 
@@ -164,8 +190,25 @@ app.service('ApiService', function($http, $q) {
     // Control Type CRUD
     self.addControlType = function(controlTypeData) {
         return $http.post(apiBaseUrl + '/controltypes', controlTypeData).then(function(r) {
-            self.data.controlTypes.push(r.data);
-            return r.data;
+            // Reload control types to get the updated list
+            return self.loadControlTypes().then(function() {
+                return r.data;
+            });
+        }).catch(function(error) {
+            // Re-throw error so it can be handled by the component
+            throw error;
+        });
+    };
+
+    self.updateControlType = function(controlTypeId, controlTypeData) {
+        return $http.put(apiBaseUrl + '/controltypes/' + controlTypeId, controlTypeData).then(function(r) {
+            // Reload control types to get the updated list
+            return self.loadControlTypes().then(function() {
+                return r.data;
+            });
+        }).catch(function(error) {
+            // Re-throw error so it can be handled by the component
+            throw error;
         });
     };
 

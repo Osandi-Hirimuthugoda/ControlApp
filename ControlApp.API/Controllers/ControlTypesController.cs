@@ -35,18 +35,32 @@ namespace ControlApp.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ControlTypeDto>> CreateControlType([FromBody] CreateControlTypeDto createControlTypeDto)
         {
-            var controlType = await _controlTypeService.CreateControlTypeAsync(createControlTypeDto);
-            return CreatedAtAction(nameof(GetControlTypeById), new { id = controlType.ControlTypeId }, controlType);
+            try
+            {
+                var controlType = await _controlTypeService.CreateControlTypeAsync(createControlTypeDto);
+                return CreatedAtAction(nameof(GetControlTypeById), new { id = controlType.ControlTypeId }, controlType);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ControlTypeDto>> UpdateControlType(int id, [FromBody] CreateControlTypeDto updateControlTypeDto)
         {
-            var controlType = await _controlTypeService.UpdateControlTypeAsync(id, updateControlTypeDto);
-            if (controlType == null)
-                return NotFound($"ControlType with ID {id} not found.");
+            try
+            {
+                var controlType = await _controlTypeService.UpdateControlTypeAsync(id, updateControlTypeDto);
+                if (controlType == null)
+                    return NotFound($"ControlType with ID {id} not found.");
 
-            return Ok(controlType);
+                return Ok(controlType);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]

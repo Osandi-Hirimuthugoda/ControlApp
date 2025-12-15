@@ -11,7 +11,7 @@ namespace ControlApp.API.DTOs
     public class CreateControlTypeDto
     {
         public string TypeName { get; set; } = null!;
-        public string? Description { get; set; }
+        public string Description { get; set; } = null!;
         public DateTime? ReleaseDate { get; set; }
     }
 }

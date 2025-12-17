@@ -3,7 +3,7 @@ app.component('controlTypeSidebar', {
     <div style="display: flex; flex-direction: column; gap: 15px;">
         <!-- Add Control Type Card -->
         <div class="card shadow-sm" style="flex-shrink: 0;">
-            <div class="card-header bg-info text-white py-3">
+            <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 1.25rem 1.5rem;">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-tag me-2"></i>New Control Type</h6>
             </div>
             <div class="card-body">
@@ -15,6 +15,15 @@ app.component('controlTypeSidebar', {
                     <div class="mb-2">
                         <label class="form-label small fw-bold">Description: <span class="text-danger">*</span></label>
                         <textarea class="form-control form-control-sm" ng-model="$ctrl.newControlType.description" placeholder="Enter description..." rows="2" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Release:</label>
+                        <select class="form-select form-select-sm" 
+                                ng-model="$ctrl.selectedReleaseId" 
+                                ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
+                                ng-change="$ctrl.onReleaseChange()">
+                            <option value="">-- Select Release --</option>
+                        </select>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">Release Date:</label>
@@ -30,7 +39,7 @@ app.component('controlTypeSidebar', {
         
         <!-- Control Types List Card -->
         <div class="card shadow-sm" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
-            <div class="card-header bg-secondary text-white py-3" style="flex-shrink: 0;">
+            <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem; flex-shrink: 0;">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Control Types</h6>
             </div>
             <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
@@ -69,6 +78,7 @@ app.component('controlTypeSidebar', {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
+        ctrl.selectedReleaseId = null;
         ctrl.isSaving = false;
         ctrl.searchType = '';
         var listener = null;
@@ -110,6 +120,29 @@ app.component('controlTypeSidebar', {
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
             return day + '.' + month;
+        };
+
+        ctrl.formatReleaseName = function(release) {
+            if(!release) return '';
+            if(release.releaseName) return release.releaseName;
+            var date = new Date(release.releaseDate);
+            var day = ('0' + date.getDate()).slice(-2);
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            return 'Release ' + day + '.' + month;
+        };
+
+        ctrl.onReleaseChange = function() {
+            if(ctrl.selectedReleaseId) {
+                var selectedRelease = ctrl.store.upcomingReleases.find(function(r) {
+                    return r.releaseId === ctrl.selectedReleaseId;
+                });
+                if(selectedRelease && selectedRelease.releaseDate) {
+                    var releaseDate = new Date(selectedRelease.releaseDate);
+                    ctrl.newControlType.releaseDate = releaseDate.toISOString().split('T')[0];
+                }
+            } else {
+                ctrl.newControlType.releaseDate = null;
+            }
         };
 
         ctrl.addControlType = function(event) {
@@ -170,6 +203,7 @@ app.component('controlTypeSidebar', {
                 
                 // Reset form immediately
                 ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
+                ctrl.selectedReleaseId = null;
                 
                 // Force reload of control types and trigger Angular digest
                 ApiService.loadControlTypes().then(function(types) {

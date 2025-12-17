@@ -1,7 +1,7 @@
 app.component('employeesList', {
     template: `
     <div class="card shadow-sm" style="height: 80vh; display: flex; flex-direction: column;">
-        <div class="card-header bg-primary text-white py-3">
+        <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem;">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Employees List</h5>
                 <div class="input-group" style="width: 300px;">

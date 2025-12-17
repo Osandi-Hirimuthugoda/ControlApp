@@ -1,7 +1,7 @@
 app.component('addControlType', {
     template: `
     <div class="card shadow-sm">
-        <div class="card-header bg-info text-white py-3">
+        <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 1.25rem 1.5rem;">
             <h5 class="mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i>Add Control Type</h5>
         </div>
         <div class="card-body">
@@ -33,6 +33,15 @@ app.component('addControlType', {
                     </div>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Release:</label>
+                    <select class="form-select" 
+                            ng-model="$ctrl.selectedReleaseId" 
+                            ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
+                            ng-change="$ctrl.onReleaseChange()">
+                        <option value="">-- Select Release --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label class="form-label fw-bold">Release Date:</label>
                     <input type="date" class="form-control" ng-model="$ctrl.newControlType.releaseDate">
                 </div>
@@ -50,7 +59,31 @@ app.component('addControlType', {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
+        ctrl.selectedReleaseId = null;
         ctrl.isSaving = false;
+
+        ctrl.formatReleaseName = function(release) {
+            if(!release) return '';
+            if(release.releaseName) return release.releaseName;
+            var date = new Date(release.releaseDate);
+            var day = ('0' + date.getDate()).slice(-2);
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            return 'Release ' + day + '.' + month;
+        };
+
+        ctrl.onReleaseChange = function() {
+            if(ctrl.selectedReleaseId) {
+                var selectedRelease = ctrl.store.upcomingReleases.find(function(r) {
+                    return r.releaseId === ctrl.selectedReleaseId;
+                });
+                if(selectedRelease && selectedRelease.releaseDate) {
+                    var releaseDate = new Date(selectedRelease.releaseDate);
+                    ctrl.newControlType.releaseDate = releaseDate.toISOString().split('T')[0];
+                }
+            } else {
+                ctrl.newControlType.releaseDate = null;
+            }
+        };
 
         ctrl.addControlType = function(event) {
             if(event) {
@@ -116,6 +149,7 @@ app.component('addControlType', {
                 
                 
                 ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
+                ctrl.selectedReleaseId = null;
                 
                 
                 if($scope.addTypeForm) {

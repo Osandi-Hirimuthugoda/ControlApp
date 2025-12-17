@@ -87,8 +87,6 @@ namespace ControlApp.API.Services
                 throw new ArgumentException("Description is required.");
             }
 
-            // Check for duplicate type name AND description combination (excluding current type)
-            // Load all control types and check in memory to ensure case-insensitive comparison works correctly
             var trimmedTypeName = updateControlTypeDto.TypeName.Trim();
             var trimmedDescription = updateControlTypeDto.Description.Trim();
             
@@ -107,9 +105,14 @@ namespace ControlApp.API.Services
 
             controlType.TypeName = updateControlTypeDto.TypeName.Trim();
             controlType.Description = updateControlTypeDto.Description.Trim();
+            // Ensure ReleaseDate is properly set (can be null)
             controlType.ReleaseDate = updateControlTypeDto.ReleaseDate;
+            
             await _controlTypeRepository.UpdateAsync(controlType);
-            return MapToDto(controlType);
+            
+            // Reload the entity to ensure we get the latest data from database
+            var updatedControlType = await _controlTypeRepository.GetByIdAsync(id);
+            return updatedControlType != null ? MapToDto(updatedControlType) : MapToDto(controlType);
         }
 
         public async Task<bool> DeleteControlTypeAsync(int id)

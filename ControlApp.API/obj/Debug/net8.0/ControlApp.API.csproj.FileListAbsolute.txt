@@ -135,6 +135,7 @@ C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\Contro
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\ControlApp.API.pdb
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\ControlApp.API.genruntimeconfig.cache
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\ref\ControlApp.API.dll
+C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\bin\Debug\net8.0\appsettings.Production.json
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets\msbuild.ControlApp.API.Microsoft.AspNetCore.StaticWebAssets.props
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets\msbuild.ControlApp.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
 C:\Users\ASUS\Desktop\virtusa\Control_App\ControlApp.API\obj\Debug\net8.0\staticwebassets\msbuild.build.ControlApp.API.props

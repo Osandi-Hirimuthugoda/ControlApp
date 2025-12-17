@@ -3,7 +3,7 @@ app.component('employeeSidebar', {
     <div style="height: 80vh; display: flex; flex-direction: column;">
         <!-- Add Employee Card -->
         <div class="card shadow-sm mb-3" style="flex-shrink: 0;">
-            <div class="card-header bg-primary text-white py-3">
+            <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem;">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2"></i>New Employee</h6>
             </div>
             <div class="card-body">
@@ -41,7 +41,7 @@ app.component('employeeSidebar', {
 
         <!-- Employee List Card -->
         <div class="card shadow-sm" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
-            <div class="card-header bg-secondary text-white py-3" style="flex-shrink: 0;">
+            <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem; flex-shrink: 0;">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Employees</h6>
             </div>
             <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
@@ -123,19 +123,18 @@ app.component('employeeSidebar', {
             };
         };
 
-        // Helper to show Type Names
         ctrl.getTypeName = function(id) {
             var t = ctrl.store.controlTypes.find(x => x.controlTypeId == id);
             return t ? t.typeName : '';
         };
 
-        // Get unique descriptions from control types
+        
         ctrl.getUniqueDescriptions = function() {
             if (!ctrl.store.controlTypes || ctrl.store.controlTypes.length === 0) {
                 return [];
             }
             
-            // Group by description and get unique ones
+            
             var descriptionMap = {};
             ctrl.store.controlTypes.forEach(function(type) {
                 if (type.description && type.description.trim() !== '') {

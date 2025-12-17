@@ -1,7 +1,7 @@
 app.component('controlTypesList', {
     template: `
     <div class="card shadow-sm" style="height: 80vh; display: flex; flex-direction: column;">
-        <div class="card-header bg-secondary text-white py-3" style="flex-shrink: 0;">
+        <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem; flex-shrink: 0;">
             <h5 class="mb-0 fw-bold"><i class="fas fa-tags me-2"></i>Control Types</h5>
         </div>
         <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
@@ -33,7 +33,15 @@ app.component('controlTypesList', {
                                     <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatDate(type.releaseDate)}}
                                 </span>
                                 <span ng-if="!type.editing && !type.releaseDate">-</span>
-                                <input ng-if="type.editing" type="date" class="form-control form-control-sm" ng-model="type.editReleaseDate">
+                                <div ng-if="type.editing">
+                                    <select class="form-select form-select-sm mb-2" 
+                                            ng-model="type.editReleaseId" 
+                                            ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
+                                            ng-change="$ctrl.onReleaseChange(type)">
+                                        <option value="">-- Select Release --</option>
+                                    </select>
+                                    <input type="date" class="form-control form-control-sm" ng-model="type.editReleaseDate">
+                                </div>
                             </td>
                             <td class="text-end">
                                 <div ng-if="!type.editing" style="white-space: nowrap;">
@@ -113,11 +121,79 @@ app.component('controlTypesList', {
             return day + '.' + month;
         };
 
+        ctrl.formatReleaseName = function(release) {
+            if(!release) return '';
+            if(release.releaseName) return release.releaseName;
+            var date = new Date(release.releaseDate);
+            var day = ('0' + date.getDate()).slice(-2);
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            return 'Release ' + day + '.' + month;
+        };
+
+        ctrl.onReleaseChange = function(type) {
+            if(type.editReleaseId) {
+                var selectedRelease = ctrl.store.upcomingReleases.find(function(r) {
+                    return r.releaseId === type.editReleaseId;
+                });
+                if(selectedRelease && selectedRelease.releaseDate) {
+                    try {
+                        var releaseDate = new Date(selectedRelease.releaseDate);
+                        if(!isNaN(releaseDate.getTime())) {
+                            type.editReleaseDate = releaseDate.toISOString().split('T')[0];
+                        } else {
+                            type.editReleaseDate = null;
+                        }
+                    } catch(e) {
+                        type.editReleaseDate = null;
+                    }
+                } else {
+                    type.editReleaseDate = null;
+                }
+            } else {
+                type.editReleaseDate = null;
+            }
+        };
+
         ctrl.startEdit = function(type) {
             type.editing = true;
             type.editTypeName = type.typeName;
             type.editDescription = type.description || '';
-            type.editReleaseDate = type.releaseDate ? new Date(type.releaseDate).toISOString().split('T')[0] : null;
+            
+            // Safely convert release date to date input format (YYYY-MM-DD)
+            if(type.releaseDate) {
+                try {
+                    var releaseDate = new Date(type.releaseDate);
+                    if(!isNaN(releaseDate.getTime())) {
+                        type.editReleaseDate = releaseDate.toISOString().split('T')[0];
+                    } else {
+                        type.editReleaseDate = null;
+                    }
+                } catch(e) {
+                    type.editReleaseDate = null;
+                }
+            } else {
+                type.editReleaseDate = null;
+            }
+            
+            // Find matching release based on releaseDate
+            type.editReleaseId = null;
+            if(type.releaseDate) {
+                try {
+                    var releaseDate = new Date(type.releaseDate);
+                    if(!isNaN(releaseDate.getTime())) {
+                        var matchingRelease = ctrl.store.upcomingReleases.find(function(r) {
+                            if(!r.releaseDate) return false;
+                            var rDate = new Date(r.releaseDate);
+                            return !isNaN(rDate.getTime()) && rDate.getTime() === releaseDate.getTime();
+                        });
+                        if(matchingRelease) {
+                            type.editReleaseId = matchingRelease.releaseId;
+                        }
+                    }
+                } catch(e) {
+                    // Ignore errors in date matching
+                }
+            }
         };
 
         ctrl.cancelEdit = function(type) {
@@ -125,6 +201,7 @@ app.component('controlTypesList', {
             delete type.editTypeName;
             delete type.editDescription;
             delete type.editReleaseDate;
+            delete type.editReleaseId; 
         };
 
         ctrl.saveControlType = function(type) {
@@ -139,17 +216,50 @@ app.component('controlTypesList', {
             }
 
             type.saving = true;
+            
+            // Safely convert release date to ISO string
+            var releaseDateValue = null;
+            if(type.editReleaseDate && type.editReleaseDate.trim() !== '') {
+                try {
+                    // Parse the date string (YYYY-MM-DD format from date input)
+                    var dateStr = type.editReleaseDate.trim();
+                    var dateObj = new Date(dateStr + 'T00:00:00');
+                    if(!isNaN(dateObj.getTime())) {
+                        releaseDateValue = dateObj.toISOString();
+                    }
+                } catch(e) {
+                    console.error('Error parsing release date:', e);
+                    releaseDateValue = null;
+                }
+            }
+            
             var payload = {
                 typeName: type.editTypeName.trim(),
                 description: type.editDescription.trim(),
-                releaseDate: type.editReleaseDate ? new Date(type.editReleaseDate + 'T00:00:00').toISOString() : null
+                releaseDate: releaseDateValue
             };
 
             ApiService.updateControlType(type.controlTypeId, payload).then(function(updatedType) {
                 // Update local view
                 type.typeName = updatedType.typeName;
                 type.description = updatedType.description;
-                type.releaseDate = updatedType.releaseDate;
+                
+                // Safely handle release date update
+                if(updatedType.releaseDate) {
+                    try {
+                        var dateObj = new Date(updatedType.releaseDate);
+                        if(!isNaN(dateObj.getTime())) {
+                            type.releaseDate = dateObj;
+                        } else {
+                            type.releaseDate = null;
+                        }
+                    } catch(e) {
+                        type.releaseDate = null;
+                    }
+                } else {
+                    type.releaseDate = null;
+                }
+                
                 type.editing = false;
                 type.saving = false;
                 
@@ -157,6 +267,7 @@ app.component('controlTypesList', {
                 delete type.editTypeName;
                 delete type.editDescription;
                 delete type.editReleaseDate;
+                delete type.editReleaseId;
 
                 NotificationService.show('Control Type Updated Successfully!', 'success');
                 

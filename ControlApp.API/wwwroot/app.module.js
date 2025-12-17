@@ -1,6 +1,5 @@
 var app = angular.module('controlApp', []);
 
-// Main Controller for View Switching
 app.controller('MainController', function($rootScope) {
     var vm = this;
     vm.currentView = $rootScope.currentView || 'controls';
@@ -21,12 +20,10 @@ app.controller('ControlsViewController', function($rootScope) {
     var vm = this;
     vm.currentSection = 'controls';
     
-    // Listen for section changes
     var listener = $rootScope.$on('controlsSectionChanged', function(event, section) {
         vm.currentSection = section;
     });
     
-    // Cleanup on scope destroy
     $rootScope.$on('$destroy', function() {
         listener();
     });

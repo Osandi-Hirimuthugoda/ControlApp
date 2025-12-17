@@ -1,7 +1,7 @@
 app.component('newEmployee', {
     template: `
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white py-3">
+        <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem;">
             <h5 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2"></i>New Employee</h5>
         </div>
         <div class="card-body">

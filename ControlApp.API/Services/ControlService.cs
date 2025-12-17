@@ -38,6 +38,28 @@ namespace ControlApp.API.Services
             if (!typeExists) throw new ArgumentException($"Invalid Type ID");
             if (!employeeExists) throw new ArgumentException($"Invalid Employee ID");
 
+            // Get the control type to retrieve its release date
+            var controlType = await _context.Set<ControlType>().FirstOrDefaultAsync(t => t.ControlTypeId == createControlDto.TypeId);
+            
+            // Determine ReleaseDate: Priority 1) DTO ReleaseDate, 2) Release table if ReleaseId provided, 3) ControlType ReleaseDate
+            DateTime? releaseDate = createControlDto.ReleaseDate;
+            
+            // If ReleaseDate is not provided but ReleaseId is provided, get it from Release table
+            if (!releaseDate.HasValue && createControlDto.ReleaseId.HasValue && createControlDto.ReleaseId.Value > 0)
+            {
+                var release = await _context.Set<Release>().FirstOrDefaultAsync(r => r.ReleaseId == createControlDto.ReleaseId.Value);
+                if (release != null)
+                {
+                    releaseDate = release.ReleaseDate;
+                }
+            }
+            
+            // If still no release date, use the release date from the control type
+            if (!releaseDate.HasValue && controlType?.ReleaseDate.HasValue == true)
+            {
+                releaseDate = controlType.ReleaseDate;
+            }
+
             var control = new Controls
             {
                 Description = createControlDto.Description,
@@ -47,9 +69,9 @@ namespace ControlApp.API.Services
                 
                 StatusId = (createControlDto.StatusId.HasValue && createControlDto.StatusId > 0) ? createControlDto.StatusId : null,
                 
-                ReleaseId = null, 
+                ReleaseId = (createControlDto.ReleaseId.HasValue && createControlDto.ReleaseId.Value > 0) ? createControlDto.ReleaseId : null, 
                 
-                ReleaseDate = createControlDto.ReleaseDate,
+                ReleaseDate = releaseDate,
                 Progress = createControlDto.Progress
             };
 
@@ -84,52 +106,57 @@ namespace ControlApp.API.Services
             
             
             // Handle ReleaseId - only set if it exists in database
+            // If ReleaseId is provided, get the ReleaseDate from the Release table
             if (updateControlDto.ReleaseId.HasValue && updateControlDto.ReleaseId.Value > 0)
             {
-                var releaseExists = await _context.Set<Release>().AnyAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
-                if (releaseExists)
+                var release = await _context.Set<Release>().FirstOrDefaultAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
+                if (release != null)
                 {
                     control.ReleaseId = updateControlDto.ReleaseId.Value;
+                    // If ReleaseDate is not explicitly provided in DTO, get it from Release table
+                    if (!updateControlDto.ReleaseDate.HasValue)
+                    {
+                        control.ReleaseDate = release.ReleaseDate;
+                    }
+                    else
+                    {
+                        control.ReleaseDate = updateControlDto.ReleaseDate;
+                    }
                 }
                 else
                 {
-                    
                     control.ReleaseId = null;
+                    control.ReleaseDate = updateControlDto.ReleaseDate;
                 }
             }
             else
             {
                 control.ReleaseId = null;
-            }
-            
-            // Set ReleaseDate (can be set even if ReleaseId is null for default releases)
-            control.ReleaseDate = updateControlDto.ReleaseDate; 
+                // If ReleaseId is removed but ReleaseDate is provided, use it
+                control.ReleaseDate = updateControlDto.ReleaseDate;
+            } 
      
-            // Handle StatusId and auto-update Progress based on Status
-            // Always save the progress value provided by the user (frontend handles auto-update when status changes)
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
-                // Check if status is changing BEFORE updating it
+                
                 var statusChanged = control.StatusId != updateControlDto.StatusId.Value;
                 control.StatusId = updateControlDto.StatusId.Value;
                 
-                // If status changed, use the progress value from frontend (which already calculated it)
-                // The frontend handles the auto-update, so we trust the progress value it sends
                 if (statusChanged)
                 {
-                    // Use the progress value provided by frontend (already calculated based on status)
+                    
                     control.Progress = updateControlDto.Progress;
                 }
                 else
                 {
-                    // Status didn't change, use provided progress (user manually set it)
+                    
                     control.Progress = updateControlDto.Progress;
                 }
             }
             else
             {
                 control.StatusId = null;
-                // Always save the provided progress value
+                
                 control.Progress = updateControlDto.Progress;
             }
 
@@ -146,10 +173,10 @@ namespace ControlApp.API.Services
 
         public async Task<IEnumerable<ControlDto>> AddAllEmployeesToControlsAsync()
         {
-            // Get all employees
+            
             var allEmployees = await _context.Set<Employee>().ToListAsync();
             
-            // Get employees that don't have controls yet
+            
             var employeesWithoutControls = allEmployees
                 .Where(e => !_context.Set<Controls>().Any(c => c.EmployeeId == e.Id))
                 .ToList();
@@ -159,7 +186,7 @@ namespace ControlApp.API.Services
                 return new List<ControlDto>();
             }
 
-            // Get default status and release for FK constraints
+           
             var defaultStatus = await _context.Set<Status>().FirstOrDefaultAsync();
             var defaultRelease = await _context.Set<Release>().FirstOrDefaultAsync();
 
@@ -167,7 +194,7 @@ namespace ControlApp.API.Services
 
             foreach (var employee in employeesWithoutControls)
             {
-                // Get control type if employee has one
+
                 ControlType? controlType = null;
                 if (employee.TypeId.HasValue)
                 {
@@ -179,7 +206,7 @@ namespace ControlApp.API.Services
                 var control = new Controls
                 {
                     EmployeeId = employee.Id,
-                    TypeId = employee.TypeId ?? 0, // Use employee's type or default to first available type
+                    TypeId = employee.TypeId ?? 0, 
                     Description = !string.IsNullOrWhiteSpace(controlType?.Description)
                         ? controlType.Description
                         : (!string.IsNullOrWhiteSpace(employee.Description)

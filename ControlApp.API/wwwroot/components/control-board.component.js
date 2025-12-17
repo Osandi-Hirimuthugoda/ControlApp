@@ -1,9 +1,9 @@
 app.component('controlBoard', {
     template: `
     <div class="card shadow-sm" style="height: 80vh; display: flex; flex-direction: column;">
-        <div class="card-header bg-success text-white py-2">
+        <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem 1.5rem;">
             <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Controls</h6>
+                <h6 class="mb-0 fw-bold"><i class="fas fa-list-check me-2"></i>Controls</h6>
                 <div class="d-flex align-items-center gap-2">
                     <!-- Search -->
                     <div class="input-group input-group-sm" style="width: 250px;">
@@ -21,7 +21,7 @@ app.component('controlBoard', {
         <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
             <div class="table-responsive" style="flex: 1; overflow-y: auto;">
                 <table class="table table-bordered table-sm mb-0 align-middle">
-                    <thead class="table-dark sticky-top">
+                    <thead class="sticky-top" style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: white;">
                         <tr class="text-center">
                             <th style="width:5%">Type</th>
                             <th style="width:15%">Description</th>
@@ -80,14 +80,21 @@ app.component('controlBoard', {
                             </td>
 
                             <!-- 7. Release -->
-                            <td ng-if="!control.editing">
-                                <div class="text-muted small" ng-if="control.releaseDate"><i class="fas fa-calendar-alt"></i> {{$ctrl.formatDate(control.releaseDate)}}</div>
-                                <span ng-if="!control.releaseDate">-</span>
-                            </td>
-                            <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editReleaseId" ng-options="r.releaseId as $ctrl.formatDate(r.releaseDate) for r in $ctrl.store.upcomingReleases">
-                                    <option value="">-- Release --</option>
-                                </select>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <i class="fas fa-calendar-alt text-muted"></i>
+                                        <input type="date" 
+                                               class="form-control form-control-sm" 
+                                               ng-model="control.releaseDateInput" 
+                                               ng-change="$ctrl.updateReleaseDate(control)"
+                                               placeholder="Select date"
+                                               ng-init="control.releaseDateInput = $ctrl.getDateInputValue(control.releaseDate)">
+                                    </div>
+                                    <div class="text-muted small" ng-if="control.releaseDate">
+                                        <i class="fas fa-calendar-check"></i> {{$ctrl.formatDate(control.releaseDate)}}
+                                    </div>
+                                </div>
                             </td>
 
                             <!-- 8. Actions -->
@@ -115,10 +122,10 @@ app.component('controlBoard', {
                            ng-if="$ctrl.selectedTypeFilter && $ctrl.getControlsByType(type.controlTypeId).length > 0" 
                            style="border-top: 3px solid #6c757d;">
                         <!-- Category Header Row -->
-                        <tr class="table-primary">
+                        <tr style="background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); color: white;">
                             <td colspan="8" class="fw-bold text-center py-2" style="font-size: 1.1em;">
                                 <i class="fas fa-tag me-2"></i>{{type.typeName}} Controls
-                                <span class="badge bg-light text-dark ms-2">{{$ctrl.getControlsByType(type.controlTypeId).length}}</span>
+                                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; ms-2;">{{$ctrl.getControlsByType(type.controlTypeId).length}}</span>
                             </td>
                         </tr>
                         <tr ng-repeat="control in $ctrl.getControlsByType(type.controlTypeId) | orderBy:'-controlId' track by control.controlId">
@@ -166,14 +173,21 @@ app.component('controlBoard', {
                             </td>
 
                             <!-- 7. Release -->
-                            <td ng-if="!control.editing">
-                                <div class="text-muted small" ng-if="control.releaseDate"><i class="fas fa-calendar-alt"></i> {{$ctrl.formatDate(control.releaseDate)}}</div>
-                                <span ng-if="!control.releaseDate">-</span>
-                            </td>
-                            <td ng-if="control.editing">
-                                <select class="form-select form-select-sm" ng-model="control.editReleaseId" ng-options="r.releaseId as $ctrl.formatDate(r.releaseDate) for r in $ctrl.store.upcomingReleases">
-                                    <option value="">-- Release --</option>
-                                </select>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <i class="fas fa-calendar-alt text-muted"></i>
+                                        <input type="date" 
+                                               class="form-control form-control-sm" 
+                                               ng-model="control.releaseDateInput" 
+                                               ng-change="$ctrl.updateReleaseDate(control)"
+                                               placeholder="Select date"
+                                               ng-init="control.releaseDateInput = $ctrl.getDateInputValue(control.releaseDate)">
+                                    </div>
+                                    <div class="text-muted small" ng-if="control.releaseDate">
+                                        <i class="fas fa-calendar-check"></i> {{$ctrl.formatDate(control.releaseDate)}}
+                                    </div>
+                                </div>
                             </td>
 
                             <!-- 8. Actions -->
@@ -231,6 +245,139 @@ app.component('controlBoard', {
             return day + '.' + month;
         };
 
+        // Convert date to YYYY-MM-DD format for date input
+        ctrl.getDateInputValue = function(date) {
+            if(!date) return '';
+            var d = new Date(date);
+            if(isNaN(d)) return '';
+            var year = d.getFullYear();
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var day = ('0' + d.getDate()).slice(-2);
+            return year + '-' + month + '-' + day;
+        };
+
+        // Update release date directly from calendar picker
+        ctrl.updateReleaseDate = function(control) {
+            if (!control.releaseDateInput) {
+                // If date is cleared, remove it
+                control.releaseDate = null;
+                ctrl.saveReleaseDateOnly(control, null);
+                return;
+            }
+
+            var selectedDate = new Date(control.releaseDateInput);
+            selectedDate.setHours(0, 0, 0, 0);
+            control.releaseDate = selectedDate;
+
+            // Save the date update
+            var releaseDate = selectedDate.toISOString();
+            ctrl.saveReleaseDateOnly(control, releaseDate);
+        };
+
+        // Save only the release date without entering full edit mode
+        ctrl.saveReleaseDateOnly = function(control, releaseDate) {
+            // Find matching release if exists
+            var releaseId = null;
+            var needsReleaseCreation = false;
+            var releaseDataToCreate = null;
+
+            if (releaseDate) {
+                var selectedDate = new Date(releaseDate);
+                selectedDate.setHours(0, 0, 0, 0);
+
+                // Try to find matching release in database
+                var matchingRelease = ctrl.store.releases.find(function(r) {
+                    var rDate = new Date(r.releaseDate);
+                    rDate.setHours(0, 0, 0, 0);
+                    return rDate.getTime() === selectedDate.getTime();
+                });
+
+                if (matchingRelease) {
+                    releaseId = matchingRelease.releaseId;
+                } else {
+                    // Check if this date matches any upcoming release
+                    var matchingUpcomingRelease = ctrl.store.upcomingReleases.find(function(r) {
+                        var rDate = new Date(r.releaseDate);
+                        rDate.setHours(0, 0, 0, 0);
+                        return rDate.getTime() === selectedDate.getTime();
+                    });
+
+                    if (matchingUpcomingRelease) {
+                        var isDefaultRelease = matchingUpcomingRelease.releaseId >= 999900;
+                        if (isDefaultRelease) {
+                            var day = ('0' + selectedDate.getDate()).slice(-2);
+                            var month = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+                            var releaseName = 'Release ' + day + '.' + month;
+
+                            releaseDataToCreate = {
+                                releaseName: releaseName,
+                                releaseDate: releaseDate,
+                                description: null
+                            };
+                            needsReleaseCreation = true;
+                        }
+                    }
+                }
+            }
+
+            // Prepare payload with only release date update
+            var payload = {
+                controlId: parseInt(control.controlId),
+                employeeId: control.employeeId,
+                typeId: control.typeId,
+                description: control.description || null,
+                comments: control.comments || null,
+                progress: control.progress || 0,
+                statusId: control.statusId || null,
+                releaseId: releaseId,
+                releaseDate: releaseDate
+            };
+
+            // Function to save control
+            var saveControlWithPayload = function(finalReleaseId, finalReleaseDate) {
+                payload.releaseId = finalReleaseId;
+                payload.releaseDate = finalReleaseDate;
+
+                return ApiService.updateControl(control.controlId, payload).then(function(r) {
+                    var updated = r.data;
+                    control.releaseDate = updated.releaseDate ? new Date(updated.releaseDate) : null;
+                    control.releaseDateInput = ctrl.getDateInputValue(control.releaseDate);
+
+                    // Reload controls and releases
+                    ApiService.loadReleases().then(function() {
+                        return ApiService.loadAllControls();
+                    });
+
+                    NotificationService.show('Release date updated successfully', 'success');
+                }).catch(function(error) {
+                    console.error('Error updating release date:', error);
+                    var errorMsg = 'Error updating release date';
+                    if(error && error.data) {
+                        if(typeof error.data === 'string') {
+                            errorMsg = error.data;
+                        } else if(error.data.message) {
+                            errorMsg = error.data.message;
+                        }
+                    }
+                    NotificationService.show(errorMsg, 'error');
+                    // Revert the date input on error
+                    control.releaseDateInput = ctrl.getDateInputValue(control.releaseDate);
+                });
+            };
+
+            // If release needs to be created, create it first
+            if(needsReleaseCreation && releaseDataToCreate) {
+                ApiService.addRelease(releaseDataToCreate).then(function(createdRelease) {
+                    saveControlWithPayload(createdRelease.releaseId, releaseDate);
+                }).catch(function(error) {
+                    console.error('Error creating release:', error);
+                    saveControlWithPayload(null, releaseDate);
+                });
+            } else {
+                saveControlWithPayload(releaseId, releaseDate);
+            }
+        };
+
         ctrl.getAllControls = function() {
             if(!ctrl.store.allControls) return [];
             return ctrl.store.allControls.filter(function(c) {
@@ -256,8 +403,7 @@ app.component('controlBoard', {
                 });
             }
             
-            // Otherwise, show only types that have controls (no duplicates)
-            // Get unique type IDs from controls - use Set to ensure uniqueness
+            
             var typeIdsWithControls = [];
             var seenTypeIds = {};
             var seenTypeNames = {}; // Also check by type name to prevent duplicates
@@ -354,19 +500,8 @@ app.component('controlBoard', {
             c.editStatusId = c.statusId;
             c.editProgress = c.progress || 0;
             
-            // Match Release Date to Dropdown ID
-            if(c.releaseDate) {
-                var rDate = new Date(c.releaseDate);
-                rDate.setHours(0,0,0,0);
-                var match = ctrl.store.upcomingReleases.find(r => {
-                    var d = new Date(r.releaseDate);
-                    d.setHours(0,0,0,0);
-                    return d.getTime() === rDate.getTime();
-                });
-                c.editReleaseId = match ? match.releaseId : null;
-            } else {
-                c.editReleaseId = null;
-            }
+            // Ensure releaseDateInput is initialized
+            c.releaseDateInput = ctrl.getDateInputValue(c.releaseDate);
         };
 
         // Auto-update progress when status changes
@@ -397,40 +532,89 @@ app.component('controlBoard', {
             }
         };
 
+        // Auto-update when date is selected directly from calendar
+        ctrl.onDateChange = function(control) {
+            if (control.editReleaseDate) {
+                var selectedDate = new Date(control.editReleaseDate);
+                selectedDate.setHours(0, 0, 0, 0);
+                control.releaseDate = selectedDate;
+                console.log('Date changed to:', control.releaseDate);
+            } else {
+                control.releaseDate = null;
+            }
+        };
+
         ctrl.saveControl = function(c) {
-            // Validate progress value before saving
+            
             var progressValue = parseInt(c.editProgress);
             if (isNaN(progressValue)) {
                 NotificationService.show('Invalid progress value. Please enter a number between 0 and 100.', 'error');
                 return;
             }
             
-            // Find selected release object
-            var selectedRelease = c.editReleaseId ? ctrl.store.upcomingReleases.find(r => r.releaseId == c.editReleaseId) : null;
             
-            // Convert empty string or undefined to null for optional fields
             var statusId = c.editStatusId && c.editStatusId !== '' && c.editStatusId !== null ? parseInt(c.editStatusId) : null;
             
-            // Handle ReleaseId and ReleaseDate
-            // Check if the release exists in the actual database releases (not default ones)
+            
             var releaseId = null;
             var releaseDate = null;
+            var needsReleaseCreation = false;
+            var releaseDataToCreate = null;
             
-            if(selectedRelease) {
-                // Check if this release exists in the database (not a default release)
-                var existsInDb = ctrl.store.releases.some(function(r) {
-                    return r.releaseId == selectedRelease.releaseId;
+            
+            var dateToUse = c.editReleaseDate || c.releaseDateInput;
+            if (dateToUse) {
+                var selectedDate = new Date(dateToUse);
+                selectedDate.setHours(0, 0, 0, 0);
+                releaseDate = selectedDate.toISOString();
+                
+                console.log('Date from picker:', c.editReleaseDate);
+                console.log('Formatted releaseDate:', releaseDate);
+                
+                
+                var matchingRelease = ctrl.store.releases.find(function(r) {
+                    var rDate = new Date(r.releaseDate);
+                    rDate.setHours(0, 0, 0, 0);
+                    return rDate.getTime() === selectedDate.getTime();
                 });
                 
-                // Only send ReleaseId if it exists in database, otherwise just send ReleaseDate
-                if(existsInDb) {
-                    releaseId = selectedRelease.releaseId;
-                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                if (matchingRelease) {
+                    // Use existing release ID
+                    releaseId = matchingRelease.releaseId;
+                    console.log('Found matching release in DB:', releaseId);
                 } else {
-                    // Default release (999991, 999992) - only send ReleaseDate, not ReleaseId
-                    releaseId = null;
-                    releaseDate = new Date(selectedRelease.releaseDate).toISOString();
+                    // Check if this date matches any upcoming release (default releases)
+                    var matchingUpcomingRelease = ctrl.store.upcomingReleases.find(function(r) {
+                        var rDate = new Date(r.releaseDate);
+                        rDate.setHours(0, 0, 0, 0);
+                        return rDate.getTime() === selectedDate.getTime();
+                    });
+                    
+                    if (matchingUpcomingRelease) {
+                        // Check if it's a default release (needs to be created)
+                        var isDefaultRelease = matchingUpcomingRelease.releaseId >= 999900;
+                        if (isDefaultRelease) {
+                            // Format release name (e.g., "Release 24.12")
+                            var day = ('0' + selectedDate.getDate()).slice(-2);
+                            var month = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+                            var releaseName = 'Release ' + day + '.' + month;
+                            
+                            // Prepare release data to create
+                            releaseDataToCreate = {
+                                releaseName: releaseName,
+                                releaseDate: releaseDate,
+                                description: null
+                            };
+                            needsReleaseCreation = true;
+                            console.log('Will create release:', releaseDataToCreate);
+                        }
+                    } else {
+                        // No matching release found, but we still save the date
+                        console.log('No matching release found, saving date only:', releaseDate);
+                    }
                 }
+            } else {
+                console.log('No date selected in picker');
             }
             
             // Ensure typeId is always a valid integer (use existing if not provided)
@@ -455,71 +639,108 @@ app.component('controlBoard', {
             if (progressValue > 100) {
                 progressValue = 100;
             }
-            
-            var payload = {
-                controlId: parseInt(c.controlId),
-                employeeId: employeeId,
-                typeId: typeId,
-                description: c.editDescription || null,
-                comments: c.editComments || null,
-                progress: progressValue,
-                statusId: statusId,
-                releaseId: releaseId,
-                releaseDate: releaseDate
-            };
-            
-            console.log('Saving control with payload:', payload);
-            console.log('Progress value being saved:', progressValue);
 
             // Set saving flag to disable buttons
             c.saving = true;
 
-            ApiService.updateControl(c.controlId, payload).then(function(r) {
-                var updated = r.data;
-                console.log('Control updated successfully. Response:', updated);
-                
-                // Update Local View with all fields including progress
-                c.description = updated.description;
-                c.comments = updated.comments;
-                c.progress = updated.progress || 0; // Ensure progress is set
-                c.statusId = updated.statusId;
-                
-                var s = ctrl.store.statuses.find(x => x.id == c.statusId);
-                c.statusName = s ? s.statusName : '';
-
-                if(updated.releaseDate) c.releaseDate = new Date(updated.releaseDate);
-                else c.releaseDate = null;
-
-                c.editing = false;
-                c.saving = false;
-                
-                // Reload controls to ensure UI is updated
-                ApiService.loadAllControls().then(function() {
-                    console.log('Controls reloaded after save. Progress:', c.progress);
-                });
-                
-                NotificationService.show('Saved successfully! Progress: ' + c.progress + '%', 'success');
-            }).catch(function(error) {
-                // Reset saving flag on error
-                c.saving = false;
-                console.error('Error saving control:', error);
-                console.error('Error response:', error.response || error.data);
-                var errorMsg = 'Error saving';
-                if(error && error.data) {
-                    if(typeof error.data === 'string') {
-                        errorMsg = error.data;
-                    } else if(error.data.message) {
-                        errorMsg = error.data.message;
-                    } else if(error.data.title) {
-                        errorMsg = error.data.title;
+            // Function to save control after release is created (if needed)
+            var saveControlWithPayload = function(finalReleaseId, finalReleaseDate) {
+                // Ensure releaseDate is properly formatted if it exists
+                var formattedReleaseDate = null;
+                if (finalReleaseDate) {
+                    if (typeof finalReleaseDate === 'string') {
+                        // If it's already a string (ISO format), use it as is
+                        formattedReleaseDate = finalReleaseDate;
+                    } else {
+                        // If it's a Date object, convert to ISO string
+                        formattedReleaseDate = new Date(finalReleaseDate).toISOString();
                     }
-                } else if(error && error.statusText) {
-                    errorMsg = 'Error: ' + error.statusText;
-                } else if(error && error.message) {
-                    errorMsg = error.message;
                 }
-                NotificationService.show(errorMsg, 'error');
-            });
+                
+                var payload = {
+                    controlId: parseInt(c.controlId),
+                    employeeId: employeeId,
+                    typeId: typeId,
+                    description: c.editDescription || null,
+                    comments: c.editComments || null,
+                    progress: progressValue,
+                    statusId: statusId,
+                    releaseId: finalReleaseId,
+                    releaseDate: formattedReleaseDate
+                };
+                
+                console.log('Saving control with payload:', payload);
+                console.log('Release Date being saved:', formattedReleaseDate);
+                console.log('Progress value being saved:', progressValue);
+
+                return ApiService.updateControl(c.controlId, payload).then(function(r) {
+                    var updated = r.data;
+                    console.log('Control updated successfully. Response:', updated);
+                    
+                    c.description = updated.description;
+                    c.comments = updated.comments;
+                    c.progress = updated.progress || 0; 
+                    c.statusId = updated.statusId;
+                    
+                    var s = ctrl.store.statuses.find(x => x.id == c.statusId);
+                    c.statusName = s ? s.statusName : '';
+
+                    if(updated.releaseDate) c.releaseDate = new Date(updated.releaseDate);
+                    else c.releaseDate = null;
+
+                    
+                    c.releaseDateInput = ctrl.getDateInputValue(c.releaseDate);
+
+                    c.editing = false;
+                    c.saving = false;
+                    
+                    
+                    ApiService.loadReleases().then(function() {
+                        return ApiService.loadAllControls();
+                    }).then(function() {
+                        console.log('Controls reloaded after save. Progress:', c.progress);
+                    });
+                    
+                    NotificationService.show('Saved successfully! Progress: ' + c.progress + '%', 'success');
+                }).catch(function(error) {
+                    // Reset saving flag on error
+                    c.saving = false;
+                    console.error('Error saving control:', error);
+                    console.error('Error response:', error.response || error.data);
+                    var errorMsg = 'Error saving';
+                    if(error && error.data) {
+                        if(typeof error.data === 'string') {
+                            errorMsg = error.data;
+                        } else if(error.data.message) {
+                            errorMsg = error.data.message;
+                        } else if(error.data.title) {
+                            errorMsg = error.data.title;
+                        }
+                    } else if(error && error.statusText) {
+                        errorMsg = 'Error: ' + error.statusText;
+                    } else if(error && error.message) {
+                        errorMsg = error.message;
+                    }
+                    NotificationService.show(errorMsg, 'error');
+                });
+            };
+
+            // If release needs to be created, create it first, then save control
+            if(needsReleaseCreation && releaseDataToCreate) {
+                ApiService.addRelease(releaseDataToCreate).then(function(createdRelease) {
+                    // Use the newly created release ID
+                    saveControlWithPayload(createdRelease.releaseId, releaseDate);
+                }).catch(function(error) {
+                    // If creation fails, save with just the date (no releaseId)
+                    console.error('Error creating release:', error);
+                    saveControlWithPayload(null, releaseDate);
+                });
+            } else {
+                // No release creation needed, save directly
+                // Always save the date if it was set, even if no matching release found
+                console.log('Saving control - releaseId:', releaseId, 'releaseDate:', releaseDate);
+                saveControlWithPayload(releaseId, releaseDate);
+            }
         };
 
         ctrl.addComment = function(c) {

@@ -6,7 +6,7 @@ app.component('controlTypesList', {
         </div>
         <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
             <div class="p-3" style="flex-shrink: 0;">
-                <input type="text" class="form-control" ng-model="$ctrl.searchType" placeholder="Search types...">
+                <input type="text" class="form-control" ng-model="$ctrl.searchType" placeholder="Search types or descriptions...">
             </div>
             <div style="flex: 1; overflow-y: auto; min-height: 0;">
                 <table class="table table-hover mb-0">
@@ -25,7 +25,7 @@ app.component('controlTypesList', {
                                 <input ng-if="type.editing" type="text" class="form-control form-control-sm" ng-model="type.editTypeName" required>
                             </td>
                             <td>
-                                <span ng-if="!type.editing">{{type.description || '-'}}</span>
+                                <span ng-if="!type.editing">{{(type.description && type.description.trim()) ? type.description : '-'}}</span>
                                 <textarea ng-if="type.editing" class="form-control form-control-sm" ng-model="type.editDescription" rows="2" required></textarea>
                             </td>
                             <td>
@@ -40,6 +40,7 @@ app.component('controlTypesList', {
                                             ng-change="$ctrl.onReleaseChange(type)">
                                         <option value="">-- Select Release --</option>
                                     </select>
+                                    <!-- FIX: This input now receives a Date object, preventing the error -->
                                     <input type="date" class="form-control form-control-sm" ng-model="type.editReleaseDate">
                                 </div>
                             </td>
@@ -76,30 +77,19 @@ app.component('controlTypesList', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope, $scope, $timeout) {
+    controller: function(ApiService, NotificationService, $rootScope, $timeout) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchType = '';
         var listener = null;
-
         
-        ApiService.loadControlTypes().then(function() {
-            console.log('Control types loaded in list component');
-        });
+        ApiService.loadControlTypes();
 
-        
         ctrl.$onInit = function() {
             listener = $rootScope.$on('controlTypesUpdated', function() {
-                console.log('Control types updated event received in list component');
-                
                 ApiService.loadControlTypes().then(function(types) {
-                    console.log('Control types reloaded in list component, count:', types.length);
-                    console.log('Control types:', types);
-                    
                     $timeout(function() {
-                        
                         ctrl.store = ApiService.data;
-                        
                     }, 100);
                 });
             });
@@ -115,7 +105,6 @@ app.component('controlTypesList', {
             if(!date) return '';
             var d = new Date(date);
             if(isNaN(d)) return '';
-            // Format: DD.MM (Day.Month) - e.g., 26.01, 25.12
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
             return day + '.' + month;
@@ -136,16 +125,8 @@ app.component('controlTypesList', {
                     return r.releaseId === type.editReleaseId;
                 });
                 if(selectedRelease && selectedRelease.releaseDate) {
-                    try {
-                        var releaseDate = new Date(selectedRelease.releaseDate);
-                        if(!isNaN(releaseDate.getTime())) {
-                            type.editReleaseDate = releaseDate.toISOString().split('T')[0];
-                        } else {
-                            type.editReleaseDate = null;
-                        }
-                    } catch(e) {
-                        type.editReleaseDate = null;
-                    }
+                    // FIX: Create a new Date Object. Do not convert to string.
+                    type.editReleaseDate = new Date(selectedRelease.releaseDate);
                 } else {
                     type.editReleaseDate = null;
                 }
@@ -159,28 +140,14 @@ app.component('controlTypesList', {
             type.editTypeName = type.typeName;
             type.editDescription = type.description || '';
             
-            // Safely convert release date to date input format (YYYY-MM-DD)
+            // FIX: Ensure editReleaseDate is a Date Object
             if(type.releaseDate) {
                 try {
                     var releaseDate = new Date(type.releaseDate);
                     if(!isNaN(releaseDate.getTime())) {
-                        type.editReleaseDate = releaseDate.toISOString().split('T')[0];
-                    } else {
-                        type.editReleaseDate = null;
-                    }
-                } catch(e) {
-                    type.editReleaseDate = null;
-                }
-            } else {
-                type.editReleaseDate = null;
-            }
-            
-            // Find matching release based on releaseDate
-            type.editReleaseId = null;
-            if(type.releaseDate) {
-                try {
-                    var releaseDate = new Date(type.releaseDate);
-                    if(!isNaN(releaseDate.getTime())) {
+                        type.editReleaseDate = releaseDate; // Assign Date object
+                        
+                        // Find matching release for dropdown
                         var matchingRelease = ctrl.store.upcomingReleases.find(function(r) {
                             if(!r.releaseDate) return false;
                             var rDate = new Date(r.releaseDate);
@@ -188,11 +155,19 @@ app.component('controlTypesList', {
                         });
                         if(matchingRelease) {
                             type.editReleaseId = matchingRelease.releaseId;
+                        } else {
+                            type.editReleaseId = null;
                         }
+                    } else {
+                        type.editReleaseDate = null;
+                        type.editReleaseId = null;
                     }
                 } catch(e) {
-                    // Ignore errors in date matching
+                    type.editReleaseDate = null;
                 }
+            } else {
+                type.editReleaseDate = null;
+                type.editReleaseId = null;
             }
         };
 
@@ -217,18 +192,13 @@ app.component('controlTypesList', {
 
             type.saving = true;
             
-            // Safely convert release date to ISO string
             var releaseDateValue = null;
-            if(type.editReleaseDate && type.editReleaseDate.trim() !== '') {
+            // FIX: Convert Date Object to ISO String for API
+            if(type.editReleaseDate) {
                 try {
-                    // Parse the date string (YYYY-MM-DD format from date input)
-                    var dateStr = type.editReleaseDate.trim();
-                    var dateObj = new Date(dateStr + 'T00:00:00');
-                    if(!isNaN(dateObj.getTime())) {
-                        releaseDateValue = dateObj.toISOString();
-                    }
+                    releaseDateValue = type.editReleaseDate.toISOString();
                 } catch(e) {
-                    console.error('Error parsing release date:', e);
+                    console.error('Error converting release date:', e);
                     releaseDateValue = null;
                 }
             }
@@ -239,23 +209,13 @@ app.component('controlTypesList', {
                 releaseDate: releaseDateValue
             };
 
+            // FIX: Service returns object directly (no .data)
             ApiService.updateControlType(type.controlTypeId, payload).then(function(updatedType) {
-                // Update local view
                 type.typeName = updatedType.typeName;
                 type.description = updatedType.description;
                 
-                // Safely handle release date update
                 if(updatedType.releaseDate) {
-                    try {
-                        var dateObj = new Date(updatedType.releaseDate);
-                        if(!isNaN(dateObj.getTime())) {
-                            type.releaseDate = dateObj;
-                        } else {
-                            type.releaseDate = null;
-                        }
-                    } catch(e) {
-                        type.releaseDate = null;
-                    }
+                    type.releaseDate = new Date(updatedType.releaseDate);
                 } else {
                     type.releaseDate = null;
                 }
@@ -263,26 +223,19 @@ app.component('controlTypesList', {
                 type.editing = false;
                 type.saving = false;
                 
-                // Clean up edit fields
                 delete type.editTypeName;
                 delete type.editDescription;
                 delete type.editReleaseDate;
                 delete type.editReleaseId;
 
                 NotificationService.show('Control Type Updated Successfully!', 'success');
-                
-                // Broadcast event to update dashboard and other components
                 $rootScope.$broadcast('controlTypesUpdated');
             }).catch(function(error) {
                 type.saving = false;
                 console.error('Error updating control type:', error);
                 var errorMsg = 'Error updating control type';
                 if(error && error.data) {
-                    if(typeof error.data === 'string') {
-                        errorMsg = error.data;
-                    } else if(error.data.message) {
-                        errorMsg = error.data.message;
-                    }
+                    errorMsg = typeof error.data === 'string' ? error.data : error.data.message;
                 }
                 NotificationService.show(errorMsg, 'error');
             });
@@ -295,12 +248,8 @@ app.component('controlTypesList', {
 
             type.deleting = true;
             ApiService.deleteControlType(type.controlTypeId).then(function() {
-                // Reload control types to get the updated list
                 ApiService.loadControlTypes().then(function(types) {
-                    console.log('Control types reloaded after delete, count:', types.length);
-                    // Use $timeout to ensure digest cycle runs
                     $timeout(function() {
-                        // Force view update by reassigning the store reference
                         ctrl.store = ApiService.data;
                         NotificationService.show('Control Type Deleted Successfully!', 'success');
                     }, 100);

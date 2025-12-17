@@ -36,7 +36,11 @@ app.service('ApiService', function($http, $q) {
     self.loadEmployees = function() {
         return $http.get(apiBaseUrl + '/employees').then(function(r) {
             self.data.employees = r.data || [];
-            self.data.employees.forEach(function(e) { e.editing = false; });
+            self.data.employees.forEach(function(e) { 
+                e.editing = false;
+                // If you have date fields like DOB, convert them here:
+                // if(e.dob) e.dob = new Date(e.dob);
+            });
             return self.data.employees;
         });
     };
@@ -44,11 +48,20 @@ app.service('ApiService', function($http, $q) {
     // Load Control Types from API
     self.loadControlTypes = function() {
         return $http.get(apiBaseUrl + '/controltypes').then(function(r) {
-            // Create a new array reference to ensure Angular detects the change
             var newTypes = r.data || [];
+            
+            // STRICT FIX: Convert strings to Date Objects
+            newTypes.forEach(function(type) {
+                if(type.releaseDate) {
+                    type.releaseDate = new Date(type.releaseDate);
+                } else {
+                    type.releaseDate = null;
+                }
+            });
+
             self.data.controlTypes = newTypes;
             console.log('Control types loaded:', self.data.controlTypes.length);
-            // Reprocess releases to include control type dates
+            
             if (self.data.releases && self.data.releases.length >= 0) {
                 self._processReleases();
             }
@@ -62,11 +75,8 @@ app.service('ApiService', function($http, $q) {
  
     self.loadStatuses = function() {
         return $http.get(apiBaseUrl + '/statuses').then(function(r) {
-            // Create a new array reference to ensure Angular detects the change
             var newStatuses = r.data || [];
             self.data.statuses = newStatuses;
-            console.log('Statuses loaded:', self.data.statuses.length);
-            console.log('Statuses:', self.data.statuses);
             return self.data.statuses;
         }).catch(function(error) {
             console.error('Error loading statuses:', error);
@@ -87,47 +97,31 @@ app.service('ApiService', function($http, $q) {
  
     self.loadAllControls = function() {
         return $http.get(apiBaseUrl + '/controls').then(function(r) {
-            // API should return controls with typeName already included
             self.data.allControls = r.data || [];
+            
             self.data.allControls.forEach(function(c) {
-                if(c.releaseDate) c.releaseDate = new Date(c.releaseDate);
-                else c.releaseDate = null;
-                
-                // Initialize releaseDateInput for calendar picker
+                // IMPORTANT: Convert String to Date Object for ng-model compatibility
                 if(c.releaseDate) {
-                    var d = new Date(c.releaseDate);
-                    if(!isNaN(d)) {
-                        var year = d.getFullYear();
-                        var month = ('0' + (d.getMonth() + 1)).slice(-2);
-                        var day = ('0' + d.getDate()).slice(-2);
-                        c.releaseDateInput = year + '-' + month + '-' + day;
-                    } else {
-                        c.releaseDateInput = '';
-                    }
+                    c.releaseDate = new Date(c.releaseDate);
+                    // Also make releaseDateInput a Date object
+                    c.releaseDateInput = new Date(c.releaseDate);
                 } else {
-                    c.releaseDateInput = '';
+                    c.releaseDate = null;
+                    c.releaseDateInput = null;
                 }
                 
                 c.editing = false;
                 
-                
                 if(c.typeId && self.data.controlTypes.length > 0) {
                     var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
-                    if(t) {
-                        c.typeName = t.typeName;
-                    } else {
-                        // If type not found, log for debugging
-                        console.warn('Control type not found for typeId:', c.typeId, 'Control ID:', c.controlId);
-                    }
+                    if(t) c.typeName = t.typeName;
                 }
                 
-                // Map statusName if not already set
                 if(c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses.length > 0) {
                     var s = self.data.statuses.find(x => x.id == c.statusId);
                     if(s) c.statusName = s.statusName;
                 }
                 
-                // Map releaseName if not already set
                 if(c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
                     var r = self.data.releases.find(x => x.releaseId == c.releaseId);
                     if(r) c.releaseName = r.releaseName;
@@ -142,14 +136,23 @@ app.service('ApiService', function($http, $q) {
 
     self.addEmployee = function(empData) {
         return $http.post(apiBaseUrl + '/employees', empData).then(function(r) {
-            self.data.employees.push(r.data);
-            self.loadAllControls(); 
-            return r.data;
+            return self.loadEmployees().then(function() {
+                self.loadAllControls(); 
+                return r.data;
+            });
         });
     };
 
+    // --- FIX APPLIED HERE ---
     self.updateEmployee = function(id, data) {
-        return $http.put(apiBaseUrl + '/employees/' + id, data);
+        return $http.put(apiBaseUrl + '/employees/' + id, data).then(function(r) {
+            // Reload employees to ensure consistent Date objects
+            return self.loadEmployees().then(function(employees) {
+                // Find and return the processed object
+                var updatedEmp = employees.find(e => e.id == id);
+                return updatedEmp;
+            });
+        });
     };
 
     self.deleteEmployee = function(id) {
@@ -160,13 +163,22 @@ app.service('ApiService', function($http, $q) {
         });
     };
 
+    // --- FIX APPLIED HERE ---
     self.updateControl = function(controlId, payload) {
         console.log('Updating control:', controlId, payload);
-        return $http.put(apiBaseUrl + '/controls/' + controlId, payload).catch(function(error) {
+        
+        return $http.put(apiBaseUrl + '/controls/' + controlId, payload).then(function(r) {
+            // Reload all controls to ensure local data is fresh and formatted (Strings -> Dates)
+            return self.loadAllControls().then(function(allControls) {
+                // Find the specific control we just updated from the formatted list
+                var updatedItem = allControls.find(c => c.controlId == controlId);
+                
+                // Return this formatted item, NOT r.data
+                // This prevents the [ngModel:datefmt] error because updatedItem.releaseDate is a Date Object
+                return updatedItem;
+            });
+        }).catch(function(error) {
             console.error('Update control error:', error);
-            if(error.data) {
-                console.error('Error details:', error.data);
-            }
             throw error;
         });
     };
@@ -202,7 +214,6 @@ app.service('ApiService', function($http, $q) {
 
         self.data.upcomingReleases = angular.copy(self.data.releases);
         
-        // Add default releases if they don't exist
         defaultReleases.forEach(function(dr) {
             var drDate = new Date(dr.releaseDate);
             drDate.setHours(0, 0, 0, 0);
@@ -216,27 +227,22 @@ app.service('ApiService', function($http, $q) {
             }
         });
 
-        // Add control type release dates to the dropdown
         if (self.data.controlTypes && self.data.controlTypes.length > 0) {
             self.data.controlTypes.forEach(function(controlType) {
                 if (controlType.releaseDate) {
                     var ctDate = new Date(controlType.releaseDate);
                     ctDate.setHours(0, 0, 0, 0);
                     
-                    // Check if this date already exists in upcomingReleases
                     var exists = self.data.upcomingReleases.some(function(r) {
                         var rDate = new Date(r.releaseDate);
                         rDate.setHours(0, 0, 0, 0);
                         return rDate.getTime() === ctDate.getTime();
                     });
                     
-                    // If it doesn't exist and is in the future, add it
                     if (!exists && ctDate >= today) {
                         var day = ('0' + ctDate.getDate()).slice(-2);
                         var month = ('0' + (ctDate.getMonth() + 1)).slice(-2);
                         var releaseName = 'Release ' + day + '.' + month;
-                        
-                        // Use a unique ID for control type releases (starting from 999900)
                         var controlTypeReleaseId = 999900 + controlType.controlTypeId;
                         
                         self.data.upcomingReleases.push({
@@ -273,33 +279,27 @@ app.service('ApiService', function($http, $q) {
 
     self.updateControlType = function(controlTypeId, controlTypeData) {
         return $http.put(apiBaseUrl + '/controltypes/' + controlTypeId, controlTypeData).then(function(r) {
-            // Reload control types to get the updated list
             return self.loadControlTypes().then(function() {
-                // Reprocess releases to include updated control type date
                 self._processReleases();
                 return r.data;
             });
         }).catch(function(error) {
-            // Re-throw error so it can be handled by the component
             throw error;
         });
     };
 
     self.deleteControlType = function(controlTypeId) {
         return $http.delete(apiBaseUrl + '/controltypes/' + controlTypeId).then(function() {
-            // Remove from local store
             var idx = self.data.controlTypes.findIndex(t => t.controlTypeId == controlTypeId);
             if (idx > -1) {
                 self.data.controlTypes.splice(idx, 1);
             }
-            // Reload employees and controls to update type references
             return self.loadEmployees().then(function() {
                 return self.loadAllControls();
             });
         });
     };
 
-    // Release CRUD
     self.addRelease = function(releaseData) {
         return $http.post(apiBaseUrl + '/releases', releaseData).then(function(r) {
             return self.loadReleases().then(function() {
@@ -312,12 +312,10 @@ app.service('ApiService', function($http, $q) {
 
     self.updateRelease = function(releaseId, releaseData) {
         return $http.put(apiBaseUrl + '/releases/' + releaseId, releaseData).then(function(r) {
-            // Reload releases to get the updated list
             return self.loadReleases().then(function() {
                 return r.data;
             });
         }).catch(function(error) {
-            // Re-throw error so it can be handled by the component
             throw error;
         });
     };

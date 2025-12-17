@@ -134,7 +134,41 @@ namespace ControlApp.API.Services
 
         public async Task<bool> DeleteEmployeeAsync(int id)
         {
-            return await _employeeRepository.DeleteAsync(id);
+            var employee = await _employeeRepository.GetByIdAsync(id);
+            if (employee == null)
+                return false;
+
+            try
+            {
+                // First, delete all controls associated with this employee
+                var controlsToDelete = await _context.Set<Controls>()
+                    .Where(c => c.EmployeeId == id)
+                    .ToListAsync();
+
+                if (controlsToDelete.Any())
+                {
+                    _context.Set<Controls>().RemoveRange(controlsToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Now delete the employee directly using context to avoid tracking issues
+                // Re-fetch the employee to ensure it's tracked properly
+                var employeeToDelete = await _context.Set<Employee>().FindAsync(id);
+                if (employeeToDelete != null)
+                {
+                    _context.Set<Employee>().Remove(employeeToDelete);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (in production, use ILogger)
+                System.Diagnostics.Debug.WriteLine($"Error deleting employee {id}: {ex.Message}");
+                throw;
+            }
         }
 
         private static EmployeeDto MapToDto(Employee employee)

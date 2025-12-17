@@ -106,14 +106,31 @@ app.component('employeesList', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService) {
+    controller: function(ApiService, NotificationService, $rootScope) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchText = '';
         ctrl.isSaving = false;
         
-        // Initialize data
         ApiService.init();
+        
+        var sectionListener = null;
+        
+        ctrl.$onInit = function() {
+            ApiService.loadEmployees();
+            
+            sectionListener = $rootScope.$on('controlsSectionChanged', function(event, section) {
+                if(section === 'employees') {
+                    ApiService.loadEmployees();
+                }
+            });
+        };
+        
+        ctrl.$onDestroy = function() {
+            if(sectionListener) {
+                sectionListener();
+            }
+        };
         
         ctrl.getFilteredEmployees = function() {
             if(!ctrl.store.employees) return [];
@@ -171,7 +188,6 @@ app.component('employeesList', {
             emp.editing = true;
             emp.editName = emp.employeeName;
             
-            // Find the current type
             var currentType = ctrl.store.controlTypes.find(t => t.controlTypeId == emp.typeId);
             if(currentType) {
                 emp.editSelectedType = currentType;
@@ -209,14 +225,13 @@ app.component('employeesList', {
                 description: emp.editSelectedType.description || "Updated Employee"
             };
             
+            // NOTE: Service returns the updated object directly now (no .data)
             ApiService.updateEmployee(emp.id, updateData).then(function(updatedEmployee) {
-                // Update local data
                 emp.employeeName = updatedEmployee ? updatedEmployee.employeeName : emp.editName;
                 emp.typeId = emp.editSelectedType.controlTypeId;
                 emp.editing = false;
                 emp.saving = false;
                 
-                // Reload employees and controls to update references
                 ApiService.loadEmployees().then(function() {
                     return ApiService.loadAllControls();
                 });
@@ -227,11 +242,7 @@ app.component('employeesList', {
                 console.error('Error updating employee:', error);
                 var errorMsg = 'Error updating employee';
                 if(error && error.data) {
-                    if(typeof error.data === 'string') {
-                        errorMsg = error.data;
-                    } else if(error.data.message) {
-                        errorMsg = error.data.message;
-                    }
+                    errorMsg = typeof error.data === 'string' ? error.data : error.data.message;
                 }
                 NotificationService.show(errorMsg, 'error');
             }).finally(function() {
@@ -253,33 +264,27 @@ app.component('employeesList', {
             
             emp.deleting = true;
             ApiService.deleteEmployee(emp.id).then(function() {
-                // Remove from local list
                 var index = ctrl.store.employees.findIndex(e => e.id === emp.id);
                 if(index > -1) {
                     ctrl.store.employees.splice(index, 1);
                 }
                 
-                // Reload controls to update the list
-                ApiService.loadAllControls();
-                
-                NotificationService.show('Employee deleted successfully', 'success');
+                ApiService.loadEmployees().then(function() {
+                    return ApiService.loadAllControls();
+                }).then(function() {
+                    NotificationService.show('Employee deleted successfully', 'success');
+                });
             }).catch(function(error) {
                 emp.deleting = false;
                 console.error('Error deleting employee:', error);
                 var errorMsg = 'Error deleting employee';
                 if(error && error.data) {
-                    if(typeof error.data === 'string') {
-                        errorMsg = error.data;
-                    } else if(error.data.message) {
-                        errorMsg = error.data.message;
-                    }
+                    errorMsg = typeof error.data === 'string' ? error.data : (error.data.message || 'Error: ' + error.data.error);
+                } else if(error && error.status) {
+                    errorMsg = 'Server error (Status: ' + error.status + ')';
                 }
                 NotificationService.show(errorMsg, 'error');
             });
         };
     }
 });
-
-
-
-

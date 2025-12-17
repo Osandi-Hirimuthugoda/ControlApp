@@ -82,14 +82,23 @@ namespace ControlApp.API.Controllers
             {
                 var deleted = await _employeeService.DeleteEmployeeAsync(id);
                 if (!deleted)
-                    return NotFound($"Employee with ID {id} not found.");
+                    return NotFound(new { message = $"Employee with ID {id} not found." });
 
                 return NoContent();
             }
             catch (Exception ex)
             {
+                // Log the full exception details for debugging
+                var errorMessage = $"Error deleting employee: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner exception: {ex.InnerException.Message}";
+                }
                 
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { 
+                    message = errorMessage,
+                    error = ex.GetType().Name
+                });
             }
         }
     }

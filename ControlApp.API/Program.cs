@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 using ControlApp.API;
 using ControlApp.API.Repositories;
 using ControlApp.API.Services;
@@ -30,6 +34,7 @@ builder.Services.AddScoped<IControlService, ControlService>();
 builder.Services.AddScoped<IControlTypeService, ControlTypeService>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IReleaseService, ReleaseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Add Controllers with JSON camelCase support and validation
 builder.Services.AddControllers()
@@ -74,9 +79,70 @@ builder.Services.AddCors(options =>
 });
 
 
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"] ?? "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLongForSecurity!";
+var issuer = jwtSettings["Issuer"] ?? "ControlAppAPI";
+var audience = jwtSettings["Audience"] ?? "ControlAppClient";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
 // add SWAGGER SERVICES
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Control App API",
+        Version = "v1",
+        Description = "API for Control Application with JWT Authentication"
+    });
+
+    // Add JWT authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -122,6 +188,10 @@ app.UseStaticFiles();
 // Enable routing
 app.UseRouting();
 
+// Enable Authentication & Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Map controllers
 app.MapControllers();
 
@@ -143,6 +213,7 @@ static void InitializeDatabase(WebApplication app)
     try
     {
         // Ensure database is created
+        //context.Database.EnsureDeleted();//delete old db
         context.Database.EnsureCreated();
         logger.LogInformation("Database initialized successfully");
         
@@ -154,6 +225,9 @@ static void InitializeDatabase(WebApplication app)
         
         // Ensure required statuses exist
         EnsureRequiredStatuses(context, logger);
+        
+        // Ensure default admin user exists
+        EnsureDefaultAdminUser(context, logger);
         
         context.SaveChanges();
         logger.LogInformation("Database cleanup completed");
@@ -288,4 +362,26 @@ static void EnsureRequiredStatuses(AppDbContext context, ILogger logger)
     // Log final status count
     var finalCount = context.Set<Status>().Count();
     logger.LogInformation("Total statuses in database: {Count}", finalCount);
+}
+
+// Helper method to ensure default admin user exists
+static void EnsureDefaultAdminUser(AppDbContext context, ILogger logger)
+{
+    var adminExists = context.Set<User>()
+        .Any(u => u.Username == "admin" || u.Email == "admin@controlapp.com");
+
+    if (!adminExists)
+    {
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123");
+        context.Set<User>().Add(new User
+        {
+            Username = "admin",
+            Email = "admin@controlapp.com",
+            PasswordHash = passwordHash,
+            FullName = "Administrator",
+            Role = "Admin",
+            CreatedAt = DateTime.UtcNow
+        });
+        logger.LogInformation("Created default admin user (username: admin, password: Admin@123)");
+    }
 }

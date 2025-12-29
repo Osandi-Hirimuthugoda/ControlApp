@@ -3,11 +3,17 @@ app.component('controlsSidebar', {
     <div class="controls-sidebar">
         <div class="sidebar-buttons">
             <button class="sidebar-btn" 
+                    ng-class="{'active': $ctrl.currentView === 'dashboard'}" 
+                    ng-click="$ctrl.switchToDashboard()">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </button>
+            <button class="sidebar-btn" 
                     ng-class="{'active': $ctrl.currentSection === 'controls'}" 
                     ng-click="$ctrl.switchSection('controls')">
                 <i class="fas fa-list-check me-2"></i>Controls
             </button>
             <button class="sidebar-btn" 
+                    ng-if="$ctrl.isAdmin()"
                     ng-class="{'active': $ctrl.currentSection === 'addControlType'}" 
                     ng-click="$ctrl.switchSection('addControlType')">
                 <i class="fas fa-plus-circle me-2"></i>Add Control Type
@@ -18,6 +24,7 @@ app.component('controlsSidebar', {
                 <i class="fas fa-tags me-2"></i>Control Types
             </button>
             <button class="sidebar-btn" 
+                    ng-if="$ctrl.isAdmin()"
                     ng-class="{'active': $ctrl.currentSection === 'newEmployee'}" 
                     ng-click="$ctrl.switchSection('newEmployee')">
                 <i class="fas fa-user-plus me-2"></i>New Employee
@@ -30,19 +37,36 @@ app.component('controlsSidebar', {
         </div>
     </div>
     `,
-    controller: function($rootScope) {
+    controller: function($rootScope, AuthService) {
         var ctrl = this;
         ctrl.currentSection = 'controls';
+        ctrl.currentView = $rootScope.currentView || 'controls';
+        
+        ctrl.isAdmin = function() {
+            return AuthService.isAdmin();
+        };
         
         ctrl.$onInit = function() {
+            // Listen for view changes
+            var viewListener = $rootScope.$on('viewChanged', function(event, view) {
+                ctrl.currentView = view;
+            });
+            
             // Listen for section changes
             var listener = $rootScope.$on('controlsSectionChanged', function(event, section) {
                 ctrl.currentSection = section;
             });
             
             ctrl.$onDestroy = function() {
+                viewListener();
                 listener();
             };
+        };
+        
+        ctrl.switchToDashboard = function() {
+            ctrl.currentView = 'dashboard';
+            $rootScope.currentView = 'dashboard';
+            $rootScope.$broadcast('viewChanged', 'dashboard');
         };
         
         ctrl.switchSection = function(section) {

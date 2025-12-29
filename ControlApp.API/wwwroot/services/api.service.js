@@ -38,8 +38,7 @@ app.service('ApiService', function($http, $q) {
             self.data.employees = r.data || [];
             self.data.employees.forEach(function(e) { 
                 e.editing = false;
-                // If you have date fields like DOB, convert them here:
-                // if(e.dob) e.dob = new Date(e.dob);
+                
             });
             return self.data.employees;
         });
@@ -49,8 +48,7 @@ app.service('ApiService', function($http, $q) {
     self.loadControlTypes = function() {
         return $http.get(apiBaseUrl + '/controltypes').then(function(r) {
             var newTypes = r.data || [];
-            
-            // STRICT FIX: Convert strings to Date Objects
+    
             newTypes.forEach(function(type) {
                 if(type.releaseDate) {
                     type.releaseDate = new Date(type.releaseDate);
@@ -100,10 +98,8 @@ app.service('ApiService', function($http, $q) {
             self.data.allControls = r.data || [];
             
             self.data.allControls.forEach(function(c) {
-                // IMPORTANT: Convert String to Date Object for ng-model compatibility
                 if(c.releaseDate) {
                     c.releaseDate = new Date(c.releaseDate);
-                    // Also make releaseDateInput a Date object
                     c.releaseDateInput = new Date(c.releaseDate);
                 } else {
                     c.releaseDate = null;
@@ -163,18 +159,15 @@ app.service('ApiService', function($http, $q) {
         });
     };
 
-    // --- FIX APPLIED HERE ---
+    
     self.updateControl = function(controlId, payload) {
         console.log('Updating control:', controlId, payload);
         
         return $http.put(apiBaseUrl + '/controls/' + controlId, payload).then(function(r) {
-            // Reload all controls to ensure local data is fresh and formatted (Strings -> Dates)
+            
             return self.loadAllControls().then(function(allControls) {
-                // Find the specific control we just updated from the formatted list
-                var updatedItem = allControls.find(c => c.controlId == controlId);
                 
-                // Return this formatted item, NOT r.data
-                // This prevents the [ngModel:datefmt] error because updatedItem.releaseDate is a Date Object
+                var updatedItem = allControls.find(c => c.controlId == controlId);
                 return updatedItem;
             });
         }).catch(function(error) {

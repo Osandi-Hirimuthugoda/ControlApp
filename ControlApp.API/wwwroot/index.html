@@ -19,6 +19,11 @@
     <app-navbar></app-navbar>
 
     <div class="container-fluid" style="padding: 0 15px;" ng-controller="MainController as main">
+        <!-- Login View -->
+        <div ng-if="main.currentView === 'login'">
+            <login-component></login-component>
+        </div>
+
         <!-- Dashboard View -->
         <div ng-if="main.currentView === 'dashboard'">
             <dashboard></dashboard>
@@ -78,8 +83,10 @@
     <!-- JS files Loading -->
     <script src="app.module.js"></script>
     <script src="services/notification.service.js"></script>
+    <script src="services/auth.service.js"></script>
     <script src="services/api.service.js"></script>
     <script src="components/navbar.component.js"></script>
+    <script src="components/login.component.js"></script>
     <script src="components/dashboard.component.js"></script>
     <script src="components/controls-sidebar.component.js"></script>
     <script src="components/control-board.component.js"></script>

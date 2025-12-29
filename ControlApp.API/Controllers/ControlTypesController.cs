@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
 
@@ -6,6 +7,7 @@ namespace ControlApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ControlTypesController : ControllerBase
     {
         private readonly IControlTypeService _controlTypeService;
@@ -33,6 +35,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ControlTypeDto>> CreateControlType([FromBody] CreateControlTypeDto createControlTypeDto)
         {
             try
@@ -47,6 +50,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ControlTypeDto>> UpdateControlType(int id, [FromBody] CreateControlTypeDto updateControlTypeDto)
         {
             try
@@ -64,6 +68,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteControlType(int id)
         {
             var deleted = await _controlTypeService.DeleteControlTypeAsync(id);

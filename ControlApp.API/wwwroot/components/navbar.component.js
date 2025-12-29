@@ -6,31 +6,48 @@ app.component('appNavbar', {
                 <i class="fas fa-network-wired"></i> Control Management System
             </span>
             <div class="d-flex align-items-center text-white" style="gap: 1.5rem;">
-                <button class="btn-nav" ng-class="{'active': $ctrl.currentView === 'dashboard'}" 
-                        ng-click="$ctrl.switchView('dashboard')">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                <div ng-if="$ctrl.isAuthenticated && $ctrl.currentView !== 'login'" class="d-flex align-items-center" style="gap: 1rem;">
+                    <span class="text-white">
+                        <i class="fas fa-user me-1"></i>{{$ctrl.user.username}}
+                    </span>
+                    <button class="btn btn-outline-light btn-sm" ng-click="$ctrl.logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
                 </button>
-                <button class="btn-nav" ng-class="{'active': $ctrl.currentView === 'controls'}" 
-                        ng-click="$ctrl.switchView('controls')">
-                    <i class="fas fa-list-check me-2"></i>Controls
-                </button>
+                </div>
             </div>
         </div>
     </nav>
     `,
-    controller: function($rootScope) {
+    controller: function($rootScope, AuthService) {
         var ctrl = this;
         
         ctrl.$onInit = function() {
-            ctrl.currentView = $rootScope.currentView || 'controls';
+            ctrl.currentView = $rootScope.currentView || 'login';
+            ctrl.isAuthenticated = AuthService.isAuthenticated();
+            ctrl.user = AuthService.getUser();
             
             // Listen for view changes
             var listener = $rootScope.$on('viewChanged', function(event, view) {
                 ctrl.currentView = view;
             });
             
+            // Listen for authentication events
+            var authListener = $rootScope.$on('userLoggedIn', function(event, userData) {
+                ctrl.isAuthenticated = true;
+                ctrl.user = AuthService.getUser();
+            });
+            
+            var logoutListener = $rootScope.$on('userLoggedOut', function() {
+                ctrl.isAuthenticated = false;
+                ctrl.user = null;
+                ctrl.currentView = 'login';
+                $rootScope.$broadcast('viewChanged', 'login');
+            });
+            
             ctrl.$onDestroy = function() {
                 listener();
+                authListener();
+                logoutListener();
             };
         };
         
@@ -38,6 +55,10 @@ app.component('appNavbar', {
             ctrl.currentView = view;
             $rootScope.currentView = view;
             $rootScope.$broadcast('viewChanged', view);
+        };
+        
+        ctrl.logout = function() {
+            AuthService.logout();
         };
     }
 });

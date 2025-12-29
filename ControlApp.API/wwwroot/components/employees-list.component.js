@@ -22,7 +22,7 @@ app.component('employeesList', {
                             <th style="width: 20%">Type</th>
                             <th style="width: 30%">Description</th>
                             <th style="width: 10%">Controls Count</th>
-                            <th style="width: 10%">Actions</th>
+                            <th style="width: 10%" ng-if="$ctrl.isAdmin()">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,10 +42,10 @@ app.component('employeesList', {
                                 <span class="badge bg-info">{{$ctrl.getControlsCount(emp.id)}}</span>
                             </td>
                             <td ng-if="!emp.editing" class="text-center">
-                                <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(emp)">
+                                <button ng-if="$ctrl.isAdmin()" class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(emp)">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteEmployee(emp)" ng-disabled="emp.deleting">
+                                <button ng-if="$ctrl.isAdmin()" class="btn btn-sm btn-danger" ng-click="$ctrl.deleteEmployee(emp)" ng-disabled="emp.deleting">
                                     <span ng-if="!emp.deleting"><i class="fas fa-trash"></i> Delete</span>
                                     <span ng-if="emp.deleting"><i class="fas fa-spinner fa-spin"></i> Deleting...</span>
                                 </button>
@@ -106,7 +106,7 @@ app.component('employeesList', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope) {
+    controller: function(ApiService, NotificationService, $rootScope, AuthService) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchText = '';
@@ -115,6 +115,10 @@ app.component('employeesList', {
         ApiService.init();
         
         var sectionListener = null;
+        
+        ctrl.isAdmin = function() {
+            return AuthService.isAdmin();
+        };
         
         ctrl.$onInit = function() {
             ApiService.loadEmployees();

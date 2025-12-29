@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
 
@@ -6,6 +7,7 @@ namespace ControlApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ControlsController : ControllerBase //inherit 
     {
         private readonly IControlService _controlService;
@@ -35,6 +37,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ControlDto>> CreateControl([FromBody] CreateControlDto createControlDto)
         {
             try
@@ -49,6 +52,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ControlDto>> UpdateControl(int id, [FromBody] UpdateControlDto updateControlDto)
         {
             try
@@ -76,6 +80,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteControl(int id)
         {
             var deleted = await _controlService.DeleteControlAsync(id);
@@ -86,6 +91,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost("add-all-employees")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ControlDto>>> AddAllEmployeesToControls()
         {
             try

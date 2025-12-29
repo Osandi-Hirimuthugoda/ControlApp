@@ -15,7 +15,7 @@ app.component('controlTypesList', {
                             <th>Type Name</th>
                             <th>Description</th>
                             <th>Release Date</th>
-                            <th class="text-end">Action</th>
+                            <th class="text-end" ng-if="$ctrl.isAdmin()">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,7 +44,7 @@ app.component('controlTypesList', {
                                     <input type="date" class="form-control form-control-sm" ng-model="type.editReleaseDate">
                                 </div>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" ng-if="$ctrl.isAdmin()">
                                 <div ng-if="!type.editing" style="white-space: nowrap;">
                                     <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(type)" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -77,11 +77,15 @@ app.component('controlTypesList', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope, $timeout) {
+    controller: function(ApiService, NotificationService, $rootScope, $timeout, AuthService) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchType = '';
         var listener = null;
+        
+        ctrl.isAdmin = function() {
+            return AuthService.isAdmin();
+        };
         
         ApiService.loadControlTypes();
 

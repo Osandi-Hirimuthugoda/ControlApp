@@ -30,7 +30,7 @@ app.component('controlBoard', {
                             <th style="width:8%">Prog %</th> 
                             <th style="width:10%">Status</th>
                             <th style="width:15%">Release</th> 
-                            <th style="width:12%">Action</th>
+                            <th style="width:10%" ng-if="$ctrl.isAdmin()">Action</th> <!-- only can admin delete/edit -->
                         </tr>
                     </thead>
                     <!-- When All Types is selected, show all controls together without category headers -->
@@ -95,7 +95,7 @@ app.component('controlBoard', {
                             </td>
 
                             <!-- 8. Actions -->
-                            <td class="text-center">
+                            <td class="text-center" ng-if="$ctrl.isAdmin()">
                                 <div ng-if="!control.editing" class="d-flex gap-1 justify-content-center">
                                     <button class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
                                     <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControl(control)" ng-disabled="control.deleting">
@@ -119,7 +119,7 @@ app.component('controlBoard', {
                            ng-if="$ctrl.selectedTypeFilter && $ctrl.getControlsByType(type.controlTypeId).length > 0" 
                            style="border-top: 3px solid #6c757d;">
                         <tr style="background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); color: white;">
-                            <td colspan="8" class="fw-bold text-center py-2" style="font-size: 1.1em;">
+                            <td ng-attr-colspan="{{$ctrl.isAdmin() ? 8 : 7}}" class="fw-bold text-center py-2" style="font-size: 1.1em;">
                                 <i class="fas fa-tag me-2"></i>{{type.typeName}} Controls
                                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; ms-2;">{{$ctrl.getControlsByType(type.controlTypeId).length}}</span>
                             </td>
@@ -168,7 +168,7 @@ app.component('controlBoard', {
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" ng-if="$ctrl.isAdmin()">
                                 <div ng-if="!control.editing" class="d-flex gap-1 justify-content-center">
                                     <button class="btn btn-sm btn-warning" ng-click="$ctrl.startEdit(control)"><i class="fas fa-edit"></i> Edit</button>
                                     <button class="btn btn-sm btn-danger" ng-click="$ctrl.deleteControl(control)" ng-disabled="control.deleting">
@@ -191,11 +191,24 @@ app.component('controlBoard', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService) {
+    controller: function(ApiService, NotificationService, AuthService) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchText = '';
         ctrl.selectedTypeFilter = null;
+        
+        ctrl.isAdmin = function() {
+            try {
+                var isAdmin = AuthService.isAdmin();
+                return isAdmin === true;
+            } catch(e) {
+                console.error('Error checking admin status:', e);
+                return false;
+            }
+        };
+        
+        // Store admin status for better performance
+        ctrl._isAdmin = null;
 
         // Initialize Data
         ApiService.init().then(function() {
@@ -473,11 +486,10 @@ app.component('controlBoard', {
             var needsReleaseCreation = false;
             var releaseDataToCreate = null;
             
-            // Logic to determine which date to use (row input or edit-specific input)
-            // Ensure we are working with a Date object
+            
             var dateToUse = c.editReleaseDate || c.releaseDateInput;
             
-            // If dateToUse is somehow a string, convert it
+            
             if (dateToUse && typeof dateToUse === 'string') {
                 dateToUse = new Date(dateToUse);
             }

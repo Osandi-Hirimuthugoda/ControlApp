@@ -15,6 +15,7 @@ namespace ControlApp.API
             public DbSet<Employee> Employees { get; set; }
             public DbSet<Status> Statuses { get; set; }
             public DbSet<Release> Releases { get; set; }
+            public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

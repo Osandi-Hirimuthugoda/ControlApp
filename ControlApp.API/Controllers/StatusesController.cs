@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
 
@@ -6,6 +7,7 @@ namespace ControlApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class StatusesController : ControllerBase
     {
         private readonly IStatusService _statusService;
@@ -43,6 +45,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<StatusDto>> CreateStatus([FromBody] CreateStatusDto createStatusDto)
         {
             try
@@ -61,6 +64,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<StatusDto>> UpdateStatus(int id, [FromBody] CreateStatusDto updateStatusDto)
         {
             try
@@ -82,6 +86,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteStatus(int id)
         {
             var deleted = await _statusService.DeleteStatusAsync(id);

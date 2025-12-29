@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
 
@@ -6,6 +7,7 @@ namespace ControlApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ReleasesController : ControllerBase
     {
         private readonly IReleaseService _releaseService;
@@ -33,6 +35,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ReleaseDto>> CreateRelease([FromBody] CreateReleaseDto createReleaseDto)
         {
             try
@@ -51,6 +54,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ReleaseDto>> UpdateRelease(int id, [FromBody] CreateReleaseDto updateReleaseDto)
         {
             try
@@ -72,6 +76,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRelease(int id)
         {
             var deleted = await _releaseService.DeleteReleaseAsync(id);

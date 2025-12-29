@@ -93,7 +93,7 @@ namespace ControlApp.API.Services
                  control.TypeId = updateControlDto.TypeId.Value;
             }
             // If TypeId is not provided, keep the existing TypeId (don't change it)
-
+ 
             if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
             {
                 var statusExists = await _context.Set<Status>().AnyAsync(s => s.Id == updateControlDto.StatusId.Value);

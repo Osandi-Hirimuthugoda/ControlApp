@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj": {}
+    "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj": {}
   },
   "projects": {
-    "c:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj": {
+    "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
+        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
         "projectName": "ControlApp.API",
-        "projectPath": "c:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
+        "projectPath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\ControlApp.API.csproj",
         "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\obj\\",
+        "outputPath": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -44,12 +44,20 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.AspNetCore.Cors": {
               "target": "Package",
               "version": "[2.2.0, )"
@@ -77,6 +85,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -90,24 +102,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.22, 8.0.22]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -116,7 +110,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

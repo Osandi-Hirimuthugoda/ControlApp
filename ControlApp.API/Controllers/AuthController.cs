@@ -22,7 +22,7 @@ namespace ControlApp.API.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (!ModelState.IsValid) 
                 {
                     return BadRequest(ModelState);
                 }
@@ -89,6 +89,109 @@ namespace ControlApp.API.Controllers
                 username = username,
                 role = role
             });
+        }
+
+        [HttpPut("update-email")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailDto updateEmailDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid user token" });
+                }
+
+                var result = await _authService.UpdateEmailAsync(userId, updateEmailDto);
+                
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to update email. Please check your current password." });
+                }
+
+                return Ok(new { message = "Email updated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating email");
+                return StatusCode(500, new { message = "An error occurred while updating email" });
+            }
+        }
+
+        [HttpPut("update-password")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid user token" });
+                }
+
+                var result = await _authService.UpdatePasswordAsync(userId, updatePasswordDto);
+                
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to update password. Please check your current password." });
+                }
+
+                return Ok(new { message = "Password updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating password");
+                return StatusCode(500, new { message = "An error occurred while updating password" });
+            }
+        }
+
+        [HttpPut("update-phone")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> UpdatePhoneNumber([FromBody] UpdatePhoneNumberDto updatePhoneNumberDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid user token" });
+                }
+
+                var result = await _authService.UpdatePhoneNumberAsync(userId, updatePhoneNumberDto);
+                
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to update phone number." });
+                }
+
+                return Ok(new { message = "Phone number updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating phone number");
+                return StatusCode(500, new { message = "An error occurred while updating phone number" });
+            }
         }
     }
 }

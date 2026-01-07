@@ -1,6 +1,16 @@
 app.component('employeeSidebar', {
     template: `
     <div style="height: 80vh; display: flex; flex-direction: column;">
+
+        <!-- New Registration Button (Main Action) -->
+        <div class="mb-3">
+            <button class="btn btn-primary w-100 shadow-sm d-flex align-items-center justify-content-center py-2" 
+                    style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border: none; border-radius: 8px;"
+                    data-bs-toggle="modal" data-bs-target="#registrationModal">
+                <i class="fas fa-user-plus me-2"></i> Register New Employee
+            </button>
+        </div>
+    
         <!-- Add Employee Card -->
         <div class="card shadow-sm mb-3" style="flex-shrink: 0;">
             <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1.25rem 1.5rem;">

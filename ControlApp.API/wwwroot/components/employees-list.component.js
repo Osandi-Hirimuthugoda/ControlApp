@@ -18,11 +18,11 @@ app.component('employeesList', {
                     <thead class="table-dark sticky-top">
                         <tr>
                             <th style="width: 5%">ID</th>
-                            <th style="width: 25%">Employee Name</th>
-                            <th style="width: 20%">Type</th>
-                            <th style="width: 30%">Description</th>
+                            <th style="width: 20%">Employee Name</th>
+                            <th style="width: 15%">Type</th>
+                            <th style="width: 35%">Control Description</th>
                             <th style="width: 10%">Controls Count</th>
-                            <th style="width: 10%" ng-if="$ctrl.isAdmin()">Actions</th>
+                            <th style="width: 15%" ng-if="$ctrl.canEditEmployee()">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,19 +36,26 @@ app.component('employeesList', {
                                 <span class="badge bg-secondary">{{$ctrl.getTypeName(emp.typeId)}}</span>
                             </td>
                             <td ng-if="!emp.editing">
-                                {{$ctrl.getDescription(emp.typeId) || '-'}}
+                                <span ng-if="$ctrl.getControlDescription(emp.id)" class="text-primary fw-bold">
+                                    {{$ctrl.getControlDescription(emp.id)}}
+                                </span>
+                                <span ng-if="!$ctrl.getControlDescription(emp.id)" class="text-muted">
+                                    {{$ctrl.getDescription(emp.typeId) || 'No control assigned'}}
+                                </span>
                             </td>
                             <td ng-if="!emp.editing" class="text-center">
                                 <span class="badge bg-info">{{$ctrl.getControlsCount(emp.id)}}</span>
                             </td>
-                            <td ng-if="!emp.editing" class="text-center">
-                                <button ng-if="$ctrl.isAdmin()" class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(emp)">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button ng-if="$ctrl.isAdmin()" class="btn btn-sm btn-danger" ng-click="$ctrl.deleteEmployee(emp)" ng-disabled="emp.deleting">
-                                    <span ng-if="!emp.deleting"><i class="fas fa-trash"></i> Delete</span>
-                                    <span ng-if="emp.deleting"><i class="fas fa-spinner fa-spin"></i> Deleting...</span>
-                                </button>
+                            <td ng-if="!emp.editing" class="text-center" ng-if="$ctrl.canEditEmployee()">
+                                <div style="white-space: nowrap;">
+                                    <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(emp)" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" ng-if="$ctrl.canDeleteEmployee()" ng-click="$ctrl.deleteEmployee(emp)" ng-disabled="emp.deleting" title="Delete">
+                                        <span ng-if="!emp.deleting"><i class="fas fa-trash"></i></span>
+                                        <span ng-if="emp.deleting"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
                             </td>
                             
                             <!-- Edit Mode -->
@@ -120,19 +127,39 @@ app.component('employeesList', {
             return AuthService.isAdmin();
         };
         
+        ctrl.canEditEmployee = function() {
+            return AuthService.canEditEmployee();
+        };
+        
+        ctrl.canDeleteEmployee = function() {
+            return AuthService.canDeleteEmployee();
+        };
+        
+        var controlsUpdateListener = null;
+        
         ctrl.$onInit = function() {
             ApiService.loadEmployees();
             
             sectionListener = $rootScope.$on('controlsSectionChanged', function(event, section) {
                 if(section === 'employees') {
-                    ApiService.loadEmployees();
+                    ApiService.loadEmployees().then(function() {
+                        return ApiService.loadAllControls();
+                    });
                 }
+            });
+            
+            // Listen for controls updates to refresh employee list
+            controlsUpdateListener = $rootScope.$on('controlsUpdated', function() {
+                ApiService.loadAllControls();
             });
         };
         
         ctrl.$onDestroy = function() {
             if(sectionListener) {
                 sectionListener();
+            }
+            if(controlsUpdateListener) {
+                controlsUpdateListener();
             }
         };
         
@@ -165,6 +192,13 @@ app.component('employeesList', {
         ctrl.getControlsCount = function(employeeId) {
             if(!ctrl.store.allControls) return 0;
             return ctrl.store.allControls.filter(c => c.employeeId == employeeId).length;
+        };
+        
+        ctrl.getControlDescription = function(employeeId) {
+            if(!ctrl.store.allControls || !employeeId) return null;
+            // Get the first control for this employee (usually there's one per employee)
+            var control = ctrl.store.allControls.find(c => c.employeeId == employeeId);
+            return control && control.description ? control.description : null;
         };
         
         ctrl.getUniqueDescriptions = function() {

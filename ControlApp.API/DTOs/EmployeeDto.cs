@@ -5,7 +5,9 @@ namespace ControlApp.API.DTOs
     public class EmployeeDto
     {
         public int Id { get; set; }
-        public string EmployeeName { get; set; } = null!;
+        public string EmployeeName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty; 
+        public string Role { get; set; } = string.Empty;
         public int? TypeId { get; set; }
         public string? TypeName { get; set; }
         public string? Description { get; set; }

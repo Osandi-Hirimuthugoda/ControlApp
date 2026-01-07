@@ -35,7 +35,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        // Allow Admin, Team Lead, and Software Architecture to add control types
+        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
         public async Task<ActionResult<ControlTypeDto>> CreateControlType([FromBody] CreateControlTypeDto createControlTypeDto)
         {
             try
@@ -50,7 +51,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        // Allow Admin, Team Lead, and Software Architecture to update control types
+        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
         public async Task<ActionResult<ControlTypeDto>> UpdateControlType(int id, [FromBody] CreateControlTypeDto updateControlTypeDto)
         {
             try
@@ -68,7 +70,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        // Allow Admin, Team Lead, and Software Architecture to delete control types
+        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
         public async Task<IActionResult> DeleteControlType(int id)
         {
             var deleted = await _controlTypeService.DeleteControlTypeAsync(id);

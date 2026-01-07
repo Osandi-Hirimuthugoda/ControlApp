@@ -1,0 +1,37 @@
+<div ng-controller="ControlsViewController as controlsView">
+    <div class="row" style="align-items: flex-start; margin: 0;">
+        <!-- Left Side: Sidebar with Buttons -->
+        <div class="col-md-3" style="padding-left: 0; padding-right: 10px;">
+            <controls-sidebar></controls-sidebar>
+        </div>
+
+        <!--Right Side: Content Area -->
+        <div class="col-md-9" style="display: flex; flex-direction: column; padding-right: 0; padding-left: 10px;">
+            <!-- Controls Table -->
+            <div ng-if="controlsView.currentSection === 'controls'">
+                <control-board></control-board>
+            </div>
+            
+            <!-- Add Control Type -->
+            <div ng-if="controlsView.currentSection === 'addControlType'">
+                <add-control-type></add-control-type>
+            </div>
+            
+            <!-- Control Types List -->
+            <div ng-if="controlsView.currentSection === 'controlTypes'">
+                <control-types-list></control-types-list>
+            </div>
+            
+            <!-- New Employee -->
+            <div ng-if="controlsView.currentSection === 'newEmployee'">
+                <new-employee></new-employee>
+            </div>
+            
+            <!-- Employees List -->
+            <div ng-if="controlsView.currentSection === 'employees'">
+                <employees-list></employees-list>
+            </div>
+        </div>
+    </div>
+</div>
+

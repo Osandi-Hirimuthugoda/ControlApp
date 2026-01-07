@@ -54,7 +54,8 @@ app.component('loginComponent', {
                             
                             <div class="text-center">
                                 <p class="mb-0">Don't have an account? 
-                                    <a href="#" ng-click="login.showRegister = true">Register</a>
+                                    <a href="#" ng-click="login.showRegister = true" ng-if="login.canRegister()">Register</a>
+                                    <span ng-if="!login.canRegister()" class="text-muted">Contact Admin or Project Manager to register</span>
                                 </p>
                             </div>
                         </div>
@@ -108,10 +109,13 @@ app.component('loginComponent', {
                                             required>
                                         <option value="">Select Role</option>
                                         <option value="Admin">Admin</option>
-                                        <option value="project Manager">Project Manager</option>
-                                        <option value="Employee">Employee</option>
+                                        <option value="Software Architecture">Software Architecture</option>
+                                        <option value="Team Lead">Team Lead</option>
+                                        <option value="Developer">Developer</option>
+                                        <option value="QA Engineer">QA Engineer</option>
+                                        <option value="Intern">Intern</option>
                                     </select>
-                                    <small class="form-text text-muted">Admin: Full access | Employee: View only</small>
+                                    <small class="form-text text-muted">Only Admin can register new users</small>
                                 </div>
                                 
                                 <div class="mb-3">
@@ -179,6 +183,11 @@ app.component('loginComponent', {
         vm.showPassword = false; // Toggle password visibility for login
         vm.showRegPassword = false; // Toggle password visibility for register
         
+        // Check if user can register (Admin only)
+        vm.canRegister = function() {
+            return AuthService.canRegisterEmployee();
+        };
+        
         vm.submit = function() {
             vm.error = '';
             vm.loading = true;
@@ -186,9 +195,9 @@ app.component('loginComponent', {
             AuthService.login(vm.credentials).then(function(response) {
                 vm.loading = false;
                 NotificationService.show('Login successful!', 'success');
-                // Redirect to controls page after a short delay to ensure auth state is updated
+                // Redirect to controls page using routing
                 $timeout(function() {
-                    $rootScope.$broadcast('viewChanged', 'controls');
+                    $location.path('/controls');
                 }, 100);
             }).catch(function(error) {
                 vm.loading = false;
@@ -207,9 +216,9 @@ app.component('loginComponent', {
             AuthService.register(vm.registerData).then(function(response) {
                 vm.loading = false;
                 NotificationService.show('Registration successful!', 'success');
-                // Redirect to controls page after a short delay to ensure auth state is updated
+                // Redirect to controls page using routing
                 $timeout(function() {
-                    $rootScope.$broadcast('viewChanged', 'controls');
+                    $location.path('/controls');
                 }, 100);
             }).catch(function(error) {
                 vm.loading = false;

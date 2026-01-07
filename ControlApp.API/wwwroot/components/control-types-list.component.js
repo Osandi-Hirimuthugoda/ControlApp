@@ -9,13 +9,14 @@ app.component('controlTypesList', {
                 <input type="text" class="form-control" ng-model="$ctrl.searchType" placeholder="Search types or descriptions...">
             </div>
             <div style="flex: 1; overflow-y: auto; min-height: 0;">
+                <!-- Control Types Table -->
                 <table class="table table-hover mb-0">
                     <thead class="table-dark sticky-top">
                         <tr>
                             <th>Type Name</th>
                             <th>Description</th>
                             <th>Release Date</th>
-                            <th class="text-end" ng-if="$ctrl.isAdmin()">Action</th>
+                            <th class="text-end" ng-if="$ctrl.canManageTypes()">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,10 +30,10 @@ app.component('controlTypesList', {
                                 <textarea ng-if="type.editing" class="form-control form-control-sm" ng-model="type.editDescription" rows="2" required></textarea>
                             </td>
                             <td>
-                                <span ng-if="!type.editing && type.releaseDate">
-                                    <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatDate(type.releaseDate)}}
+                                <span ng-if="!type.editing && type.releaseDate" class="fw-bold" style="font-size: 0.95em;">
+                                    <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatDateWithYear(type.releaseDate)}}
                                 </span>
-                                <span ng-if="!type.editing && !type.releaseDate">-</span>
+                                <span ng-if="!type.editing && !type.releaseDate" class="text-muted">-</span>
                                 <div ng-if="type.editing">
                                     <select class="form-select form-select-sm mb-2" 
                                             ng-model="type.editReleaseId" 
@@ -44,7 +45,7 @@ app.component('controlTypesList', {
                                     <input type="date" class="form-control form-control-sm" ng-model="type.editReleaseDate">
                                 </div>
                             </td>
-                            <td class="text-end" ng-if="$ctrl.isAdmin()">
+                            <td class="text-end" ng-if="$ctrl.canManageTypes()">
                                 <div ng-if="!type.editing" style="white-space: nowrap;">
                                     <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(type)" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -73,23 +74,67 @@ app.component('controlTypesList', {
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- All Controls Table -->
+                <div class="mt-3">
+                    <h6 class="fw-bold mb-2"><i class="fas fa-list-check me-2"></i>All Controls (from API)</h6>
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr class="text-center">
+                                <th style="width:10%">Type</th>
+                                <th style="width:30%">Description</th>
+                                <th style="width:20%">Employee</th>
+                                <th style="width:20%">Release Date</th>
+                                <th style="width:20%">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="c in $ctrl.store.allControls | orderBy:'-controlId'">
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">{{$ctrl.getTypeName(c.typeId)}}</span>
+                                </td>
+                                <td>{{c.description}}</td>
+                                <td>{{$ctrl.getEmployeeName(c.employeeId)}}</td>
+                                <td class="text-center">
+                                    <span ng-if="c.releaseDate">{{$ctrl.formatDateWithYear(c.releaseDate)}}</span>
+                                    <span ng-if="!c.releaseDate" class="text-muted small">No date</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info" ng-if="c.statusName">{{c.statusName}}</span>
+                                    <span class="text-muted small" ng-if="!c.statusName">-</span>
+                                </td>
+                            </tr>
+                            <tr ng-if="!$ctrl.store.allControls || $ctrl.store.allControls.length === 0">
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    <i class="fas fa-inbox me-2"></i>No controls found
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope, $timeout, AuthService) {
+    controller: function(ApiService, NotificationService, $rootScope, $timeout, AuthService, $q) {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchType = '';
         var listener = null;
         
-        ctrl.isAdmin = function() {
-            return AuthService.isAdmin();
+        // Admin, Software Architecture and Team Lead can manage (edit/delete) control types
+        ctrl.canManageTypes = function() {
+            return AuthService.isAdmin() || AuthService.isSoftwareArchitecture() || AuthService.isTeamLead();
         };
         
         ApiService.loadControlTypes();
 
         ctrl.$onInit = function() {
+            // Ensure we have latest types, employees and controls
+            ApiService.loadControlTypes();
+            ApiService.loadEmployees();
+            ApiService.loadAllControls();
+
             listener = $rootScope.$on('controlTypesUpdated', function() {
                 ApiService.loadControlTypes().then(function(types) {
                     $timeout(function() {
@@ -97,13 +142,30 @@ app.component('controlTypesList', {
                     }, 100);
                 });
             });
+            
+            // Also listen for controls updates to refresh control types if needed
+            var controlsListener = $rootScope.$on('controlsUpdated', function() {
+                // Reload control types to ensure they're in sync
+                ApiService.loadControlTypes().then(function(types) {
+                    $timeout(function() {
+                        ctrl.store = ApiService.data;
+                    }, 100);
+                });
+            });
+            
+            // Store listener for cleanup
+            ctrl.controlsListener = controlsListener;
         };
         
         ctrl.$onDestroy = function() {
             if(listener) {
                 listener();
             }
+            if(ctrl.controlsListener) {
+                ctrl.controlsListener();
+            }
         };
+        
 
         ctrl.formatDate = function(date) {
             if(!date) return '';
@@ -112,6 +174,42 @@ app.component('controlTypesList', {
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
             return day + '.' + month;
+        };
+
+        // Full date with year (DD.MM.YYYY) for controls table
+        ctrl.formatDateWithYear = function(date) {
+            if(!date) return '';
+            var d = new Date(date);
+            if(isNaN(d)) return '';
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear();
+            return day + '.' + month + '.' + year;
+        };
+
+        // Helper: get type name by id
+        ctrl.getTypeName = function(typeId) {
+            if(!typeId || !ctrl.store.controlTypes) return '';
+            var t = ctrl.store.controlTypes.find(function(tp) { return tp.controlTypeId == typeId; });
+            return t ? t.typeName : '';
+        };
+
+        // Helper: get employee name by id
+        ctrl.getEmployeeName = function(employeeId) {
+            if(!employeeId || !ctrl.store.employees) return '';
+            var e = ctrl.store.employees.find(function(emp) { return emp.id == employeeId; });
+            return e ? e.employeeName : '';
+        };
+
+        // Format date with year for full date display (DD.MM.YYYY)
+        ctrl.formatDateWithYear = function(date) {
+            if(!date) return '';
+            var d = new Date(date);
+            if(isNaN(d)) return '';
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear();
+            return day + '.' + month + '.' + year;
         };
 
         ctrl.formatReleaseName = function(release) {
@@ -218,8 +316,10 @@ app.component('controlTypesList', {
                 type.typeName = updatedType.typeName;
                 type.description = updatedType.description;
                 
+                var newReleaseDate = null;
                 if(updatedType.releaseDate) {
-                    type.releaseDate = new Date(updatedType.releaseDate);
+                    newReleaseDate = new Date(updatedType.releaseDate);
+                    type.releaseDate = newReleaseDate;
                 } else {
                     type.releaseDate = null;
                 }
@@ -232,8 +332,57 @@ app.component('controlTypesList', {
                 delete type.editReleaseDate;
                 delete type.editReleaseId;
 
-                NotificationService.show('Control Type Updated Successfully!', 'success');
-                $rootScope.$broadcast('controlTypesUpdated');
+                // Update all controls that use this control type
+                var controlsToUpdate = [];
+                if(ApiService.data.allControls && ApiService.data.allControls.length > 0) {
+                    ApiService.data.allControls.forEach(function(control) {
+                        if(control.typeId === type.controlTypeId) {
+                            // Update the control's description and release date to match the control type
+                            var updatePayload = {
+                                controlId: parseInt(control.controlId),
+                                description: updatedType.description, // Update description from control type
+                                comments: control.comments,
+                                employeeId: control.employeeId,
+                                typeId: control.typeId,
+                                statusId: control.statusId,
+                                releaseId: control.releaseId,
+                                progress: control.progress,
+                                releaseDate: newReleaseDate ? newReleaseDate.toISOString() : null
+                            };
+                            
+                            controlsToUpdate.push(
+                                ApiService.updateControl(control.controlId, updatePayload)
+                            );
+                        }
+                    });
+                }
+                
+                // Wait for all control updates to complete, then reload
+                if(controlsToUpdate.length > 0) {
+                    $q.all(controlsToUpdate).then(function() {
+                        // Reload controls to get the latest data
+                        return ApiService.loadAllControls();
+                    }).then(function() {
+                        // Broadcast updates to sync all components
+                        $rootScope.$broadcast('controlTypesUpdated');
+                        $rootScope.$broadcast('controlsUpdated');
+                        
+                        NotificationService.show('Control Type Updated Successfully! ' + controlsToUpdate.length + ' related control(s) have been updated.', 'success');
+                    }).catch(function(error) {
+                        console.error('Error updating related controls:', error);
+                        // Still show success for control type update
+                        $rootScope.$broadcast('controlTypesUpdated');
+                        $rootScope.$broadcast('controlsUpdated');
+                        NotificationService.show('Control Type Updated Successfully!', 'success');
+                    });
+                } else {
+                    // No controls to update, just reload and broadcast
+                    ApiService.loadAllControls().then(function() {
+                        $rootScope.$broadcast('controlTypesUpdated');
+                        $rootScope.$broadcast('controlsUpdated');
+                        NotificationService.show('Control Type Updated Successfully!', 'success');
+                    });
+                }
             }).catch(function(error) {
                 type.saving = false;
                 console.error('Error updating control type:', error);

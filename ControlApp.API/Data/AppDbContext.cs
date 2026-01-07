@@ -63,6 +63,11 @@ namespace ControlApp.API
                     .WithMany()
                     .HasForeignKey(e => e.TypeId)
                     .OnDelete(DeleteBehavior.SetNull);
+                
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             

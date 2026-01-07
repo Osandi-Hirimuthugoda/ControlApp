@@ -182,7 +182,7 @@ if (app.Environment.IsDevelopment())
 // Enable CORS
 app.UseCors("AllowAll");
 
-// Enable static files (for AngularJS frontend)
+// CSS/JS files serve from wwwroot folder
 app.UseStaticFiles();
 
 // Enable routing
@@ -212,8 +212,11 @@ static void InitializeDatabase(WebApplication app)
     
     try
     {
+        
+        // Comment this line out after running once to prevent accidental deletions
+        //context.Database.EnsureDeleted(); //delete old db - TEMPORARY, comment out after use
+        
         // Ensure database is created
-        //context.Database.EnsureDeleted();//delete old db
         context.Database.EnsureCreated();
         logger.LogInformation("Database initialized successfully");
         
@@ -364,7 +367,7 @@ static void EnsureRequiredStatuses(AppDbContext context, ILogger logger)
     logger.LogInformation("Total statuses in database: {Count}", finalCount);
 }
 
-// Helper method to ensure default admin user exists
+// Helper method
 static void EnsureDefaultAdminUser(AppDbContext context, ILogger logger)
 {
     var adminExists = context.Set<User>()

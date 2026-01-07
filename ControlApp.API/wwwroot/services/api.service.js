@@ -5,6 +5,7 @@ app.service('ApiService', function($http, $q) {
     // Shared Data Store
     self.data = {
         employees: [],
+        masterEmployees: [], //registered employees
         allControls: [],
         controlTypes: [], 
         statuses: [],
@@ -18,6 +19,7 @@ app.service('ApiService', function($http, $q) {
         var p1 = self.loadControlTypes(); 
         var p2 = self.loadStatuses();
         var p3 = self.loadReleases();
+        var p4 = self.loadMasterEmployees();
 
         return $q.all([p1, p2, p3]).then(function(results) {
             console.log('Initial data loaded. Statuses:', self.data.statuses.length);
@@ -31,6 +33,42 @@ app.service('ApiService', function($http, $q) {
         });
     };
 
+
+    //load master Employee Registration Method
+
+    self.loadMasterEmployees = function() {
+        return $http.get(apiBaseUrl + '/master-employees').then(function(r) {
+            self.data.masterEmployees = r.data || [];
+            return self.data.masterEmployees;
+        }).catch(function(err) {
+            console.error('Error loading master employees:', err);
+            return [];
+        });
+    };
+
+    self.registerMasterEmployee = function(empData) {
+        return $http.post(apiBaseUrl + '/master-employees', empData).then(function(r) {
+            return self.loadMasterEmployees().then(function() {
+                return r.data;
+            });
+        });
+    };
+
+    self.updateMasterEmployee = function(id, empData) {
+        return $http.put(apiBaseUrl + '/master-employees/' + id, empData).then(function(r) {
+            return self.loadMasterEmployees().then(function() {
+                return r.data;
+            });
+        });
+    };
+
+    self.deleteMasterEmployee = function(id) {
+        return $http.delete(apiBaseUrl + '/master-employees/' + id).then(function() {
+            return self.loadMasterEmployees();
+        });
+    };
+
+    
     // Load Data Methods
     
     self.loadEmployees = function() {
@@ -98,12 +136,33 @@ app.service('ApiService', function($http, $q) {
             self.data.allControls = r.data || [];
             
             self.data.allControls.forEach(function(c) {
+                // Ensure releaseDate is properly set from either releaseDate or release
+                // Always convert to Date object using new Date()
                 if(c.releaseDate) {
                     c.releaseDate = new Date(c.releaseDate);
                     c.releaseDateInput = new Date(c.releaseDate);
+                } else if(c.release && c.release.releaseDate) {
+                    // If releaseDate is not set but release object has releaseDate, use it
+                    c.releaseDate = new Date(c.release.releaseDate);
+                    c.releaseDateInput = new Date(c.release.releaseDate);
                 } else {
                     c.releaseDate = null;
                     c.releaseDateInput = null;
+                }
+                
+                // Set formatted date string for ng-model binding (YYYY-MM-DD format)
+                if(c.releaseDate) {
+                    var d = new Date(c.releaseDate);
+                    if(!isNaN(d.getTime())) {
+                        var year = d.getFullYear();
+                        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                        var day = ('0' + d.getDate()).slice(-2);
+                        c.releaseDateInputFormatted = year + '-' + month + '-' + day;
+                    } else {
+                        c.releaseDateInputFormatted = '';
+                    }
+                } else {
+                    c.releaseDateInputFormatted = '';
                 }
                 
                 c.editing = false;
@@ -120,7 +179,22 @@ app.service('ApiService', function($http, $q) {
                 
                 if(c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
                     var r = self.data.releases.find(x => x.releaseId == c.releaseId);
-                    if(r) c.releaseName = r.releaseName;
+                    if(r) {
+                        c.releaseName = r.releaseName;
+                        // If releaseDate is not set but we found a release, use its date
+                        if(!c.releaseDate && r.releaseDate) {
+                            c.releaseDate = new Date(r.releaseDate);
+                            c.releaseDateInput = new Date(r.releaseDate);
+                            // Update formatted date
+                            var d = new Date(c.releaseDate);
+                            if(!isNaN(d.getTime())) {
+                                var year = d.getFullYear();
+                                var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                                var day = ('0' + d.getDate()).slice(-2);
+                                c.releaseDateInputFormatted = year + '-' + month + '-' + day;
+                            }
+                        }
+                    }
                 }
             });
             console.log('Controls loaded:', self.data.allControls.length);
@@ -129,6 +203,16 @@ app.service('ApiService', function($http, $q) {
     };
 
     // CRUD Actions 
+
+    // Register employee with user account (Admin only)
+    self.registerEmployee = function(empData) {
+        return $http.post(apiBaseUrl + '/employees/register', empData).then(function(r) {
+            return self.loadEmployees().then(function() {
+                self.loadAllControls(); 
+                return r.data;
+            });
+        });
+    };
 
     self.addEmployee = function(empData) {
         return $http.post(apiBaseUrl + '/employees', empData).then(function(r) {
@@ -287,8 +371,8 @@ app.service('ApiService', function($http, $q) {
             if (idx > -1) {
                 self.data.controlTypes.splice(idx, 1);
             }
-            return self.loadEmployees().then(function() {
-                return self.loadAllControls();
+            return self.loadEmployees().then(function() { 
+                return self.loadAllControls();  
             });
         });
     };
@@ -310,6 +394,27 @@ app.service('ApiService', function($http, $q) {
             });
         }).catch(function(error) {
             throw error;
+        });
+    };
+
+    // Update user email
+    self.updateEmail = function(emailData) {
+        return $http.put(apiBaseUrl + '/auth/update-email', emailData).then(function(r) {
+            return r.data;
+        });
+    };
+
+    // Update user password
+    self.updatePassword = function(passwordData) {
+        return $http.put(apiBaseUrl + '/auth/update-password', passwordData).then(function(r) {
+            return r.data;
+        });
+    };
+
+    // Update user phone number
+    self.updatePhoneNumber = function(phoneData) {
+        return $http.put(apiBaseUrl + '/auth/update-phone', phoneData).then(function(r) {
+            return r.data;
         });
     };
 });

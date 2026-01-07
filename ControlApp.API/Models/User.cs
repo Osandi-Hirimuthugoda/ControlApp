@@ -22,6 +22,9 @@ namespace ControlApp.API.Models
         [StringLength(100)]
         public string? FullName { get; set; }
 
+        [StringLength(10)]
+        public string? PhoneNumber { get; set; }
+
         public string Role { get; set; } = "User"; // User, Admin
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

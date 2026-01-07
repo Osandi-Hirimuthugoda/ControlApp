@@ -3,6 +3,7 @@ using ControlApp.API.DTOs;
 using ControlApp.API.Models;
 using ControlApp.API.Repositories;
 using ControlApp.API;
+using BCrypt.Net;
 
 namespace ControlApp.API.Services
 {
@@ -116,6 +117,129 @@ namespace ControlApp.API.Services
             return await CreateEmployeeAsync(createEmployeeDto);
         }
 
+        public async Task<EmployeeDto> RegisterEmployeeWithUserAsync(RegisterEmployeeWithUserDto registerDto)
+        {
+            // Check if user already exists
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == registerDto.Email || u.Email == registerDto.Email);
+
+            User user;
+
+            if (existingUser != null)
+            {
+                // User already exists - link employee to existing user
+                // Update phone number if provided
+                if (!string.IsNullOrWhiteSpace(registerDto.PhoneNumber))
+                {
+                    existingUser.PhoneNumber = registerDto.PhoneNumber;
+                }
+
+                // Update role based on selected employee role (e.g. Developer, QA Engineer)
+                if (!string.IsNullOrWhiteSpace(registerDto.Role))
+                {
+                    existingUser.Role = registerDto.Role.Trim();
+                }
+
+                // Check if employee already exists for this user
+                var existingEmployee = await _context.Set<Employee>()
+                    .FirstOrDefaultAsync(e => e.UserId == existingUser.Id);
+
+                if (existingEmployee != null)
+                {
+                    // Update existing employee details instead of throwing error
+                    existingEmployee.EmployeeName = registerDto.EmployeeName.Trim();
+                    existingEmployee.TypeId = registerDto.TypeId;
+                    existingEmployee.Description = registerDto.Description?.Trim();
+
+                    await _employeeRepository.UpdateAsync(existingEmployee);
+                }
+                else
+                {
+                    // No employee record yet, will be created below
+                }
+
+                // Persist updates to the existing user (phone/role changes) and employee (if any)
+                await _context.SaveChangesAsync();
+
+                user = existingUser;
+            }
+            else
+            {
+                // Create new User account
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
+                user = new User
+                {
+                    Username = registerDto.Email, // Use email as username
+                    Email = registerDto.Email,
+                    PasswordHash = passwordHash,
+                    FullName = registerDto.EmployeeName,
+                    PhoneNumber = registerDto.PhoneNumber,
+                    // Use the selected role from UI; fall back to "Employee" just in case
+                    Role = string.IsNullOrWhiteSpace(registerDto.Role)
+                        ? "Employee"
+                        : registerDto.Role.Trim(),
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            // Create Employee record linked to User
+            var employee = new Employee
+            {
+                EmployeeName = registerDto.EmployeeName.Trim(),
+                TypeId = registerDto.TypeId,
+                Description = registerDto.Description?.Trim(),
+                UserId = user.Id // Link to User account
+            };
+
+            var createdEmployee = await _employeeRepository.AddAsync(employee);
+
+            // Create Control Record if TypeId is provided
+            try
+            {
+                if (createdEmployee.TypeId.HasValue)
+                {
+                    var selectedType = await _context.Set<ControlType>()
+                        .FirstOrDefaultAsync(t => t.ControlTypeId == createdEmployee.TypeId.Value);
+
+                    if (selectedType != null)
+                    {
+                        var defaultStatus = await _context.Set<Status>().FirstOrDefaultAsync();
+                        var defaultRelease = await _context.Set<Release>().FirstOrDefaultAsync();
+
+                        var control = new Controls
+                        {
+                            EmployeeId = createdEmployee.Id,
+                            TypeId = createdEmployee.TypeId.Value,
+                            Description = !string.IsNullOrWhiteSpace(selectedType.Description) 
+                                ? selectedType.Description 
+                                : (!string.IsNullOrWhiteSpace(createdEmployee.Description) 
+                                    ? createdEmployee.Description 
+                                    : $"Control for {createdEmployee.EmployeeName}"),
+                            ReleaseDate = selectedType.ReleaseDate,
+                            StatusId = defaultStatus?.Id,
+                            ReleaseId = defaultRelease?.ReleaseId,
+                            Progress = 0,
+                            Comments = ""
+                        };
+
+                        await _context.Set<Controls>().AddAsync(control);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Warning: Failed to create auto-control for employee {createdEmployee.Id}: {ex.Message}");
+            }
+
+            // Return the result
+            var employeeWithDetails = await _employeeRepository.GetEmployeeWithDetailsByIdAsync(createdEmployee.Id);
+            return employeeWithDetails != null ? MapToDto(employeeWithDetails) : MapToDto(createdEmployee);
+        }
+
         public async Task<EmployeeDto?> UpdateEmployeeAsync(int id, CreateEmployeeDto updateEmployeeDto)
         {
             var employee = await _employeeRepository.GetByIdAsync(id);
@@ -177,6 +301,8 @@ namespace ControlApp.API.Services
             {
                 Id = employee.Id,
                 EmployeeName = employee.EmployeeName,
+                Email = employee.User?.Email ?? string.Empty,
+                Role = employee.User?.Role ?? string.Empty,
                 TypeId = employee.TypeId,
                 TypeName = employee.Type?.TypeName,
                 Description = employee.Description

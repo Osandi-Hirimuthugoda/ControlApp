@@ -1,73 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="controlApp">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Control Management</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="/styles.css" rel="stylesheet">
 </head>
-<body>
+<body ng-controller="MainController as main">
     
     <!--Header Component -->
     <app-navbar></app-navbar>
 
-    <div class="container-fluid" style="padding: 0 15px;" ng-controller="MainController as main">
-        <!-- Login View -->
-        <div ng-if="main.currentView === 'login'">
-            <login-component></login-component>
-        </div>
-
-        <!-- Dashboard View -->
-        <div ng-if="main.currentView === 'dashboard'">
-            <dashboard></dashboard>
-        </div>
-
-        <!-- Controls View -->
-        <div ng-if="main.currentView === 'controls'" ng-controller="ControlsViewController as controlsView">
-            <div class="row" style="align-items: flex-start; margin: 0;">
-                
-                <!-- Left Side: Sidebar with Buttons -->
-                <div class="col-md-3" style="padding-left: 0; padding-right: 10px;">
-                    <controls-sidebar></controls-sidebar>
-                </div>
-
-                <!--Right Side: Content Area -->
-                <div class="col-md-9" style="display: flex; flex-direction: column; padding-right: 0; padding-left: 10px;">
-                    <!-- Controls Table -->
-                    <div ng-if="controlsView.currentSection === 'controls'">
-                        <control-board></control-board>
-                    </div>
-                    
-                    <!-- Add Control Type -->
-                    <div ng-if="controlsView.currentSection === 'addControlType'">
-                        <add-control-type></add-control-type>
-                    </div>
-                    
-                    <!-- Control Types List -->
-                    <div ng-if="controlsView.currentSection === 'controlTypes'">
-                        <control-types-list></control-types-list>
-                    </div>
-                    
-                    <!-- New Employee -->
-                    <div ng-if="controlsView.currentSection === 'newEmployee'">
-                        <new-employee></new-employee>
-                    </div>
-                    
-                    <!-- Employees List -->
-                    <div ng-if="controlsView.currentSection === 'employees'">
-                        <employees-list></employees-list>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+    <div class="container-fluid" style="padding: 0 15px;">
+        <!-- ng-view will render the routed templates -->
+        <div ng-view></div>
     </div>
     
     <!-- Toast Notifications Container -->
@@ -81,19 +37,22 @@
     </div>
 
     <!-- JS files Loading -->
-    <script src="app.module.js"></script>
-    <script src="services/notification.service.js"></script>
-    <script src="services/auth.service.js"></script>
-    <script src="services/api.service.js"></script>
-    <script src="components/navbar.component.js"></script>
-    <script src="components/login.component.js"></script>
-    <script src="components/dashboard.component.js"></script>
-    <script src="components/controls-sidebar.component.js"></script>
-    <script src="components/control-board.component.js"></script>
-    <script src="components/add-control-type.component.js"></script>
-    <script src="components/control-types-list.component.js"></script>
-    <script src="components/new-employee.component.js"></script>
-    <script src="components/employees-list.component.js"></script>
+    <script src="/app.module.js"></script>
+    <script src="/services/notification.service.js"></script>
+    <script src="/services/auth.service.js"></script>
+    <script src="/services/api.service.js"></script>
+    <script src="/components/navbar.component.js"></script>
+    <script src="/components/login.component.js"></script>
+    <script src="/components/dashboard.component.js"></script>
+    <script src="/components/controls-sidebar.component.js"></script>
+    <script src="/components/controls-view.component.js"></script>
+    <script src="/components/control-board.component.js"></script>
+    <script src="/components/add-control-type.component.js"></script>
+    <script src="/components/control-types-list.component.js"></script>
+    <script src="/components/new-employee.component.js"></script>
+    <script src="/components/employees-list.component.js"></script>
+    <script src="/components/profile.component.js"></script>
+    <script src="/components/access-denied.component.js"></script>
 
 </body>
 </html>

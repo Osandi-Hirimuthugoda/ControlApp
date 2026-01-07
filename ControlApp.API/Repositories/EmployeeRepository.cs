@@ -14,6 +14,7 @@ namespace ControlApp.API.Repositories
         {
             return await _dbSet
                 .Include(e => e.Type)
+                .Include(e => e.User)
                 .ToListAsync();
         }
 
@@ -21,6 +22,7 @@ namespace ControlApp.API.Repositories
         {
             return await _dbSet
                 .Include(e => e.Type)
+                .Include(e => e.User)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 

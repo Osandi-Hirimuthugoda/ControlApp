@@ -123,6 +123,104 @@ namespace ControlApp.API.Services
                 .AnyAsync(u => u.Username == username || u.Email == email);
         }
 
+        public async Task<bool> UpdateEmailAsync(int userId, UpdateEmailDto updateEmailDto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                // Verify current password
+                if (!BCrypt.Net.BCrypt.Verify(updateEmailDto.CurrentPassword, user.PasswordHash))
+                {
+                    return false;
+                }
+
+                // Check if new email already exists
+                var emailExists = await _context.Users
+                    .AnyAsync(u => u.Email == updateEmailDto.NewEmail && u.Id != userId);
+                
+                if (emailExists)
+                {
+                    throw new ArgumentException("Email already exists. Please use a different email.");
+                }
+
+                // Update email and username (username is same as email)
+                user.Email = updateEmailDto.NewEmail.Trim().ToLower();
+                user.Username = updateEmailDto.NewEmail.Trim().ToLower();
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("User {UserId} updated email to {NewEmail}", userId, updateEmailDto.NewEmail);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating email for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, UpdatePasswordDto updatePasswordDto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                // Verify current password
+                if (!BCrypt.Net.BCrypt.Verify(updatePasswordDto.CurrentPassword, user.PasswordHash))
+                {
+                    return false;
+                }
+
+                // Hash new password
+                var newPasswordHash = BCrypt.Net.BCrypt.HashPassword(updatePasswordDto.NewPassword);
+                user.PasswordHash = newPasswordHash;
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("User {UserId} updated password", userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating password for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdatePhoneNumberAsync(int userId, UpdatePhoneNumberDto updatePhoneNumberDto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                // Update phone number
+                user.PhoneNumber = updatePhoneNumberDto.PhoneNumber.Trim();
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("User {UserId} updated phone number", userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating phone number for user {UserId}", userId);
+                throw;
+            }
+        }
+
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");

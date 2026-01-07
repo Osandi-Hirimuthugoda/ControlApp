@@ -5,6 +5,10 @@
       "PackagePath": "staticwebassets\\app.module.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\access-denied.component.js",
+      "PackagePath": "staticwebassets\\components\\access-denied.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\add-control-type.component.js",
       "PackagePath": "staticwebassets\\components\\add-control-type.component.js"
     },
@@ -23,6 +27,10 @@
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-sidebar.component.js",
       "PackagePath": "staticwebassets\\components\\controls-sidebar.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-view.component.js",
+      "PackagePath": "staticwebassets\\components\\controls-view.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\dashboard.component.js",
@@ -49,6 +57,10 @@
       "PackagePath": "staticwebassets\\components\\new-employee.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\profile.component.js",
+      "PackagePath": "staticwebassets\\components\\profile.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",
       "PackagePath": "staticwebassets\\index.html"
     },
@@ -67,6 +79,10 @@
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
       "PackagePath": "staticwebassets\\styles.css"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\templates\\controls-view.html",
+      "PackagePath": "staticwebassets\\templates\\controls-view.html"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ControlApp.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

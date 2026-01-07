@@ -1,199 +1,236 @@
 app.component('addControlType', {
     template: `
     <div class="card shadow-sm">
-        <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 1.25rem 1.5rem;">
-            <h5 class="mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i>Add Control Type</h5>
+        <div class="card-header"
+             style="background: linear-gradient(135deg,#3b82f6,#2563eb);
+                    color:white; padding:1.25rem 1.5rem;">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-plus-circle me-2"></i>Add Control & Assign Owner
+            </h5>
         </div>
+
         <div class="card-body">
-            <form name="addTypeForm" ng-submit="$ctrl.addControlType($event)" novalidate>
+            <!-- Form -->
+            <form name="addTypeForm" ng-submit="$ctrl.addControlType(addTypeForm)" novalidate>
+
+                <!-- 1. Type Name -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Controller Type Name: <span class="text-danger">*</span></label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="typeName"
-                           ng-model="$ctrl.newControlType.typeName" 
-                           placeholder="e.g., L3, CR" 
-                           required
-                           ng-class="{'is-invalid': addTypeForm.typeName.$invalid && addTypeForm.typeName.$touched}">
-                    <div class="invalid-feedback" ng-if="addTypeForm.typeName.$invalid && addTypeForm.typeName.$touched">
-                        Type Name is required
-                    </div>
+                    <label class="form-label fw-bold">Controller Type Name *</label>
+                    <input type="text"
+                           class="form-control"
+                           ng-model="$ctrl.newControlType.typeName"
+                           placeholder="e.g. L3, CR"
+                           required>
                 </div>
+
+                <!-- 2. Description -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Description: <span class="text-danger">*</span></label>
-                    <textarea class="form-control" 
-                              name="description"
-                              ng-model="$ctrl.newControlType.description" 
-                              placeholder="Enter description..." 
+                    <label class="form-label fw-bold">Description *</label>
+                    <textarea class="form-control"
                               rows="3"
-                              required
-                              ng-class="{'is-invalid': addTypeForm.description.$invalid && addTypeForm.description.$touched}"></textarea>
-                    <div class="invalid-feedback" ng-if="addTypeForm.description.$invalid && addTypeForm.description.$touched">
-                        Description is required
-                    </div>
+                              ng-model="$ctrl.newControlType.description"
+                              placeholder="Enter control task details..."
+                              required></textarea>
                 </div>
+
+                <!-- 3. Assign Employee (Owner) -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Release:</label>
-                    <select class="form-select" 
-                            ng-model="$ctrl.selectedReleaseId" 
+                    <label class="form-label fw-bold">Assign Employee (Owner)</label>
+                    <!-- Only show registered employees (those with User accounts) -->
+                    <select class="form-select"
+                            ng-model="$ctrl.assignedEmployeeId"
+                            ng-options="e.id as $ctrl.formatEmployeeOption(e) for e in $ctrl.getRegisteredEmployees()">
+                        <option value="">-- Select Registered Employee (Optional) --</option>
+                    </select>
+                    <small class="text-muted">Only employees with registered accounts are shown. Leave empty to add control type only.</small>
+                </div>
+
+                <!-- 4. Release Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Release</label>
+                    <select class="form-select"
+                            ng-model="$ctrl.selectedReleaseId"
                             ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
                             ng-change="$ctrl.onReleaseChange()">
                         <option value="">-- Select Release --</option>
                     </select>
                 </div>
+
+                <!-- 5. Release Date -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Release Date:</label>
-                    <input type="date" class="form-control" ng-model="$ctrl.newControlType.releaseDate">
+                    <label class="form-label fw-bold">Release Date</label>
+                    <input type="date"
+                           class="form-control"
+                           ng-model="$ctrl.newControlType.releaseDate">
                 </div>
-                <button type="submit" 
-                        class="btn btn-info w-100" 
+
+                <!-- Submit Button -->
+                <!--  $invalid  -->
+                <button class="btn btn-primary w-100 shadow-sm"
+                        type="submit"
                         ng-disabled="$ctrl.isSaving || addTypeForm.$invalid">
-                    <span ng-if="!$ctrl.isSaving"><i class="fas fa-plus me-2"></i>Add Type</span>
-                    <span ng-if="$ctrl.isSaving"><i class="fas fa-spinner fa-spin me-2"></i>Adding...</span>
+                    <span ng-if="!$ctrl.isSaving">
+                        <i class="fas fa-save me-2"></i>Add and Assign to Board
+                    </span>
+                    <span ng-if="$ctrl.isSaving">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Processing...
+                    </span>
                 </button>
+                
+                <!-- Debugging  Form Invalid -->
+                <p class="text-danger small mt-2" ng-if="addTypeForm.$invalid">* Please fill all required fields.</p>
+
             </form>
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope, $scope) {
+
+    controller: function(ApiService, NotificationService, $rootScope, $scope, $timeout) {
         var ctrl = this;
         ctrl.store = ApiService.data;
-        ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
+
+        // Models
+        ctrl.newControlType = { typeName:'', description:'', releaseDate:null };
+        ctrl.assignedEmployeeId = null;
         ctrl.selectedReleaseId = null;
         ctrl.isSaving = false;
 
-        ctrl.formatReleaseName = function(release) {
-            if(!release) return '';
-            if(release.releaseName) return release.releaseName;
-            var date = new Date(release.releaseDate);
-            var day = ('0' + date.getDate()).slice(-2);
-            var month = ('0' + (date.getMonth() + 1)).slice(-2);
-            return 'Release ' + day + '.' + month;
+        // Get only registered employees 
+        ctrl.getRegisteredEmployees = function() {
+            if(!ctrl.store.employees) return [];
+            // Filter employees that have email 
+            return ctrl.store.employees.filter(function(emp) {
+                return emp.email && emp.email.trim() !== '';
+            });
+        };
+
+        // Format employee option display with role
+        ctrl.formatEmployeeOption = function(employee) {
+            var name = employee.employeeName || 'Unknown';
+            var role = employee.role || 'No Role';
+            return name + ' (' + role + ')';
+        };
+
+        ctrl.formatReleaseName = function(r) {
+            if(!r) return '';
+            return r.releaseName || ('Release ' + r.releaseDate);
         };
 
         ctrl.onReleaseChange = function() {
-            if(ctrl.selectedReleaseId) {
-                var selectedRelease = ctrl.store.upcomingReleases.find(function(r) {
-                    return r.releaseId === ctrl.selectedReleaseId;
-                });
-                if(selectedRelease && selectedRelease.releaseDate) {
-                    var releaseDate = new Date(selectedRelease.releaseDate);
-                    ctrl.newControlType.releaseDate = releaseDate.toISOString().split('T')[0];
-                }
-            } else {
-                ctrl.newControlType.releaseDate = null;
+            var rel = ctrl.store.upcomingReleases.find(r => r.releaseId === ctrl.selectedReleaseId);
+            if (rel && rel.releaseDate) {
+                ctrl.newControlType.releaseDate = new Date(rel.releaseDate);
             }
         };
 
-        ctrl.addControlType = function(event) {
-            if(event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            
-            console.log('Add control type called', ctrl.newControlType);
-            
-            // Validate 
-            if(!ctrl.newControlType || !ctrl.newControlType.typeName || ctrl.newControlType.typeName.trim() === '') {
-                NotificationService.show('Type Name is required', 'error');
+        ctrl.addControlType = function(form) {
+            // Validate manually even if button is clicked
+            if(form.$invalid) {
+                NotificationService.show('Please fill all required fields correctly.', 'error');
                 return;
-            }
-
-            if(!ctrl.newControlType.description || ctrl.newControlType.description.trim() === '') {
-                NotificationService.show('Description is required', 'error');
-                return;
-            }
-
-            
-            var trimmedName = ctrl.newControlType.typeName.trim().toLowerCase();
-            var trimmedDescription = ctrl.newControlType.description.trim().toLowerCase();
-            
-            var duplicateType = ctrl.store.controlTypes.find(function(t) {
-                var existingName = t.typeName ? t.typeName.trim().toLowerCase() : '';
-                var existingDescription = t.description ? t.description.trim().toLowerCase() : '';
-                return existingName === trimmedName && existingDescription === trimmedDescription;
-            });
-            
-            if(duplicateType) {
-                NotificationService.show('A control type with the name "' + ctrl.newControlType.typeName.trim() + '" and description "' + ctrl.newControlType.description.trim() + '" already exists. Please use a different description.', 'error');
-                return; 
             }
 
             ctrl.isSaving = true;
-            
-            
-            var releaseDate = null;
-            if(ctrl.newControlType.releaseDate) {
-                if(typeof ctrl.newControlType.releaseDate === 'string') {
-                    
-                    releaseDate = new Date(ctrl.newControlType.releaseDate + 'T00:00:00').toISOString();
-                } else if(ctrl.newControlType.releaseDate instanceof Date) {
-                    
-                    releaseDate = ctrl.newControlType.releaseDate.toISOString();
-                } else {
-                    releaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
-                }
+
+            var formattedDate = null;
+            if (ctrl.newControlType.releaseDate) {
+                formattedDate = new Date(ctrl.newControlType.releaseDate).toISOString();
             }
-            
-            var payload = {
+
+            var typePayload = {
                 typeName: ctrl.newControlType.typeName.trim(),
                 description: ctrl.newControlType.description.trim(),
-                releaseDate: releaseDate
+                releaseDate: formattedDate
             };
-            
-            console.log('Sending payload:', payload);
-            
-            ApiService.addControlType(payload).then(function(addedType) {
-                console.log('Control type added successfully:', addedType);
-                NotificationService.show('Control Type "' + payload.typeName + '" Added Successfully!', 'success');
-                
-                
-                ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
-                ctrl.selectedReleaseId = null;
-                
-                
-                if($scope.addTypeForm) {
-                    $scope.addTypeForm.$setPristine();
-                    $scope.addTypeForm.$setUntouched();
-                }
-                
-                
-                ApiService.loadControlTypes().then(function(types) {
-                    console.log('Control types reloaded after add, count:', types.length);
+
+            // 1. Add Control Type
+            ApiService.addControlType(typePayload)
+                .then(function(addedType) {
                     
-                    if(!$scope.$$phase && !$rootScope.$$phase) {
-                        $scope.$apply();
+                    var typeId = addedType.controlTypeId || addedType.id;
+
+                    if (!typeId) {
+                        throw new Error("Control Type ID not returned from server.");
                     }
+
+                    // 2. Add Control to Board only if employee is assigned
+                    if (ctrl.assignedEmployeeId) {
+                        
+                        var controlReleaseDate = null;
+                        if (ctrl.newControlType.releaseDate) {
+                           
+                            controlReleaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
+                        } else if (addedType.releaseDate) {
+                            
+                            controlReleaseDate = addedType.releaseDate;
+                        }
+                        
+                        var controlPayload = {
+                            typeId: typeId,
+                            employeeId: ctrl.assignedEmployeeId,
+                            description: addedType.description,
+                            statusId: 1, 
+                            progress: 0,
+                            comments: 'Initial assignment',
+                            releaseDate: controlReleaseDate
+                        };
+
+                        return ApiService.addControl(controlPayload).then(function() {
+                            return 'Control added to Board.';
+                        });
+                    } else {
+                        // No employee assigned, just return success message
+                        return Promise.resolve('Control type added. No control created (no employee assigned).');
+                    }
+                })
+                .then(function(message) {
+                    // Toast success
+                    NotificationService.show('Success! ' + message, 'success');
+
+                    // Popup success
+                    if (message && message.indexOf('Control added to Board') !== -1) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Control Added',
+                            text: 'The control has been added to the board successfully.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+
+                    // Reset Form
+                    ctrl.newControlType = { typeName:'', description:'', releaseDate:null };
+                    ctrl.assignedEmployeeId = null;
+                    ctrl.selectedReleaseId = null;
                     
-                    
+                    if(form) {
+                        form.$setPristine();
+                        form.$setUntouched();
+                    }
+
+                    // Refresh data
+                    return ApiService.loadAllControls();
+                })
+                .then(function() {
                     $rootScope.$broadcast('controlTypesUpdated');
+                    $rootScope.$broadcast('controlsUpdated');
+                })
+                .catch(function(err) {
+                    console.error("Error Details:", err);
+                    var msg = "Error: ";
+                    if (err.status === 404) msg += "API Endpoint not found (404).";
+                    else msg += (err.data && err.data.message) ? err.data.message : "Save failed.";
+                    NotificationService.show(msg, 'error');
+                })
+                .finally(function() {
+                    ctrl.isSaving = false;
                 });
-                
-            }).catch(function(error) {
-                console.error('Error adding control type:', error);
-                var errorMsg = 'Error adding control type';
-                
-                
-                if(error && error.data) {
-                    if(typeof error.data === 'string') {
-                        errorMsg = error.data;
-                    } else if(error.data.message) {
-                        errorMsg = error.data.message;
-                    } else if(error.data.title) {
-                        errorMsg = error.data.title;
-                    } else if(Array.isArray(error.data) && error.data.length > 0) {
-                        errorMsg = error.data[0];
-                    }
-                } else if(error && error.statusText) {
-                    errorMsg = 'Error: ' + error.statusText;
-                } else if(error && error.message) {
-                    errorMsg = error.message;
-                }
-                
-                NotificationService.show(errorMsg, 'error');
-            }).finally(function() { 
-                ctrl.isSaving = false; 
-            });
+        };
+
+        ctrl.$onInit = function() {
+            ApiService.loadControlTypes();
+            if (ApiService.loadEmployees) {
+                ApiService.loadEmployees();
+            }
         };
     }
 });

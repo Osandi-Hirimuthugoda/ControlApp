@@ -1,6 +1,1 @@
-@ControlApp.API_HostAddress = http://localhost:5088/swagger/index.html
-
-GET {{ControlApp.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
+ 

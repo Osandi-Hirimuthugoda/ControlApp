@@ -1,4 +1,4 @@
-var app = angular.module('controlApp', []);
+var app = angular.module('controlApp', ['ngRoute']);
 
 // HTTP Interceptor to add JWT token to all requests and handle 401 errors
 app.factory('AuthInterceptor', function($window, $q, $rootScope) {
@@ -28,31 +28,125 @@ app.config(function($httpProvider) {
     $httpProvider.interceptors.push('AuthInterceptor');
 });
 
-app.controller('MainController', function($rootScope, AuthService) {
+// Configure Routing
+app.config(function($routeProvider, $locationProvider) {
+    $routeProvider
+        .when('/login', {
+            template: '<login-component></login-component>'
+        })
+        .when('/dashboard', {
+            template: '<dashboard></dashboard>',
+            resolve: {
+                auth: function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }  
+        })
+        .when('/profile', {
+            template: '<profile-component></profile-component>',
+            resolve: {
+                auth: function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .when('/controls', {
+            template: '<controls-view></controls-view>',
+            resolve: {
+                auth: function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .when('/controls/:section', {
+            template: '<controls-view></controls-view>',
+            resolve: {
+                auth: function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .when('/access-denied/:section?', {
+            template: '<access-denied></access-denied>',
+            resolve: {
+                auth: function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .otherwise({
+            redirectTo: '/login'
+        });
+    
+    // Enable HTML5 mode (no hash in URLs)
+    $locationProvider.html5Mode(true);
+});
+
+app.controller('MainController', function($rootScope, AuthService, $location, $routeParams, $route) {
     var vm = this;
     
-    // Always start with login page when URL is first loaded
-    vm.currentView = 'login';
+    // Check authentication on route change
+    $rootScope.$on('$routeChangeStart', function(event, next, current) {
+        // Allow login page without authentication
+        if (next && next.$$route && next.$$route.originalPath === '/login') {
+            return;
+        }
+        
+        // Redirect to login if not authenticated
+        if (!AuthService.isAuthenticated()) {
+            event.preventDefault();
+            $location.path('/login');
+        }
+    });
     
-    // Listen for view changes with authentication check
+    // Listen for view changes with routing
     var listener = $rootScope.$on('viewChanged', function(event, view) {
         // Protect routes - redirect to login if not authenticated
         if (view !== 'login' && !AuthService.isAuthenticated()) {
-            vm.currentView = 'login';
+            $location.path('/login');
             return;
         }
-        vm.currentView = view;
+        
+        // Map view names to routes
+        var routeMap = {
+            'login': '/login',
+            'dashboard': '/dashboard',
+            'profile': '/profile',
+            'controls': '/controls'
+        };
+        
+        if (routeMap[view]) {
+            $location.path(routeMap[view]);
+        }
     });
     
     // Listen for authentication events
     var authListener = $rootScope.$on('userLoggedIn', function() {
-        if (vm.currentView === 'login') {
-            vm.currentView = 'controls';
+        var currentPath = $location.path();
+        if (currentPath === '/login' || currentPath === '/' || currentPath === '') {
+            $location.path('/controls');
         }
     });
     
     var logoutListener = $rootScope.$on('userLoggedOut', function() {
-        vm.currentView = 'login';
+        $location.path('/login');
+    });
+    
+    // Handle route changes for controls section on initial load
+    $rootScope.$on('$routeChangeSuccess', function(event, current) {
+        if (current && current.params && current.params.section) {
+            $rootScope.$broadcast('controlsSectionChanged', current.params.section);
+        }
     });
     
     // Cleanup on scope destroy
@@ -60,20 +154,6 @@ app.controller('MainController', function($rootScope, AuthService) {
         listener();
         authListener();
         logoutListener();
-    });
-});
-
-// Controls View Controller for Section Switching
-app.controller('ControlsViewController', function($rootScope) {
-    var vm = this;
-    vm.currentSection = 'controls';
-    
-    var listener = $rootScope.$on('controlsSectionChanged', function(event, section) {
-        vm.currentSection = section;
-    });
-    
-    $rootScope.$on('$destroy', function() {
-        listener();
     });
 });
 

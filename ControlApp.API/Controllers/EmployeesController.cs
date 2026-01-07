@@ -17,6 +17,7 @@ namespace ControlApp.API.Controllers
             _employeeService = employeeService;
         }
 
+        // GET: api/employees
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAllEmployees()
         {
@@ -31,7 +32,8 @@ namespace ControlApp.API.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        // GET: api/employees/{id}
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeById(int id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
@@ -41,9 +43,44 @@ namespace ControlApp.API.Controllers
             return Ok(employee);
         }
 
-        
+        // POST: api/employees/register
+        [HttpPost("register")]
+        // Allow both Admin and Project Manager to register employees
+        [Authorize(Roles = "Admin,Project Manager")]
+        public async Task<ActionResult<EmployeeDto>> RegisterEmployee([FromBody] RegisterEmployeeWithUserDto registerDto)
+        {
+            try
+            {
+                if (registerDto == null)
+                    return BadRequest(new { message = "Employee registration data is required." });
+
+                if (string.IsNullOrWhiteSpace(registerDto.EmployeeName))
+                    return BadRequest(new { message = "Employee name is required." });
+
+                if (string.IsNullOrWhiteSpace(registerDto.Email))
+                    return BadRequest(new { message = "Email is required." });
+
+                if (string.IsNullOrWhiteSpace(registerDto.Password))
+                    return BadRequest(new { message = "Password is required." });
+
+                var employee = await _employeeService.RegisterEmployeeWithUserAsync(registerDto);
+                
+                return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error registering employee: {ex.Message}" });
+            }
+        }
+
+        // POST: api/employees
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        // Admin, Software Architecture, and Team Lead can create employees (non-registered flow)
+        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee([FromBody] CreateEmployeeWithControlDto createDto)
         {
             try
@@ -68,8 +105,10 @@ namespace ControlApp.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        // PUT: api/employees/{id}
+        [HttpPut("{id:int}")]
+        // Admin, Software Architecture, and Team Lead can update employees
+        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
         public async Task<ActionResult<EmployeeDto>> UpdateEmployee(int id, [FromBody] CreateEmployeeDto updateEmployeeDto)
         {
             var employee = await _employeeService.UpdateEmployeeAsync(id, updateEmployeeDto);
@@ -79,8 +118,10 @@ namespace ControlApp.API.Controllers
             return Ok(employee);
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        // DELETE: api/employees/{id}
+        [HttpDelete("{id:int}")]
+        // Admin, Software Architecture, and Team Lead can delete employees
+        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             try

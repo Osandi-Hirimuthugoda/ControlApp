@@ -35,7 +35,8 @@ namespace ControlApp.API
                 entity.HasOne(c => c.Employee)
                     .WithMany(e => e.Controls)
                     .HasForeignKey(c => c.EmployeeId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne(c => c.Status)
                     .WithMany(s => s.Controls)

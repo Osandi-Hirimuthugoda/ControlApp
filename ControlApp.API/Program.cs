@@ -9,6 +9,7 @@ using ControlApp.API.Repositories;
 using ControlApp.API.Services;
 using ControlApp.API.Models;
 using System.Text.Json;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,7 +102,9 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = issuer,
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        // Map role claims correctly so [Authorize(Roles = "...")] works with JWT
+        RoleClaimType = ClaimTypes.Role
     };
 });
 
@@ -216,9 +219,23 @@ static void InitializeDatabase(WebApplication app)
         // Comment this line out after running once to prevent accidental deletions
         //context.Database.EnsureDeleted(); //delete old db - TEMPORARY, comment out after use
         
-        // Ensure database is created
-        context.Database.EnsureCreated();
-        logger.LogInformation("Database initialized successfully");
+        // Apply migrations to ensure database schema is up to date
+        // This preserves existing data unlike EnsureCreated()
+        try
+        {
+            context.Database.Migrate();
+            logger.LogInformation("Database migrations applied successfully");
+        }
+        catch (Exception migrationEx)
+        {
+            logger.LogWarning(migrationEx, "Migration failed, attempting EnsureCreated as fallback");
+            // Fallback to EnsureCreated if migrations fail (for initial setup)
+            if (!context.Database.CanConnect())
+            {
+                context.Database.EnsureCreated();
+                logger.LogInformation("Database created using EnsureCreated");
+            }
+        }
         
         // Clean up duplicate control types
         CleanupDuplicateControlTypes(context, logger);
@@ -253,26 +270,38 @@ static void CleanupDuplicateControlTypes(AppDbContext context, ILogger logger)
     
     context.SaveChanges();
     
-    // Remove invalid control types (not L3 or CR)
+    // Remove invalid control types (not L3 or CR) - but ONLY if they are not being used
     var updatedControlTypes = context.ControlTypes.ToList();
     var finalL3 = updatedControlTypes.FirstOrDefault(t => t.TypeName == "L3");
     var finalCR = updatedControlTypes.FirstOrDefault(t => t.TypeName == "CR");
     
-    var invalidTypes = updatedControlTypes
+    // Get all control types that are not L3 or CR
+    var otherTypes = updatedControlTypes
         .Where(t => t.TypeName != "L3" && t.TypeName != "CR")
         .ToList();
     
-    foreach (var invalidType in invalidTypes)
+    // Only remove types that are NOT being used by any controls or employees
+    foreach (var otherType in otherTypes)
     {
-        var defaultType = finalCR ?? finalL3;
-        if (defaultType != null)
-        {
-            // Reassign controls and employees to default type
-            ReassignReferences(context, invalidType.ControlTypeId, defaultType.ControlTypeId);
-        }
+        // Check if this type is being used by any controls
+        var isUsedByControls = context.Set<Controls>()
+            .Any(c => c.TypeId == otherType.ControlTypeId);
         
-        context.ControlTypes.Remove(invalidType);
-        logger.LogInformation("Removed invalid control type: {TypeName}", invalidType.TypeName);
+        // Check if this type is being used by any employees
+        var isUsedByEmployees = context.Set<Employee>()
+            .Any(e => e.TypeId == otherType.ControlTypeId);
+        
+        // Only remove if not being used
+        if (!isUsedByControls && !isUsedByEmployees)
+        {
+            context.ControlTypes.Remove(otherType);
+            logger.LogInformation("Removed unused control type: {TypeName}", otherType.TypeName);
+        }
+        else
+        {
+            logger.LogInformation("Keeping control type {TypeName} as it is in use (Controls: {HasControls}, Employees: {HasEmployees})", 
+                otherType.TypeName, isUsedByControls, isUsedByEmployees);
+        }
     }
 }
 

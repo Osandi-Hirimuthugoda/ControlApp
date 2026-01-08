@@ -11,8 +11,8 @@ app.component('controlsSidebar', {
 
             <hr class="sidebar-divider">
 
-            <!-- Add Employee -->
-            <button class="sidebar-btn" 
+            <!-- Add Employee (everyone can see; access checked on click) -->
+            <button class="sidebar-btn"
                     ng-class="{'active': $ctrl.currentSection === 'newEmployee'}" 
                     ng-click="$ctrl.switchSection('newEmployee')">
                 <i class="fas fa-user-plus me-2"></i>Add Employee
@@ -66,7 +66,7 @@ app.component('controlsSidebar', {
         
         /**
          * Checks if user can add employees
-         * (Only Admin; Developer / QA Engineer / Intern are view-only)
+         * (Only Admin and Project Manager; Developer / QA Engineer / Intern are view-only)
          */
         ctrl.canAddEmployee = function() {
             return AuthService.canAddEmployee();
@@ -150,7 +150,7 @@ app.component('controlsSidebar', {
                 case 'controlTypes':
                     return true; // Everyone can view control types
                 case 'newEmployee':
-                    return AuthService.canAddEmployee(); // Admin only
+                    return AuthService.canAddEmployee(); // Admin & Project Manager
                 case 'employees':
                     return true; // Everyone can view employees
                 default:
@@ -192,8 +192,8 @@ app.component('controlsSidebar', {
                 'addControlType': ['Admin', 'Team Lead', 'Software Architecture'],
                 // Control List (everyone can view)
                 'controlTypes': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern'],
-                // Add Employee (Admin only)
-                'newEmployee': ['Admin'],
+                // Add Employee (Admin & Project Manager)
+                'newEmployee': ['Admin', 'Project Manager'],
                 // Employees List (everyone can view)
                 'employees': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern']
             };

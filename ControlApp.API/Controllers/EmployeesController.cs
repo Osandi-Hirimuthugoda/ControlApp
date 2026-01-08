@@ -79,8 +79,8 @@ namespace ControlApp.API.Controllers
 
         // POST: api/employees
         [HttpPost]
-        // Admin, Software Architecture, and Team Lead can create employees (non-registered flow)
-        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
+        // Only Admin and Project Manager can create employees (non-registered flow)
+        [Authorize(Roles = "Admin,Project Manager")]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee([FromBody] CreateEmployeeWithControlDto createDto)
         {
             try

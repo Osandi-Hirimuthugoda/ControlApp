@@ -9,7 +9,7 @@ namespace ControlApp.API.DTOs
         public string? Comments { get; set; }
         public int TypeId { get; set; }
         public string? TypeName { get; set; }
-        public int EmployeeId { get; set; }
+        public int? EmployeeId { get; set; }
         public string? EmployeeName { get; set; }
         public int? StatusId { get; set; }
         public string? StatusName { get; set; }
@@ -28,9 +28,8 @@ namespace ControlApp.API.DTOs
         [Range(1, int.MaxValue, ErrorMessage = "TypeId must be greater than 0")]
         public int TypeId { get; set; }
         
-        [Required(ErrorMessage = "EmployeeId is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "EmployeeId must be greater than 0")]
-        public int EmployeeId { get; set; }
+        // EmployeeId is optional - can be assigned later
+        public int? EmployeeId { get; set; }
         
         public int? StatusId { get; set; }
         public int? ReleaseId { get; set; }

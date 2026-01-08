@@ -18,7 +18,7 @@ namespace ControlApp.API.Models
 
         
         public int TypeId { get; set; }
-        public int EmployeeId { get; set; }
+        public int? EmployeeId { get; set; }
         
         
         public int? StatusId { get; set; }

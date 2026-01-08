@@ -302,6 +302,7 @@ namespace ControlApp.API.Services
                 Id = employee.Id,
                 EmployeeName = employee.EmployeeName,
                 Email = employee.User?.Email ?? string.Empty,
+                PhoneNumber = employee.User?.PhoneNumber,
                 Role = employee.User?.Role ?? string.Empty,
                 TypeId = employee.TypeId,
                 TypeName = employee.Type?.TypeName,

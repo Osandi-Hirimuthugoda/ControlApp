@@ -7,8 +7,8 @@ namespace ControlApp.API.DTOs
         [Required]
         public int ControlId { get; set; } 
         
-        [Required]
-        public int EmployeeId { get; set; } 
+        // EmployeeId is optional - can be null for controls without assigned employees
+        public int? EmployeeId { get; set; } 
 
         public int? TypeId { get; set; }
         public string? Description { get; set; }

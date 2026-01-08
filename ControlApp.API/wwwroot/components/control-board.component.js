@@ -30,7 +30,7 @@ app.component('controlBoard', {
                             <th style="width:8%">Prog %</th> 
                             <th style="width:10%">Status</th>
                             <th style="width:15%">Release</th> 
-                            <th style="width:10%">Action</th>
+                            <th style="width:10%" ng-if="$ctrl.showActionColumn()">Action</th>
                         </tr>
                     </thead>
                     <!-- When All Types is selected, show all controls in one flat list -->
@@ -40,10 +40,17 @@ app.component('controlBoard', {
                             <td>
                                 <div>{{control.description}}</div>
                             </td>
-                            <td><strong>{{$ctrl.getEmployeeName(control.employeeId)}}</strong></td>
+                            <td class="text-start">
+                                <span ng-init="empName = $ctrl.getEmployeeName(control.employeeId)"
+                                      ng-class="{'fw-bold text-danger': empName === 'Unassigned'}">
+                                    {{empName || 'Unassigned'}}
+                                </span>
+                            </td>
                             <td ng-if="!control.editing">
-                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
-                                <div class="input-group input-group-sm">
+                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">
+                                    {{control.comments}}
+                                </div>
+                                <div class="input-group input-group-sm" ng-if="$ctrl.canAddComment()">
                                     <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
                                     <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
                                 </div>
@@ -82,7 +89,7 @@ app.component('controlBoard', {
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" ng-if="$ctrl.showActionColumn()">
                                 <div ng-if="!control.editing" style="white-space: nowrap;">
                                     <button ng-if="$ctrl.canEditControl() && !control.isPlaceholder" 
                                             class="btn btn-sm btn-warning me-1" 
@@ -131,10 +138,17 @@ app.component('controlBoard', {
                             <td>
                                 <div>{{control.description}}</div>
                             </td>
-                            <td><strong>{{$ctrl.getEmployeeName(control.employeeId)}}</strong></td>
+                            <td class="text-start">
+                                <span ng-init="empName = $ctrl.getEmployeeName(control.employeeId)"
+                                      ng-class="{'fw-bold text-danger': empName === 'Unassigned'}">
+                                    {{empName || 'Unassigned'}}
+                                </span>
+                            </td>
                             <td ng-if="!control.editing">
-                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">{{control.comments}}</div>
-                                <div class="input-group input-group-sm">
+                                <div class="mb-1 bg-white border p-1 rounded" style="max-height:80px; overflow-y:auto; font-size:0.8em; white-space:pre-line;">
+                                    {{control.comments}}
+                                </div>
+                                <div class="input-group input-group-sm" ng-if="$ctrl.canAddComment()">
                                     <input type="text" class="form-control" ng-model="control.newProgressComment" placeholder="Add comment..." ng-keyup="$event.keyCode === 13 && $ctrl.addComment(control)">
                                     <button class="btn btn-outline-secondary" ng-click="$ctrl.addComment(control)">+</button>
                                 </div>
@@ -173,7 +187,7 @@ app.component('controlBoard', {
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" ng-if="$ctrl.showActionColumn()">
                                 <div ng-if="!control.editing" style="white-space: nowrap;">
                                     <button ng-if="$ctrl.canEditControl() && !control.isPlaceholder" 
                                             class="btn btn-sm btn-warning me-1" 
@@ -233,6 +247,22 @@ app.component('controlBoard', {
         
         ctrl.canDeleteControl = function() {
             return AuthService.canDeleteControl();
+        };
+
+        // Only Admin, Team Lead, Software Architecture can add progress comments
+        ctrl.canAddComment = function() {
+            return AuthService.canMarkProgress();
+        };
+
+        // Show/hide Action column (hide for view-only roles like Developers / QA Engineers / Interns)
+        ctrl.showActionColumn = function() {
+            try {
+                // View-only roles should not see the Action column
+                return !AuthService.isViewOnly();
+            } catch (e) {
+                console.error('Error determining if Action column should be shown:', e);
+                return true;
+            }
         };
         
         // Store admin status for better performance
@@ -588,7 +618,7 @@ app.component('controlBoard', {
 
         ctrl.getAllControls = function() {
             if(!ctrl.store.allControls) ctrl.store.allControls = [];
-            if(!ctrl.store.employees) return [];
+            if(!ctrl.store.employees) ctrl.store.employees = [];
             
             // For \"All Types\" view we want, for each employee, one row per TYPE,
             // but not multiple rows for the same (employee, type) pair.
@@ -597,8 +627,9 @@ app.component('controlBoard', {
             var employeeTypeMap = new Map();     // key: employeeId|typeId -> control
             
             ctrl.store.allControls.forEach(function(c) {
-                // Skip controls without employeeId or without a valid controlId (not assigned)
-                if(!c.employeeId || !c.controlId) return;
+                // Skip controls without a valid controlId (not assigned)
+                // But allow controls without employeeId to show (they can be assigned later)
+                if(!c.controlId) return;
                 
                 // Deduplicate by controlId first (safety)
                 var controlIdKey = String(c.controlId);
@@ -628,7 +659,9 @@ app.component('controlBoard', {
                 }
                 
                 // Key per (employee, type) so the same type for same employee appears only once
-                var empTypeKey = String(c.employeeId) + '|' + String(c.typeId);
+                // Use 'null' for employeeId if it doesn't exist
+                var empId = c.employeeId || 'null';
+                var empTypeKey = String(empId) + '|' + String(c.typeId);
                 if(!employeeTypeMap.has(empTypeKey)) {
                     employeeTypeMap.set(empTypeKey, c);
                 } else {
@@ -682,7 +715,7 @@ app.component('controlBoard', {
 
         ctrl.getControlsByType = function(typeId) {
             if(!ctrl.store.allControls) ctrl.store.allControls = [];
-            if(!ctrl.store.employees) return [];
+            if(!ctrl.store.employees) ctrl.store.employees = [];
             
             // We want to show ALL controls for this type (not just one per employee)
             // but still avoid true duplicates by controlId.
@@ -690,8 +723,9 @@ app.component('controlBoard', {
             var result = [];
             
             ctrl.store.allControls.forEach(function(c) {
-                // Skip controls without employeeId or without a valid controlId (not assigned)
-                if(!c.employeeId || !c.controlId) return;
+                // Skip controls without a valid controlId (not assigned)
+                // But allow controls without employeeId to show
+                if(!c.controlId) return;
                 
                 // Filter by typeId - must match the type we're looking for
                 if(c.typeId != typeId) return;

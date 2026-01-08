@@ -4,6 +4,7 @@ using ControlApp.API.Models;
 using ControlApp.API.Repositories;
 using ControlApp.API;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace ControlApp.API.Services
 {
@@ -11,11 +12,13 @@ namespace ControlApp.API.Services
     {
         private readonly IControlRepository _controlRepository;
         private readonly AppDbContext _context;
+        private readonly ILogger<ControlService> _logger;
 
-        public ControlService(IControlRepository controlRepository, AppDbContext context)
+        public ControlService(IControlRepository controlRepository, AppDbContext context, ILogger<ControlService> logger)
         {
             _controlRepository = controlRepository;
             _context = context;
+            _logger = logger;
         }
     
         public async Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null)
@@ -32,11 +35,34 @@ namespace ControlApp.API.Services
 
         public async Task<ControlDto> CreateControlAsync(CreateControlDto createControlDto)
         {
-            var typeExists = await _context.Set<ControlType>().AnyAsync(t => t.ControlTypeId == createControlDto.TypeId);
-            var employeeExists = await _context.Set<Employee>().AnyAsync(e => e.Id == createControlDto.EmployeeId);
+            _logger.LogInformation("CreateControlAsync called with TypeId: {TypeId}, EmployeeId: {EmployeeId}", 
+                createControlDto.TypeId, createControlDto.EmployeeId);
 
-            if (!typeExists) throw new ArgumentException($"Invalid Type ID");
-            if (!employeeExists) throw new ArgumentException($"Invalid Employee ID");
+            // Validate TypeId exists
+            var typeExists = await _context.Set<ControlType>().AnyAsync(t => t.ControlTypeId == createControlDto.TypeId);
+            if (!typeExists)
+            {
+                _logger.LogWarning("Invalid TypeId: {TypeId}", createControlDto.TypeId);
+                throw new ArgumentException($"Invalid Type ID: {createControlDto.TypeId}");
+            }
+
+            // Validate EmployeeId exists (if provided)
+            if (createControlDto.EmployeeId.HasValue && createControlDto.EmployeeId.Value > 0)
+            {
+                var employeeExists = await _context.Set<Employee>().AnyAsync(e => e.Id == createControlDto.EmployeeId.Value);
+                if (!employeeExists)
+                {
+                    _logger.LogWarning("Invalid EmployeeId: {EmployeeId}", createControlDto.EmployeeId.Value);
+                    throw new ArgumentException($"Invalid Employee ID: {createControlDto.EmployeeId.Value}");
+                }
+                _logger.LogInformation("EmployeeId validation passed");
+            }
+            else
+            {
+                _logger.LogInformation("No EmployeeId provided - control will be created without employee assignment");
+            }
+
+            _logger.LogInformation("TypeId validation passed");
 
             // Get the control type to retrieve its release date
             var controlType = await _context.Set<ControlType>().FirstOrDefaultAsync(t => t.ControlTypeId == createControlDto.TypeId);
@@ -51,6 +77,7 @@ namespace ControlApp.API.Services
                 if (release != null)
                 {
                     releaseDate = release.ReleaseDate;
+                    _logger.LogInformation("Using release date from Release table: {ReleaseDate}", releaseDate);
                 }
             }
             
@@ -58,6 +85,7 @@ namespace ControlApp.API.Services
             if (!releaseDate.HasValue && controlType?.ReleaseDate.HasValue == true)
             {
                 releaseDate = controlType.ReleaseDate;
+                _logger.LogInformation("Using release date from ControlType: {ReleaseDate}", releaseDate);
             }
 
             var control = new Controls
@@ -65,7 +93,7 @@ namespace ControlApp.API.Services
                 Description = createControlDto.Description,
                 Comments = createControlDto.Comments,
                 TypeId = createControlDto.TypeId,
-                EmployeeId = createControlDto.EmployeeId,
+                EmployeeId = createControlDto.EmployeeId.HasValue && createControlDto.EmployeeId.Value > 0 ? createControlDto.EmployeeId.Value : (int?)null,
                 
                 StatusId = (createControlDto.StatusId.HasValue && createControlDto.StatusId > 0) ? createControlDto.StatusId : null,
                 
@@ -75,9 +103,38 @@ namespace ControlApp.API.Services
                 Progress = createControlDto.Progress
             };
 
-            var createdControl = await _controlRepository.AddAsync(control);
-            var controlWithDetails = await _controlRepository.GetControlWithDetailsByIdAsync(createdControl.ControlId);
-            return controlWithDetails != null ? MapToDto(controlWithDetails) : MapToDto(createdControl);
+            _logger.LogInformation("Creating control entity: TypeId={TypeId}, EmployeeId={EmployeeId}, StatusId={StatusId}, ReleaseId={ReleaseId}, Progress={Progress}", 
+                control.TypeId, control.EmployeeId, control.StatusId, control.ReleaseId, control.Progress);
+
+            try
+            {
+                _logger.LogInformation("Attempting to save control to database: TypeId={TypeId}, EmployeeId={EmployeeId}, Description={Description}", 
+                    control.TypeId, control.EmployeeId, control.Description);
+                
+                var createdControl = await _controlRepository.AddAsync(control);
+                
+                _logger.LogInformation("Control saved to database successfully. ControlId: {ControlId}, EmployeeId: {EmployeeId}", 
+                    createdControl.ControlId, createdControl.EmployeeId);
+                
+                // Verify the control was saved by retrieving it
+                var controlWithDetails = await _controlRepository.GetControlWithDetailsByIdAsync(createdControl.ControlId);
+                if (controlWithDetails == null)
+                {
+                    _logger.LogError("CRITICAL: Control created but could not retrieve details for ID: {ControlId}. Data may not be persisted!", createdControl.ControlId);
+                }
+                else
+                {
+                    _logger.LogInformation("Control verified in database: ControlId={ControlId}, EmployeeId={EmployeeId}", 
+                        controlWithDetails.ControlId, controlWithDetails.EmployeeId);
+                }
+                
+                return controlWithDetails != null ? MapToDto(controlWithDetails) : MapToDto(createdControl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving control to database: {Message}. StackTrace: {StackTrace}", ex.Message, ex.StackTrace);
+                throw new Exception($"Failed to save control to database: {ex.Message}", ex);
+            }
         }
 
         public async Task<ControlDto?> UpdateControlAsync(int id, UpdateControlDto updateControlDto)
@@ -102,7 +159,23 @@ namespace ControlApp.API.Services
 
             control.Description = updateControlDto.Description;
             control.Comments = updateControlDto.Comments;
-            control.EmployeeId = updateControlDto.EmployeeId;
+            
+            // Handle EmployeeId - allow null (controls without assigned employees)
+            if (updateControlDto.EmployeeId.HasValue && updateControlDto.EmployeeId.Value > 0)
+            {
+                // Validate employee exists if provided
+                var employeeExists = await _context.Set<Employee>().AnyAsync(e => e.Id == updateControlDto.EmployeeId.Value);
+                if (!employeeExists)
+                {
+                    throw new ArgumentException($"Invalid Employee ID: {updateControlDto.EmployeeId.Value}");
+                }
+                control.EmployeeId = updateControlDto.EmployeeId.Value;
+            }
+            else
+            {
+                // Set to null if not provided or 0
+                control.EmployeeId = null;
+            }
             
             
             // Handle ReleaseId - only set if it exists in database

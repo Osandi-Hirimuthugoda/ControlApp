@@ -357,7 +357,7 @@ static void EnsureRequiredControlTypes(AppDbContext context, ILogger logger)
     if (!existingTypes.Contains("L3"))
     {
         context.ControlTypes.Add(new ControlType { TypeName = "L3" });
-        logger.LogInformation("Created missing L3 control type");
+        logger.LogInformation("Created missing L3 control Type");
     }
     
     if (!existingTypes.Contains("CR"))

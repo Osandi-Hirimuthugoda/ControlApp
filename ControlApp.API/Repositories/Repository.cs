@@ -28,7 +28,15 @@ namespace ControlApp.API.Repositories
         public virtual async Task<T> AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            
+            // If SaveChangesAsync returns 0, it means no changes were saved
+            // This could indicate a problem, but we'll let the service layer handle logging
+            if (result == 0)
+            {
+                throw new InvalidOperationException($"SaveChangesAsync returned 0 - no changes were saved to database for entity type {typeof(T).Name}");
+            }
+            
             return entity;
         }
 

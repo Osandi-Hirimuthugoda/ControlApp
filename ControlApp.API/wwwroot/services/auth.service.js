@@ -104,8 +104,8 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
     self.canRegisterEmployee = function() {
         // View-only roles cannot register employees
         if (self.isViewOnly()) return false;
-        // Only Admin can register employees
-        return self.isAdmin();
+        // Admin and Project Manager can register employees
+        return self.isAdmin() || self.isProjectManager();
     };
     
     self.canEditControl = function() {

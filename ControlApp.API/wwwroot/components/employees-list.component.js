@@ -13,40 +13,33 @@ app.component('employeesList', {
             </div>
         </div>
         <div class="card-body p-0" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
-            <div class="table-responsive" style="flex: 1; overflow-y: auto;">
-                <table class="table table-hover table-sm mb-0">
-                    <thead class="table-dark sticky-top">
-                        <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 20%">Employee Name</th>
-                            <th style="width: 15%">Type</th>
-                            <th style="width: 35%">Control Description</th>
-                            <th style="width: 10%">Controls Count</th>
-                            <th style="width: 15%" ng-if="$ctrl.canEditEmployee()">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="emp in $ctrl.getFilteredEmployees()">
-                            <!-- View Mode -->
-                            <td ng-if="!emp.editing">{{emp.id}}</td>
-                            <td ng-if="!emp.editing">
-                                <strong>{{emp.employeeName}}</strong>
-                            </td>
-                            <td ng-if="!emp.editing">
-                                <span class="badge bg-secondary">{{$ctrl.getTypeName(emp.typeId)}}</span>
-                            </td>
-                            <td ng-if="!emp.editing">
-                                <span ng-if="$ctrl.getControlDescription(emp.id)" class="text-primary fw-bold">
-                                    {{$ctrl.getControlDescription(emp.id)}}
-                                </span>
-                                <span ng-if="!$ctrl.getControlDescription(emp.id)" class="text-muted">
-                                    {{$ctrl.getDescription(emp.typeId) || 'No control assigned'}}
-                                </span>
-                            </td>
-                            <td ng-if="!emp.editing" class="text-center">
-                                <span class="badge bg-info">{{$ctrl.getControlsCount(emp.id)}}</span>
-                            </td>
-                            <td ng-if="!emp.editing" class="text-center" ng-if="$ctrl.canEditEmployee()">
+        <div class="table-responsive" style="flex: 1; overflow-y: auto;">
+        <table class="table table-hover table-sm mb-0">
+        <thead class="table-dark sticky-top">
+        <tr>
+        <th style="width: 25%">Employee Name</th>
+        <th style="width: 25%">Email</th>
+        <th style="width: 20%">Role</th>
+        <th style="width: 15%">Controls Count</th>
+        <th style="width: 15%" ng-if="$ctrl.canEditEmployee()">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="emp in $ctrl.getFilteredEmployees()">
+        <!-- View Mode -->
+        <td ng-if="!emp.editing">
+        <strong>{{emp.employeeName}}</strong>
+        </td>
+        <td ng-if="!emp.editing">
+        {{emp.email}}
+        </td>
+        <td ng-if="!emp.editing">
+        {{emp.role}}
+        </td>
+        <td ng-if="!emp.editing" class="text-center">
+        <span class="badge bg-info">{{$ctrl.getControlsCount(emp.id)}}</span>
+        </td>
+        <td ng-if="!emp.editing" class="text-center" ng-if="$ctrl.canEditEmployee()">
                                 <div style="white-space: nowrap;">
                                     <button class="btn btn-sm btn-warning me-1" ng-click="$ctrl.startEdit(emp)" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -58,8 +51,8 @@ app.component('employeesList', {
                                 </div>
                             </td>
                             
-                            <!-- Edit Mode -->
-                            <td ng-if="emp.editing" colspan="6">
+        <!-- Edit Mode -->
+        <td ng-if="emp.editing" colspan="5">
                                 <div class="p-3 bg-light">
                                     <form ng-submit="$ctrl.saveEmployee(emp)">
                                         <div class="row mb-2">
@@ -101,8 +94,8 @@ app.component('employeesList', {
                                 </div>
                             </td>
                         </tr>
-                        <tr ng-if="$ctrl.getFilteredEmployees().length === 0">
-                            <td colspan="6" class="text-center text-muted py-4">
+        <tr ng-if="$ctrl.getFilteredEmployees().length === 0">
+        <td colspan="5" class="text-center text-muted py-4">
                                 <i class="fas fa-users fa-2x mb-2 d-block"></i>
                                 No employees found
                             </td>

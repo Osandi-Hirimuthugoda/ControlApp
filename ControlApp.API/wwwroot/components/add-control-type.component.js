@@ -153,49 +153,53 @@ app.component('addControlType', {
                         throw new Error("Control Type ID not returned from server.");
                     }
 
-                    // 2. Add Control to Board only if employee is assigned
-                    if (ctrl.assignedEmployeeId) {
-                        
-                        var controlReleaseDate = null;
-                        if (ctrl.newControlType.releaseDate) {
-                           
-                            controlReleaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
-                        } else if (addedType.releaseDate) {
-                            
-                            controlReleaseDate = addedType.releaseDate;
-                        }
-                        
-                        var controlPayload = {
-                            typeId: typeId,
-                            employeeId: ctrl.assignedEmployeeId,
-                            description: addedType.description,
-                            statusId: 1, 
-                            progress: 0,
-                            comments: 'Initial assignment',
-                            releaseDate: controlReleaseDate
-                        };
-
-                        return ApiService.addControl(controlPayload).then(function() {
-                            return 'Control added to Board.';
-                        });
-                    } else {
-                        // No employee assigned, just return success message
-                        return Promise.resolve('Control type added. No control created (no employee assigned).');
+                    // 2. Always create a Control row
+                    //    - If employee selected -> assign to that employee
+                    //    - If not selected      -> backend will auto-assign to 'Unassigned' employee
+                    var controlReleaseDate = null;
+                    if (ctrl.newControlType.releaseDate) {
+                        controlReleaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
+                    } else if (addedType.releaseDate) {
+                        controlReleaseDate = addedType.releaseDate;
                     }
+
+                    var employeeIdValue = null;
+                    if (ctrl.assignedEmployeeId && ctrl.assignedEmployeeId !== '' && ctrl.assignedEmployeeId !== 'null') {
+                        var parsedId = parseInt(ctrl.assignedEmployeeId);
+                        if (!isNaN(parsedId) && parsedId > 0) {
+                            employeeIdValue = parsedId;
+                        }
+                    }
+
+                    var controlPayload = {
+                        typeId: typeId,
+                        employeeId: employeeIdValue, // can be null -> backend handles as 'Unassigned'
+                        description: addedType.description,
+                        statusId: 1,
+                        progress: 0,
+                        comments: 'Initial assignment',
+                        releaseDate: controlReleaseDate
+                    };
+
+                    return ApiService.addControl(controlPayload).then(function() {
+                        if (employeeIdValue) {
+                            return 'Control added to Board and assigned to employee.';
+                        } else {
+                            return 'Control added without employee. You can assign an owner later.';
+                        }
+                    });
                 })
                 .then(function(message) {
                     // Toast success
                     NotificationService.show('Success! ' + message, 'success');
 
-                    // Popup success
-                    if (message && message.indexOf('Control added to Board') !== -1) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Control Added',
-                            text: 'The control has been added to the board successfully.',
-                            confirmButtonText: 'OK'
-                        });
-                    }
+                    // Always show success popup when control is added
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Successfully Added Control',
+                        text: 'The control has been added to the board successfully.',
+                        confirmButtonText: 'OK'
+                    });
 
                     // Reset Form
                     ctrl.newControlType = { typeName:'', description:'', releaseDate:null };

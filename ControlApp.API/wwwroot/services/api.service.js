@@ -203,6 +203,25 @@ app.service('ApiService', function($http, $q) {
             });
             console.log('Controls loaded:', self.data.allControls.length);
             return self.data.allControls;
+        }).catch(function(error) {
+            console.error('=== ERROR LOADING CONTROLS ===');
+            console.error('Error object:', error);
+            if(error && error.data) {
+                console.error('Error data:', error.data);
+                if(error.data.message) {
+                    console.error('ERROR MESSAGE:', error.data.message);
+                    alert('Error loading controls: ' + error.data.message);
+                } else {
+                    console.error('Full error data:', JSON.stringify(error.data, null, 2));
+                    alert('Error loading controls. Check console for details.');
+                }
+            } else {
+                console.error('No error data available');
+                alert('Error loading controls. Check console for details.');
+            }
+            // Return empty array to prevent breaking the app
+            self.data.allControls = [];
+            return self.data.allControls;
         });
     };
 
@@ -286,16 +305,17 @@ app.service('ApiService', function($http, $q) {
     self._processReleases = function() {
         var today = new Date();
         var currentYear = today.getFullYear();
+        //var defaultReleases = '';
         
-        // var defaultReleases = [
-        //     { releaseId: 999991, releaseName: "Release 26.01", releaseDate: new Date(currentYear, 0, 26) },
-        //     { releaseId: 999992, releaseName: "Release 25.12", releaseDate: new Date(currentYear, 11, 25) },
-        //     { releaseId: 999993, releaseName: "Release 24.12", releaseDate: new Date(currentYear, 11, 24) }
-        // ];
+        var defaultReleases = [
+            { releaseId: 999991, releaseName: "Release 26.01", releaseDate: new Date(currentYear, 0, 26) },
+            { releaseId: 999992, releaseName: "Release 25.12", releaseDate: new Date(currentYear, 11, 25) },
+            { releaseId: 999993, releaseName: "Release 24.12", releaseDate: new Date(currentYear, 11, 24) }
+        ];
 
-        // if (defaultReleases[0].releaseDate < today) defaultReleases[0].releaseDate = new Date(currentYear + 1, 0, 26);
-        // if (defaultReleases[1].releaseDate < today) defaultReleases[1].releaseDate = new Date(currentYear + 1, 11, 25);
-        // if (defaultReleases[2].releaseDate < today) defaultReleases[2].releaseDate = new Date(currentYear + 1, 11, 24);
+        if (defaultReleases[0].releaseDate < today) defaultReleases[0].releaseDate = new Date(currentYear + 1, 0, 26);
+        if (defaultReleases[1].releaseDate < today) defaultReleases[1].releaseDate = new Date(currentYear + 1, 11, 25);
+        if (defaultReleases[2].releaseDate < today) defaultReleases[2].releaseDate = new Date(currentYear + 1, 11, 24);
 
         self.data.upcomingReleases = angular.copy(self.data.releases);
         

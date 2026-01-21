@@ -91,6 +91,7 @@ namespace ControlApp.API.Services
             var control = new Controls
             {
                 Description = createControlDto.Description,
+                SubDescriptions = createControlDto.SubDescriptions,
                 Comments = createControlDto.Comments,
                 TypeId = createControlDto.TypeId,
                 EmployeeId = createControlDto.EmployeeId.HasValue && createControlDto.EmployeeId.Value > 0 ? createControlDto.EmployeeId.Value : (int?)null,
@@ -158,6 +159,7 @@ namespace ControlApp.API.Services
             }
 
             control.Description = updateControlDto.Description;
+            control.SubDescriptions = updateControlDto.SubDescriptions;
             control.Comments = updateControlDto.Comments;
             
             // Handle EmployeeId - allow null (controls without assigned employees)
@@ -209,28 +211,65 @@ namespace ControlApp.API.Services
                 control.ReleaseDate = updateControlDto.ReleaseDate;
             } 
      
-            if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
+            // Update progress first
+            control.Progress = updateControlDto.Progress;
+            
+            // Check if progress reached 100% and automatically advance to next status
+            if (updateControlDto.Progress >= 100)
             {
-                
-                var statusChanged = control.StatusId != updateControlDto.StatusId.Value;
-                control.StatusId = updateControlDto.StatusId.Value;
-                
-                if (statusChanged)
+                // Get current status (use the one from control object, not DTO, to check current state)
+                Status? currentStatus = null;
+                if (control.StatusId.HasValue)
                 {
-                    
-                    control.Progress = updateControlDto.Progress;
+                    currentStatus = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == control.StatusId.Value);
+                }
+                
+                // If we have a current status, try to advance to the next one
+                if (currentStatus != null)
+                {
+                    var nextStatus = await GetNextStatusAsync(currentStatus.StatusName);
+                    if (nextStatus != null)
+                    {
+                        control.StatusId = nextStatus.Id;
+                        
+                        // Update progress to match the default progress for the new status
+                        var newProgress = GetProgressByStatus(nextStatus.StatusName);
+                        if (newProgress.HasValue)
+                        {
+                            control.Progress = newProgress.Value;
+                            _logger.LogInformation("Progress reached 100%. Auto-advancing status from '{CurrentStatus}' to '{NextStatus}' and setting progress to {Progress}% for ControlId: {ControlId}", 
+                                currentStatus.StatusName, nextStatus.StatusName, newProgress.Value, control.ControlId);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Progress reached 100%. Auto-advancing status from '{CurrentStatus}' to '{NextStatus}' for ControlId: {ControlId}", 
+                                currentStatus.StatusName, nextStatus.StatusName, control.ControlId);
+                        }
+                    }
+                    else
+                    {
+                        // Already at the final status (QA), keep it at 100%
+                        _logger.LogInformation("Progress reached 100% but already at final status '{StatusName}' for ControlId: {ControlId}", 
+                            currentStatus.StatusName, control.ControlId);
+                    }
                 }
                 else
                 {
-                    
-                    control.Progress = updateControlDto.Progress;
+                    // No current status, use the one from DTO if provided
+                    if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
+                    {
+                        control.StatusId = updateControlDto.StatusId.Value;
+                    }
                 }
             }
             else
             {
-                control.StatusId = null;
-                
-                control.Progress = updateControlDto.Progress;
+                // Progress is not 100%, use the status from DTO if provided
+                if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
+                {
+                    control.StatusId = updateControlDto.StatusId.Value;
+                }
+                // If StatusId is not provided in DTO (null or 0), keep the existing status unchanged
             }
 
             await _controlRepository.UpdateAsync(control);
@@ -336,12 +375,38 @@ namespace ControlApp.API.Services
             };
         }
 
+        /// <summary>
+        /// Gets the next status in the sequence when progress reaches 100%
+        /// Status order: Analyze -> Development -> Dev Testing -> QA
+        /// </summary>
+        private async Task<Status?> GetNextStatusAsync(string currentStatusName)
+        {
+            var statusOrder = new[] { "Analyze", "Development", "Dev Testing", "QA" };
+            var currentIndex = Array.IndexOf(statusOrder, currentStatusName);
+            
+            // If current status is not in the order or is the last one, return null
+            if (currentIndex < 0 || currentIndex >= statusOrder.Length - 1)
+            {
+                return null;
+            }
+            
+            // Get the next status name
+            var nextStatusName = statusOrder[currentIndex + 1];
+            
+            // Find and return the next status from database
+            var nextStatus = await _context.Set<Status>()
+                .FirstOrDefaultAsync(s => s.StatusName == nextStatusName);
+            
+            return nextStatus;
+        }
+
         private static ControlDto MapToDto(Controls control)
         {
             return new ControlDto
             {
                 ControlId = control.ControlId,
                 Description = control.Description,
+                SubDescriptions = control.SubDescriptions,
                 Comments = control.Comments,
                 TypeId = control.TypeId,
                 TypeName = control.Type?.TypeName,

@@ -87,10 +87,10 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
     };
     
     self.canAddControl = function() {
-        // Developers and Interns have view-only access
+        // Developers, QA Engineers and Interns have view-only access
         if (self.isViewOnly()) return false;
-        // Admin, Team Lead, and Software Architecture can add controls
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        // All other employees can add controls
+        return true;
     };
     
     self.canEditEmployee = function() {

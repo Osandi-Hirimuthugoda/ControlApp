@@ -194,6 +194,7 @@ app.component('newEmployee', {
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        
                         // User confirmed, proceed with registration
                         ctrl.proceedWithRegistration();
                     }
@@ -246,7 +247,7 @@ app.component('newEmployee', {
                     // Show success toast
                     NotificationService.show('Employee account created successfully!', 'success');
 
-                    // Show SweetAlert success dialog as well
+                    // Show Alert success dialog as well
                     Swal.fire({
                         icon: 'success',
                         title: 'Employee Registered',

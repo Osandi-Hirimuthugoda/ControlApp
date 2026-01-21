@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Data.Common;
 using ControlApp.API;
 using ControlApp.API.Repositories;
 using ControlApp.API.Services;
@@ -103,7 +104,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.Zero,
-        // Map role claims correctly so [Authorize(Roles = "...")] works with JWT
+        // Map role claims correctly so [Authorize(Roles)
         RoleClaimType = ClaimTypes.Role
     };
 });
@@ -237,6 +238,9 @@ static void InitializeDatabase(WebApplication app)
             }
         }
         
+        // Ensure SubDescriptions column exists in Controls table
+        EnsureSubDescriptionsColumn(context, logger);
+        
         // Clean up duplicate control types
         CleanupDuplicateControlTypes(context, logger);
         
@@ -256,6 +260,39 @@ static void InitializeDatabase(WebApplication app)
     {
         logger.LogError(ex, "Error during database initialization");
         throw;
+    }
+}
+
+// Helper method to ensure SubDescriptions column exists
+static void EnsureSubDescriptionsColumn(AppDbContext context, ILogger logger)
+{
+    try
+    {
+        // Check if SubDescriptions column exists
+        var connection = context.Database.GetDbConnection();
+        connection.Open();
+        
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            IF NOT EXISTS (
+                SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = 'Controls' 
+                AND COLUMN_NAME = 'SubDescriptions'
+            )
+            BEGIN
+                ALTER TABLE Controls
+                ADD SubDescriptions NVARCHAR(MAX) NULL;
+            END";
+        
+        command.ExecuteNonQuery();
+        connection.Close();
+        
+        logger.LogInformation("SubDescriptions column verified/added successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to ensure SubDescriptions column exists, but continuing...");
+        // Don't throw - allow the app to continue even if this fails
     }
 }
 

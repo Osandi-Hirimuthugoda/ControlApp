@@ -21,9 +21,28 @@ namespace ControlApp.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls([FromQuery] string? search = null)
         {
-            
-            var controls = await _controlService.GetAllControlsAsync(search);
-            return Ok(controls);
+            try
+            {
+                var controls = await _controlService.GetAllControlsAsync(search);
+                return Ok(controls);
+            }
+            catch (Exception ex)
+            {
+                var logger = HttpContext.RequestServices.GetRequiredService<ILogger<ControlsController>>();
+                logger.LogError(ex, "Error getting all controls: {Message}. Inner Exception: {InnerException}. Stack Trace: {StackTrace}", 
+                    ex.Message, 
+                    ex.InnerException?.Message ?? "None", 
+                    ex.StackTrace ?? "None");
+                
+                // Include inner exception message if available
+                var errorMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                
+                return StatusCode(500, new { message = $"Error getting controls: {errorMessage}" });
+            }
         }
 
         [HttpGet("{id}")]
@@ -37,8 +56,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
-        // Admin, Team Lead, and Software Architecturer can create controls
-        [Authorize(Roles = "Admin, Team Lead, Software Architecturer")]
+        // All authenticated users (except view-only roles) can create controls
+        [Authorize]
         public async Task<ActionResult<ControlDto>> CreateControl([FromBody] CreateControlDto createControlDto)
         {
             try

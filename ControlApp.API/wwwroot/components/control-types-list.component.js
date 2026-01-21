@@ -379,7 +379,7 @@ app.component('controlTypesList', {
         };
 
         // Format date with year for full date display (DD.MM.YYYY)
-        ctrl.formatDateWithYear = function(date) {
+        ctrl.formatDateWithYear = function(date) { 
             if(!date) return '';
             var d = new Date(date);
             if(isNaN(d)) return '';

@@ -26,6 +26,12 @@ namespace ControlApp.API
             {
                 entity.HasKey(e => e.ControlId);
                 
+                // Configure SubDescriptions - nullable column
+                entity.Property(e => e.SubDescriptions)
+                    .HasColumnName("SubDescriptions")
+                    .HasColumnType("nvarchar(max)")
+                    .IsRequired(false);
+                
                 
                 entity.HasOne(c => c.Type)
                     .WithMany(t => t.Controls)

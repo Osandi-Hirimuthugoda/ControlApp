@@ -10,6 +10,7 @@ namespace ControlApp.API.Models
 
         
         public string? Description { get; set; } 
+        public string? SubDescriptions { get; set; }
         public string? Comments { get; set; }
 
         

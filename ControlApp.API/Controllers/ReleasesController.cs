@@ -55,7 +55,7 @@ namespace ControlApp.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ReleaseDto>> UpdateRelease(int id, [FromBody] CreateReleaseDto updateReleaseDto)
+        public async Task<ActionResult<ReleaseDto>>UpdateRelease(int id, [FromBody] CreateReleaseDto updateReleaseDto)
         {
             try
             {

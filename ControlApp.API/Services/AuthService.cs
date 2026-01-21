@@ -40,6 +40,7 @@ namespace ControlApp.API.Services
                 // Verify password
                 if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
                 {
+                    
                     _logger.LogWarning("Invalid password attempt for user: {Username}", user.Username);
                     return null;
                 }

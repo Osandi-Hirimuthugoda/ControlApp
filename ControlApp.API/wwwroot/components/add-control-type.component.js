@@ -70,7 +70,7 @@ app.component('addControlType', {
                                             <div class="col-md-4">
                                                 <select class="form-select form-select-sm border-0 bg-light" 
                                                         ng-model="sub.employeeId" 
-                                                        ng-options="e.id as e.employeeName for e in $ctrl.store.employees">
+                                                        ng-options="e.id as e.employeeName for e in $ctrl.getDeveloperEmployees()">
                                                     <option value="">- Owner (Optional) -</option>
                                                 </select>
                                             </div>
@@ -135,12 +135,24 @@ app.component('addControlType', {
         ctrl.isSaving = false;
         ctrl.newSubDescriptions = [];
 
-        // Get only registered employees 
+        // Get only registered developer employees (those with User accounts, excluding QA/PM/Architect)
         ctrl.getRegisteredEmployees = function () {
             if (!ctrl.store.employees) return [];
-            // Filter employees that have email 
+            var excludedRoles = ['qa engineer', 'intern qa engineer', 'project manager', 'software architecturer', 'software architecture'];
             return ctrl.store.employees.filter(function (emp) {
-                return emp.email && emp.email.trim() !== '';
+                if (!emp.email || emp.email.trim() === '') return false;
+                var role = (emp.role || '').toLowerCase().trim();
+                return excludedRoles.indexOf(role) === -1;
+            });
+        };
+
+        // Get developer employees for sub-description owner dropdown
+        ctrl.getDeveloperEmployees = function () {
+            if (!ctrl.store.employees) return [];
+            var excludedRoles = ['qa engineer', 'intern qa engineer', 'project manager', 'software architecturer', 'software architecture'];
+            return ctrl.store.employees.filter(function (emp) {
+                var role = (emp.role || '').toLowerCase().trim();
+                return excludedRoles.indexOf(role) === -1;
             });
         };
 
@@ -222,7 +234,8 @@ app.component('addControlType', {
                         progress: 0,
                         comments: 'Initial assignment',
                         releaseDate: addedType.releaseDate || null,
-                        subDescriptions: subDescriptionsJson
+                        subDescriptions: subDescriptionsJson,
+                        teamId: AuthService.getTeamId() ? parseInt(AuthService.getTeamId()) : null
                     };
 
                     return ApiService.addControl(controlPayload).then(function () {
@@ -256,7 +269,7 @@ app.component('addControlType', {
                     }
 
                     // Refresh data
-                    return ApiService.loadAllControls();
+                    return ApiService.loadAllControls(AuthService.getTeamId() ? parseInt(AuthService.getTeamId()) : null);
                 })
                 .then(function () {
                     $rootScope.$broadcast('controlTypesUpdated');

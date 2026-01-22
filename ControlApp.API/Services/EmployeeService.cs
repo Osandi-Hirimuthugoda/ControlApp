@@ -377,7 +377,8 @@ namespace ControlApp.API.Services
                 TypeName = employee.Type?.TypeName,
                 Description = employee.Description,
                 TeamId = employee.TeamId,
-                TeamName = employee.Team?.TeamName
+                TeamName = employee.Team?.TeamName,
+                UserId = employee.UserId
             };
         }
     }

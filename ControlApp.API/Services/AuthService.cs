@@ -67,10 +67,19 @@ namespace ControlApp.API.Services
 
                 // Get current team info
                 string currentTeamName = null;
+                int? employeeId = null;
+                
                 if (user.CurrentTeamId.HasValue)
                 {
                     var currentTeam = userTeams.FirstOrDefault(t => t.TeamId == user.CurrentTeamId.Value);
                     currentTeamName = currentTeam?.TeamName;
+                    
+                    // Get employee ID — try team-scoped first, fall back to any employee for this user
+                    var employee = await _context.Employees
+                        .FirstOrDefaultAsync(e => e.UserId == user.Id && e.TeamId == user.CurrentTeamId.Value)
+                        ?? await _context.Employees
+                        .FirstOrDefaultAsync(e => e.UserId == user.Id);
+                    employeeId = employee?.Id;
                 }
                 else if (userTeams.Any())
                 {
@@ -78,6 +87,13 @@ namespace ControlApp.API.Services
                     user.CurrentTeamId = userTeams.First().TeamId;
                     await _context.SaveChangesAsync();
                     currentTeamName = userTeams.First().TeamName;
+                    
+                    // Get employee ID — try team-scoped first, fall back to any employee for this user
+                    var employee = await _context.Employees
+                        .FirstOrDefaultAsync(e => e.UserId == user.Id && e.TeamId == user.CurrentTeamId.Value)
+                        ?? await _context.Employees
+                        .FirstOrDefaultAsync(e => e.UserId == user.Id);
+                    employeeId = employee?.Id;
                 }
 
                 return new AuthResponseDto
@@ -90,6 +106,7 @@ namespace ControlApp.API.Services
                     CurrentTeamId = user.CurrentTeamId,
                     CurrentTeamName = currentTeamName,
                     IsSuperAdmin = user.IsSuperAdmin,
+                    EmployeeId = employeeId,
                     Teams = userTeams
                 };
             }

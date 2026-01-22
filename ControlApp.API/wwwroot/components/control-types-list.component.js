@@ -11,7 +11,7 @@ app.component('controlTypesList', {
                         <p class="mb-0 small mt-1" style="color: #4b5563;">Complete overview of all controls in the system</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <span class="badge bg-white text-dark px-3 py-2 rounded-pill shadow-sm">{{$ctrl.store.allControls.length}} Total Controls</span>
+                        <span class="badge bg-white text-dark px-3 py-2 rounded-pill shadow-sm">{{$ctrl.getFilteredControls().length}} Total Controls</span>
                     </div>
                 </div>
                 
@@ -54,7 +54,7 @@ app.component('controlTypesList', {
                                         <label class="form-label fw-bold">Assign Employee</label>
                                         <select class="form-select" ng-model="$ctrl.newControl.employeeId">
                                             <option value="">Select Employee (Optional)</option>
-                                            <option ng-repeat="emp in $ctrl.store.employees" value="{{emp.id}}">{{emp.employeeName}}</option>
+                                            <option ng-repeat="emp in $ctrl.getDeveloperEmployees()" value="{{emp.id}}">{{emp.employeeName}}</option>
                                         </select>
                                     </div>
                                     <div class="col-12">
@@ -97,13 +97,14 @@ app.component('controlTypesList', {
                                     <th class="py-3 px-4 text-secondary small fw-bold text-uppercase text-center" style="width: 10%">Type</th>
                                     <th class="py-3 px-4 text-secondary small fw-bold text-uppercase text-center" style="width: 10%">Sub Objectives</th>
                                     <th class="py-3 px-4 text-secondary small fw-bold text-uppercase">Description / Name</th>
+                                    <th class="py-3 px-4 text-secondary small fw-bold text-uppercase text-center" style="width: 12%">Release Date</th>
                                     <th class="py-3 px-4 text-secondary small fw-bold text-uppercase" style="width: 25%">Add Sub Objectives</th>
                                     <th class="py-3 px-4 text-secondary small fw-bold text-uppercase text-end" style="width: 15%" 
                                         ng-if="$ctrl.canEditControl() || $ctrl.canDeleteControl()">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="c in $ctrl.store.allControls | filter:$ctrl.searchControl | orderBy:'-controlId'" class="border-bottom">
+                                <tr ng-repeat="c in $ctrl.getFilteredControls() | filter:$ctrl.searchControl | orderBy:'-controlId'" class="border-bottom">
                                     <td class="py-3 px-4 text-center">
                                         <div ng-if="!c.editing">
                                             <span class="badge rounded-pill fw-bold" style="background: rgba(99, 102, 241, 0.15); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3);">
@@ -153,6 +154,24 @@ app.component('controlTypesList', {
                                                 <label class="form-label small fw-bold text-primary border-bottom pb-1 mb-2 d-block">Overall Progress (%) <span class="badge bg-light text-primary ms-1 border">(Currently: {{c.progress}}%)</span></label>
                                                 <input type="number" class="form-control border-primary shadow-none fw-bold" ng-model="c.editProgress" min="0" max="100">
                                             </div>
+                                        </div>
+                                    </td>
+                                    <!-- Release Date column -->
+                                    <td class="py-3 px-4 text-center">
+                                        <div ng-if="!c.editing">
+                                            <span ng-if="c.releaseDate" class="badge rounded-pill fw-bold" style="background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3);">
+                                                <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatReleaseDate(c.releaseDate)}}
+                                            </span>
+                                            <span ng-if="!c.releaseDate" class="text-muted small">
+                                                <i class="fas fa-calendar-times me-1 opacity-50"></i>Not set
+                                            </span>
+                                        </div>
+                                        <div ng-if="c.editing">
+                                            <input type="date"
+                                                   class="form-control form-control-sm border-success shadow-none"
+                                                   ng-model="c.editReleaseDate"
+                                                   style="min-width:130px;">
+                                            <small class="text-muted d-block mt-1" style="font-size:0.7rem;">Pick a release date</small>
                                         </div>
                                     </td>
                                     <td class="py-3 px-4">
@@ -226,7 +245,7 @@ app.component('controlTypesList', {
                                 <label class="form-label fw-bold">Assigned To</label>
                                 <select class="form-select border-success" ng-model="$ctrl.newSubObjective.employeeId">
                                     <option value="">- Unassigned -</option>
-                                    <option ng-repeat="emp in $ctrl.store.employees" value="{{emp.id}}">{{emp.employeeName}}</option>
+                                    <option ng-repeat="emp in $ctrl.getDeveloperEmployees()" value="{{emp.id}}">{{emp.employeeName}}</option>
                                 </select>
                             </div>
                             
@@ -383,6 +402,16 @@ app.component('controlTypesList', {
         var ctrl = this;
         ctrl.store = ApiService.data;
         ctrl.searchControl = '';
+
+        ctrl.getFilteredControls = function() {
+            var teamId = AuthService.getTeamId();
+            if (!ctrl.store.allControls) return [];
+            if (teamId === null || teamId === undefined) return ctrl.store.allControls;
+            var tid = parseInt(teamId);
+            return ctrl.store.allControls.filter(function(c) {
+                return c.teamId && parseInt(c.teamId) === tid;
+            });
+        };
 
         // Check if user can edit controls
         ctrl.canEditControl = function () {
@@ -614,11 +643,29 @@ app.component('controlTypesList', {
             return t ? t.typeName : '';
         };
 
+        // Helper: format release date for display
+        ctrl.formatReleaseDate = function (date) {
+            if (!date) return '';
+            var d = new Date(date);
+            if (isNaN(d)) return '';
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        };
+
         // Helper: get employee name by id
         ctrl.getEmployeeName = function (employeeId) {
             if (!employeeId || !ctrl.store.employees) return 'Not Assigned';
             var e = ctrl.store.employees.find(function (emp) { return emp.id == employeeId; });
             return e ? e.employeeName : 'Not Assigned';
+        };
+
+        // Helper: filter to developers/team leads only (exclude QA, PM, Architect)
+        ctrl.getDeveloperEmployees = function () {
+            if (!ctrl.store.employees) return [];
+            var excludedRoles = ['qa engineer', 'intern qa engineer', 'project manager', 'software architecturer', 'software architecture'];
+            return ctrl.store.employees.filter(function (emp) {
+                var role = (emp.role || '').toLowerCase().trim();
+                return excludedRoles.indexOf(role) === -1;
+            });
         };
 
         // Get count of sub-objectives for a control
@@ -681,6 +728,7 @@ app.component('controlTypesList', {
             control.editProgress = control.progress || 0;
             control.editEmployeeId = control.employeeId || null;
             control.editTypeId = control.typeId || null;
+            control.editReleaseDate = control.releaseDate ? new Date(control.releaseDate) : null;
         };
 
         ctrl.cancelEditControl = function (control) {
@@ -690,6 +738,7 @@ app.component('controlTypesList', {
             delete control.editProgress;
             delete control.editEmployeeId;
             delete control.editTypeId;
+            delete control.editReleaseDate;
         };
 
         ctrl.saveControl = function (control) {
@@ -711,7 +760,12 @@ app.component('controlTypesList', {
                 description: control.editDescription,
                 progress: progressValue,
                 statusId: control.editStatusId ? parseInt(control.editStatusId) : null,
-                comments: control.comments || ''
+                // Preserve existing subDescriptions and comments — do NOT wipe them
+                subDescriptions: control.subDescriptions || null,
+                comments: control.comments || null,
+                releaseId: control.releaseId || null,
+                releaseDate: control.editReleaseDate ? new Date(control.editReleaseDate).toISOString() : null,
+                qaEmployeeId: control.qaEmployeeId || null
             };
 
             ApiService.updateControl(control.controlId, payload).then(function (updatedControl) {
@@ -720,6 +774,7 @@ app.component('controlTypesList', {
                 control.statusId = updatedControl.statusId;
                 control.employeeId = updatedControl.employeeId;
                 control.typeId = updatedControl.typeId;
+                control.releaseDate = updatedControl.releaseDate || null;
 
                 var status = ctrl.store.statuses.find(function (s) { return s.id == control.statusId; });
                 control.statusName = status ? status.statusName : '';
@@ -777,7 +832,11 @@ app.component('controlTypesList', {
                 description: control.description,
                 progress: control.progress,
                 statusId: control.statusId,
-                comments: control.comments || ''
+                subDescriptions: control.subDescriptions || null,
+                comments: control.comments || null,
+                releaseId: control.releaseId || null,
+                releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null,
+                qaEmployeeId: control.qaEmployeeId || null
             };
 
             ApiService.updateControl(control.controlId, payload).then(function (updatedControl) {

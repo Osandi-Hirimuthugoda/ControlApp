@@ -39,6 +39,9 @@ namespace ControlApp.API.DTOs
         
         // EmployeeId is optional - can be assigned later
         public int? EmployeeId { get; set; }
+
+        // QAEmployeeId is optional
+        public int? QAEmployeeId { get; set; }
         
         public int? StatusId { get; set; }
         public int? ReleaseId { get; set; }

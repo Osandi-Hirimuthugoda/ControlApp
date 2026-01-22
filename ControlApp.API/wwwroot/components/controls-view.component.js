@@ -1,9 +1,18 @@
 app.component('controlsView', {
     template: `
-    <div class="row" style="align-items: flex-start; margin: 0;">
-        <!-- Left Side: Sidebar with Buttons -->
-        <div class="sidebar-container" ng-class="{'collapsed': $ctrl.sidebarCollapsed, 'expanded': !$ctrl.sidebarCollapsed, 'minimized': $ctrl.sidebarMinimized}">
-            <!-- Anchor Bar with Icons -->
+    <!-- Mobile hamburger toggle -->
+    <div class="d-md-none mobile-menu-toggle" ng-click="$ctrl.mobileSidebarOpen = !$ctrl.mobileSidebarOpen">
+        <i class="fas" ng-class="$ctrl.mobileSidebarOpen ? 'fa-times' : 'fa-bars'"></i>
+    </div>
+
+    <!-- Mobile overlay backdrop -->
+    <div class="mobile-sidebar-backdrop" ng-if="$ctrl.mobileSidebarOpen" ng-click="$ctrl.mobileSidebarOpen = false"></div>
+
+    <div class="row controls-view-row" style="margin: 0;">
+        <!-- Left Side: Sidebar -->
+        <div class="sidebar-container"
+             ng-class="{'collapsed': $ctrl.sidebarCollapsed, 'minimized': $ctrl.sidebarMinimized, 'mobile-open': $ctrl.mobileSidebarOpen}">
+            <!-- Anchor Bar -->
             <div class="sidebar-anchor-bar">
                 <button class="anchor-btn" ng-click="$ctrl.toggleSidebar()" title="Toggle Sidebar">
                     <i class="fas" ng-class="$ctrl.sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
@@ -24,65 +33,25 @@ app.component('controlsView', {
             </div>
         </div>
 
-        <!--Right Side: Content Area -->
+        <!-- Right Side: Content Area -->
         <div class="content-area" ng-class="{'full-width': $ctrl.sidebarCollapsed || $ctrl.sidebarMinimized, 'normal-width': !$ctrl.sidebarCollapsed && !$ctrl.sidebarMinimized}">
-            <!-- Controls Table -->
-            <div ng-if="$ctrl.currentSection === 'controls'">
-                <control-board></control-board>
-            </div>
-            
-            <!-- Add Control Type -->
-            <div ng-if="$ctrl.currentSection === 'addControlType'">
-                <add-control-type></add-control-type>
-            </div>
-            
-            <!-- Control Types List -->
-            <div ng-if="$ctrl.currentSection === 'controlTypes'">
-                <control-types-list></control-types-list>
-            </div>
-            
-            <!-- Control Types Management -->
-            <div ng-if="$ctrl.currentSection === 'controlTypesManagement'">
-                <control-types-management></control-types-management>
-            </div>
-            
-            <!-- Sub Objectives List -->
-            <!-- <div ng-if="$ctrl.currentSection === 'subObjectives'">
-                <sub-objectives-view></sub-objectives-view>
-            </div> -->
-            
-            <!-- Daily Progress Tracking -->
-            <div ng-if="$ctrl.currentSection === 'dailyProgress'">
-                <daily-progress></daily-progress>
-            </div>
-            
-            <!-- Latest Insights -->
-            <div ng-if="$ctrl.currentSection === 'latestInsights'">
-                <latest-insights></latest-insights>
-            </div>
-            
-            <!-- New Employee -->
-            <div ng-if="$ctrl.currentSection === 'newEmployee'">
-                <new-employee></new-employee>
-            </div>
-            
-            <!-- Employees List -->
-            <div ng-if="$ctrl.currentSection === 'employees'">
-                <employees-list></employees-list>
-            </div>
+            <div ng-if="$ctrl.currentSection === 'controls'"><control-board></control-board></div>
+            <div ng-if="$ctrl.currentSection === 'addControlType'"><add-control-type></add-control-type></div>
+            <div ng-if="$ctrl.currentSection === 'controlTypes'"><control-types-list></control-types-list></div>
+            <div ng-if="$ctrl.currentSection === 'controlTypesManagement'"><control-types-management></control-types-management></div>
+            <div ng-if="$ctrl.currentSection === 'dailyProgress'"><daily-progress></daily-progress></div>
+            <div ng-if="$ctrl.currentSection === 'newEmployee'"><new-employee></new-employee></div>
+            <div ng-if="$ctrl.currentSection === 'employees'"><employees-list></employees-list></div>
         </div>
     </div>
     `,
     controller: function ($rootScope, $location, $routeParams, AuthService) {
         var ctrl = this;
-
-        // Store AuthService reference
         ctrl.authService = AuthService;
-
-        // Sidebar state management
         ctrl.sidebarCollapsed = false;
         ctrl.sidebarMinimized = false;
         ctrl.isFullscreen = false;
+        ctrl.mobileSidebarOpen = false;
 
         // Toggle sidebar collapse/expand
         ctrl.toggleSidebar = function () {
@@ -172,7 +141,7 @@ app.component('controlsView', {
 
         var listener = $rootScope.$on('controlsSectionChanged', function (event, section) {
             ctrl.currentSection = section;
-            // Update URL when section changes
+            ctrl.mobileSidebarOpen = false; // close drawer on mobile after selection
             if (section && section !== 'controls') {
                 $location.path('/controls/' + section);
             } else {

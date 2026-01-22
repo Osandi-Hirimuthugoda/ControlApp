@@ -4,7 +4,7 @@ namespace ControlApp.API.Services
 {
     public interface IReleaseService
     {
-        Task<IEnumerable<ReleaseDto>> GetAllReleasesAsync();
+        Task<IEnumerable<ReleaseDto>> GetAllReleasesAsync(int? teamId = null);
         Task<ReleaseDto?> GetReleaseByIdAsync(int id);
         Task<ReleaseDto> CreateReleaseAsync(CreateReleaseDto createReleaseDto);
         Task<ReleaseDto?> UpdateReleaseAsync(int id, CreateReleaseDto updateReleaseDto);

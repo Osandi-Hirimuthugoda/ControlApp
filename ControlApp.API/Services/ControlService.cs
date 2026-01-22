@@ -108,11 +108,9 @@ namespace ControlApp.API.Services
                 Comments = createControlDto.Comments,
                 TypeId = createControlDto.TypeId,
                 EmployeeId = createControlDto.EmployeeId.HasValue && createControlDto.EmployeeId.Value > 0 ? createControlDto.EmployeeId.Value : (int?)null,
-                
+                QAEmployeeId = createControlDto.QAEmployeeId.HasValue && createControlDto.QAEmployeeId.Value > 0 ? createControlDto.QAEmployeeId.Value : (int?)null,
                 StatusId = (createControlDto.StatusId.HasValue && createControlDto.StatusId > 0) ? createControlDto.StatusId : null,
-                
                 ReleaseId = (createControlDto.ReleaseId.HasValue && createControlDto.ReleaseId.Value > 0) ? createControlDto.ReleaseId : null, 
-                
                 ReleaseDate = releaseDate,
                 Progress = createControlDto.Progress,
                 UpdatedAt = DateTime.UtcNow,

@@ -1,48 +1,109 @@
 app.component('superAdminDashboard', {
     template: `
     <div class="container-fluid mt-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2><i class="fas fa-crown me-2 text-warning"></i>Super Admin Dashboard</h2>
-                <p class="text-muted">Manage teams, assign members, and oversee all operations</p>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="fas fa-crown me-2 text-warning"></i>Company Overview</h2>
+                <p class="text-muted mb-0">All teams · All members · Real-time company-wide metrics</p>
+            </div>
+            <button class="btn btn-outline-primary rounded-pill px-4" ng-click="$ctrl.loadData()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
+        </div>
+
+        <!-- Company-wide Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="rounded-4 shadow-sm p-4 text-white" style="background:linear-gradient(135deg,#6366f1,#4f46e5);position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                    <div class="fw-bold" style="font-size:2rem;">{{$ctrl.stats.totalTeams}}</div>
+                    <div class="opacity-75 small fw-bold text-uppercase" style="letter-spacing:0.05em;">Teams</div>
+                    <div class="opacity-60 x-small mt-1">{{$ctrl.stats.activeTeams}} active</div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="rounded-4 shadow-sm p-4 text-white" style="background:linear-gradient(135deg,#10b981,#059669);position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                    <div class="fw-bold" style="font-size:2rem;">{{$ctrl.companyStats.totalUniqueEmployees}}</div>
+                    <div class="opacity-75 small fw-bold text-uppercase" style="letter-spacing:0.05em;">Employees</div>
+                    <div class="opacity-60 x-small mt-1">across all teams</div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="rounded-4 shadow-sm p-4 text-white" style="background:linear-gradient(135deg,#3b82f6,#2563eb);position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                    <div class="fw-bold" style="font-size:2rem;">{{$ctrl.stats.totalControls}}</div>
+                    <div class="opacity-75 small fw-bold text-uppercase" style="letter-spacing:0.05em;">Controls</div>
+                    <div class="opacity-60 x-small mt-1">{{$ctrl.companyStats.completedControls}} completed</div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="rounded-4 shadow-sm p-4 text-white" style="background:linear-gradient(135deg,#f59e0b,#d97706);position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                    <div class="fw-bold" style="font-size:2rem;">{{$ctrl.companyStats.avgProgress}}<span style="font-size:1rem;">%</span></div>
+                    <div class="opacity-75 small fw-bold text-uppercase" style="letter-spacing:0.05em;">Avg Progress</div>
+                    <div class="opacity-60 x-small mt-1">company-wide</div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="rounded-4 shadow-sm p-4 text-white" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                    <div class="fw-bold" style="font-size:2rem;">{{$ctrl.stats.totalControlTypes}}</div>
+                    <div class="opacity-75 small fw-bold text-uppercase" style="letter-spacing:0.05em;">Control Types</div>
+                    <div class="opacity-60 x-small mt-1">active categories</div>
+                </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-users me-2"></i>Total Teams</h5>
-                        <h2>{{$ctrl.stats.totalTeams}}</h2>
-                        <small>{{$ctrl.stats.activeTeams}} Active</small>
+        <!-- Per-team breakdown -->
+        <div class="row g-3 mb-4">
+            <div ng-repeat="team in $ctrl.teams track by team.teamId" class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header border-0 py-3 px-4 d-flex justify-content-between align-items-center rounded-top-4"
+                         ng-style="{'background': $ctrl.teamColors[$index % $ctrl.teamColors.length]}">
+                        <div>
+                            <h6 class="fw-bold text-white mb-0"><i class="fas fa-users me-2"></i>{{team.teamName}}</h6>
+                            <small class="text-white opacity-75">{{team.teamCode}}</small>
+                        </div>
+                        <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2);color:white;font-size:0.7rem;">
+                            {{team.isActive ? 'Active' : 'Inactive'}}
+                        </span>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-user-friends me-2"></i>Total Employees</h5>
-                        <h2>{{$ctrl.stats.totalEmployees}}</h2>
-                        <small>Across all teams</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-tasks me-2"></i>Total Controls</h5>
-                        <h2>{{$ctrl.stats.totalControls}}</h2>
-                        <small>All teams combined</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-list me-2"></i>Control Types</h5>
-                        <h2>{{$ctrl.stats.totalControlTypes}}</h2>
-                        <small>Active types</small>
+                    <div class="card-body p-3">
+                        <div class="row g-2 text-center mb-3">
+                            <div class="col-4">
+                                <div class="fw-bold text-dark" style="font-size:1.4rem;">{{$ctrl.getTeamEmployeeCount(team.teamId)}}</div>
+                                <div class="text-muted" style="font-size:0.7rem;">Members</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold text-dark" style="font-size:1.4rem;">{{$ctrl.getTeamControlCount(team.teamId)}}</div>
+                                <div class="text-muted" style="font-size:0.7rem;">Controls</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold text-dark" style="font-size:1.4rem;">{{$ctrl.getTeamAvgProgress(team.teamId)}}<span style="font-size:0.8rem;">%</span></div>
+                                <div class="text-muted" style="font-size:0.7rem;">Avg Progress</div>
+                            </div>
+                        </div>
+                        <!-- Progress bar -->
+                        <div class="progress rounded-pill mb-2" style="height:6px;background:#e2e8f0;">
+                            <div class="progress-bar rounded-pill" ng-style="{'width': $ctrl.getTeamAvgProgress(team.teamId) + '%', 'background': $ctrl.teamColors[$index % $ctrl.teamColors.length]}"></div>
+                        </div>
+                        <!-- Role breakdown -->
+                        <div class="d-flex flex-wrap gap-1 mt-2">
+                            <span ng-repeat="rb in $ctrl.getTeamRoleBreakdown(team.teamId) track by $index"
+                                  class="badge rounded-pill" style="font-size:0.62rem;background:#eef2ff;color:#4f46e5;">
+                                {{rb.role}}: {{rb.count}}
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-sm btn-outline-primary flex-grow-1 rounded-pill" ng-click="$ctrl.viewTeamControls(team)">
+                                <i class="fas fa-tasks me-1"></i>Controls
+                            </button>
+                            <button class="btn btn-sm btn-outline-success flex-grow-1 rounded-pill" ng-click="$ctrl.manageTeamMembers(team)">
+                                <i class="fas fa-users-cog me-1"></i>Members
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,33 +112,21 @@ app.component('superAdminDashboard', {
         <!-- Quick Actions -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn btn-primary me-2" ng-click="$ctrl.createTeam()">
-                            <i class="fas fa-plus me-1"></i>Create New Team
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body py-3 px-4 d-flex gap-3 flex-wrap">
+                        <button class="btn btn-primary rounded-pill px-4" ng-click="$ctrl.createTeam()">
+                            <i class="fas fa-plus me-2"></i>Create New Team
                         </button>
-                        <button class="btn btn-success me-2" ng-click="$ctrl.goToTeamManagement()">
-                            <i class="fas fa-users-cog me-1"></i>Manage Teams
+                        <button class="btn btn-success rounded-pill px-4" ng-click="$ctrl.goToTeamManagement()">
+                            <i class="fas fa-users-cog me-2"></i>Manage Teams
                         </button>
-                        <button class="btn btn-info me-2" ng-click="$ctrl.assignEmployees()">
-                            <i class="fas fa-user-plus me-1"></i>Assign Employees to Teams
+                        <button class="btn btn-info rounded-pill px-4" ng-click="$ctrl.assignEmployees()">
+                            <i class="fas fa-user-plus me-2"></i>Assign Employees
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Teams Overview -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Teams Overview</h5>
-                        <button class="btn btn-sm btn-outline-primary" ng-click="$ctrl.loadData()">
-                            <i class="fas fa-sync-alt me-1"></i>Refresh
                         </button>
                     </div>
                     <div class="card-body">
@@ -159,7 +208,201 @@ app.component('superAdminDashboard', {
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- All Members by Team -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header border-0 py-3 px-4 d-flex justify-content-between align-items-center"
+                         style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:16px 16px 0 0;">
+                        <div>
+                            <h5 class="fw-bold text-white mb-0"><i class="fas fa-shield-alt me-2"></i>Role Permissions</h5>
+                            <small class="text-white opacity-75">Configure which roles can access which features</small>
+                        </div>
+                        <button class="btn btn-sm rounded-pill fw-bold" style="background:rgba(255,255,255,0.2);color:white;" ng-click="$ctrl.savePermissions()">
+                            <i class="fas fa-save me-1"></i>Save Changes
+                        </button>
+                        <button class="btn btn-sm rounded-pill" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);" ng-click="$ctrl.resetPermissions()" title="Reset to defaults">
+                            <i class="fas fa-undo me-1"></i>Reset
+                        </button>
+                    </div>
+                    <div class="card-body p-4" style="background:#f8fafc;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mb-0" style="font-size:0.82rem;">
+                                <thead style="background:#f1f5f9;">
+                                    <tr>
+                                        <th class="fw-bold py-2 px-3" style="min-width:180px;">Permission</th>
+                                        <th ng-repeat="role in $ctrl.permissionRoles" class="fw-bold text-center py-2 px-2" style="min-width:100px;">
+                                            <span class="badge rounded-pill" ng-style="{'background': $ctrl.getRoleColor(role)}">{{role}}</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="perm in $ctrl.permissionDefs track by perm.key">
+                                        <td class="py-2 px-3 fw-semibold">
+                                            <i class="{{perm.icon}} me-2 text-muted"></i>{{perm.label}}
+                                        </td>
+                                        <td ng-repeat="role in $ctrl.permissionRoles" class="text-center py-2">
+                                            <div class="form-check d-flex justify-content-center mb-0">
+                                                <input class="form-check-input" type="checkbox"
+                                                       ng-model="$ctrl.permissions[perm.key][role]"
+                                                       ng-disabled="role === 'Admin'">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-2 text-muted" style="font-size:0.72rem;"><i class="fas fa-info-circle me-1"></i>Admin always has full access. Changes take effect on next login.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Permission Overrides -->
+        <div class="row mt-0 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header border-0 py-3 px-4 d-flex justify-content-between align-items-center"
+                         style="background:linear-gradient(135deg,#0891b2,#0e7490);border-radius:16px 16px 0 0;">
+                        <div>
+                            <h5 class="fw-bold text-white mb-0"><i class="fas fa-user-shield me-2"></i>User Permission Overrides</h5>
+                            <small class="text-white opacity-75">Grant or restrict specific permissions per employee, per team</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm border-0 rounded-pill" style="width:160px;" ng-model="$ctrl.overrideTeamFilter">
+                                <option value="">All Teams</option>
+                                <option ng-repeat="t in $ctrl.teams" value="{{t.teamId}}">{{t.teamName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-3" style="background:#f8fafc;">
+                        <div class="row g-2">
+                            <div ng-repeat="emp in $ctrl.getFilteredEmployeesForOverride() track by emp.id" class="col-xl-3 col-md-4 col-sm-6">
+                                <div class="card border-0 shadow-sm rounded-3 p-3" style="background:white;">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                             style="width:36px;height:36px;font-size:0.82rem;"
+                                             ng-style="{'background': $ctrl.getRoleColor(emp.role)}">
+                                            {{emp.employeeName.charAt(0).toUpperCase()}}
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="fw-semibold text-dark" style="font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{emp.employeeName}}</div>
+                                            <div style="font-size:0.68rem;" class="d-flex align-items-center gap-1 flex-wrap">
+                                                <span class="badge rounded-pill" ng-style="{'background': $ctrl.getRoleColor(emp.role)}" style="font-size:0.6rem;">{{emp.role}}</span>
+                                                <span class="badge rounded-pill" style="background:#1e3a5f;color:white;font-size:0.6rem;">
+                                                    <i class="fas fa-home me-1" style="font-size:0.55rem;"></i>{{$ctrl.getTeamName(emp.teamId)}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm rounded-circle flex-shrink-0"
+                                                style="width:28px;height:28px;background:#eef2ff;color:#4f46e5;padding:0;"
+                                                ng-click="$ctrl.openUserOverride(emp)"
+                                                title="Configure permissions for primary team">
+                                            <i class="fas fa-cog" style="font-size:0.7rem;"></i>
+                                        </button>
+                                        <button class="btn btn-sm rounded-circle flex-shrink-0"
+                                                style="width:28px;height:28px;background:#f0fdf4;color:#059669;padding:0;"
+                                                ng-click="$ctrl.openTeamAccess(emp)"
+                                                title="Add to other teams">
+                                            <i class="fas fa-user-plus" style="font-size:0.7rem;"></i>
+                                        </button>
+                                    </div>
+                                    <!-- Show active overrides -->
+                                    <div ng-if="$ctrl.hasOverrides(emp.id)" class="d-flex flex-wrap gap-1">
+                                        <span ng-repeat="perm in $ctrl.getUserOverrideLabels(emp.id) track by $index"
+                                              class="badge rounded-pill" style="font-size:0.6rem;background:#dcfce7;color:#166534;">
+                                            <i class="fas fa-check me-1"></i>{{perm}}
+                                        </span>
+                                    </div>
+                                    <div ng-if="!$ctrl.hasOverrides(emp.id)" class="text-muted" style="font-size:0.68rem;">No overrides — using role defaults</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Override Modal -->
+        <div ng-if="$ctrl.overrideModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;" ng-click="$ctrl.overrideModal=null">
+            <div class="card border-0 shadow-lg rounded-4" style="width:480px;max-width:96vw;" ng-click="$event.stopPropagation()">
+                <div class="card-header border-0 rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center" style="background:linear-gradient(135deg,#0891b2,#0e7490);">
+                    <div>
+                        <h6 class="fw-bold text-white mb-0"><i class="fas fa-user-shield me-2"></i>{{$ctrl.overrideModal.emp.employeeName}}</h6>
+                        <small class="text-white opacity-75">{{$ctrl.overrideModal.emp.role}} · {{$ctrl.getTeamName($ctrl.overrideModal.emp.teamId)}}</small>
+                    </div>
+                    <button class="btn btn-sm rounded-circle" style="background:rgba(255,255,255,0.2);color:white;width:30px;height:30px;" ng-click="$ctrl.overrideModal=null">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Toggle permissions for this employee. These override the role-based defaults.</p>
+                    <div ng-repeat="perm in $ctrl.permissionDefs track by perm.key" class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                        <span class="small fw-semibold"><i class="{{perm.icon}} me-2 text-muted"></i>{{perm.label}}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted" style="font-size:0.68rem;">Role default: {{$ctrl.getRoleDefault(perm.key, $ctrl.overrideModal.emp.role) ? '✓' : '✗'}}</small>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" ng-model="$ctrl.overrideModal.overrides[perm.key]">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-primary flex-grow-1 rounded-pill fw-bold" ng-click="$ctrl.saveUserOverride()">
+                            <i class="fas fa-save me-2"></i>Save Overrides
+                        </button>
+                        <button class="btn btn-outline-danger rounded-pill" ng-click="$ctrl.clearUserOverride($ctrl.overrideModal.emp.id)" title="Reset to role defaults">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Access Modal -->
+        <div ng-if="$ctrl.teamAccessModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;" ng-click="$ctrl.teamAccessModal=null">
+            <div class="card border-0 shadow-lg rounded-4" style="width:440px;max-width:96vw;" ng-click="$event.stopPropagation()">
+                <div class="card-header border-0 rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center" style="background:linear-gradient(135deg,#059669,#047857);">
+                    <div>
+                        <h6 class="fw-bold text-white mb-0"><i class="fas fa-users me-2"></i>{{$ctrl.teamAccessModal.emp.employeeName}}</h6>
+                        <small class="text-white opacity-75">Manage team access</small>
+                    </div>
+                    <button class="btn btn-sm rounded-circle" style="background:rgba(255,255,255,0.2);color:white;width:30px;height:30px;" ng-click="$ctrl.teamAccessModal=null">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">
+                        <i class="fas fa-home me-1 text-primary"></i>
+                        Primary team: <strong>{{$ctrl.getTeamName($ctrl.teamAccessModal.emp.teamId)}}</strong>
+                        <br>Toggle additional teams this employee can access.
+                    </p>
+                    <div ng-repeat="team in $ctrl.teams track by team.teamId" class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                 style="width:30px;height:30px;background:linear-gradient(135deg,#6366f1,#4f46e5);font-size:0.72rem;">
+                                {{team.teamName.charAt(0)}}
+                            </div>
+                            <span class="fw-semibold small">{{team.teamName}}</span>
+                            <span class="badge rounded-pill" style="background:#1e3a5f;color:white;font-size:0.62rem;" ng-if="team.teamId === $ctrl.teamAccessModal.emp.teamId">
+                                <i class="fas fa-home me-1"></i>Primary
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span ng-if="team.teamId === $ctrl.teamAccessModal.emp.teamId" class="text-muted" style="font-size:0.7rem;">Cannot remove primary</span>
+                            <div class="form-check form-switch mb-0" ng-if="team.teamId !== $ctrl.teamAccessModal.emp.teamId">
+                                <input class="form-check-input" type="checkbox"
+                                       ng-model="$ctrl.teamAccessModal.teamAccess[team.teamId]"
+                                       ng-change="$ctrl.toggleTeamAccess($ctrl.teamAccessModal.emp, team)">
+                            </div>
+                            <input class="form-check-input" type="checkbox" ng-if="team.teamId === $ctrl.teamAccessModal.emp.teamId" checked disabled>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-muted" style="font-size:0.72rem;"><i class="fas fa-info-circle me-1"></i>Employee needs to re-login to see new teams in the team switcher.</div>
+                </div>
+            </div>
+        </div>
+
     `,
     controller: function(ApiService, AuthService, $location, $rootScope) {
         var ctrl = this;
@@ -221,20 +464,85 @@ app.component('superAdminDashboard', {
                 ctrl.employees = ApiService.data.employees;
                 ctrl.controls = ApiService.data.allControls;
                 ctrl.controlTypes = ApiService.data.controlTypes;
+
+                // Build userTeamMap in background — non-blocking
+                ctrl.userTeamMap = {};
+                ctrl.teams.forEach(function(t) {
+                    ApiService.get('/api/teams/' + t.teamId + '/members').then(function(r) {
+                        (r.data || []).forEach(function(m) {
+                            if (!ctrl.userTeamMap[m.userId]) ctrl.userTeamMap[m.userId] = [];
+                            if (ctrl.userTeamMap[m.userId].indexOf(t.teamId) === -1) {
+                                ctrl.userTeamMap[m.userId].push(t.teamId);
+                            }
+                        });
+                    }).catch(function() {
+                        // Endpoint not available yet (needs backend restart) — silently ignore
+                    });
+                });
                 
                 ctrl.stats.totalControlTypes = ctrl.controlTypes.length;
-                
+                ctrl._roleBreakdownCache = {};
+                ctrl._computeCompanyStats();
                 ctrl.loading = false;
-                $rootScope.$apply();
+                if (!$rootScope.$$phase) { $rootScope.$apply(); }
             }).catch(function(error) {
                 console.error('Error loading data:', error);
                 ctrl.loading = false;
-                $rootScope.$apply();
+                if (!$rootScope.$$phase) { $rootScope.$apply(); }
             });
         };
         
+        ctrl.teamColors = [
+            'linear-gradient(135deg,#6366f1,#4f46e5)',
+            'linear-gradient(135deg,#10b981,#059669)',
+            'linear-gradient(135deg,#f59e0b,#d97706)',
+            'linear-gradient(135deg,#3b82f6,#2563eb)',
+            'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+            'linear-gradient(135deg,#ef4444,#dc2626)'
+        ];
+
+        ctrl.companyStats = { totalUniqueEmployees: 0, completedControls: 0, avgProgress: 0 };
+
+        ctrl._computeCompanyStats = function() {
+            // Unique employees (by id, not counting duplicates across teams)
+            var uniqueEmpIds = {};
+            (ctrl.employees || []).forEach(function(e) { uniqueEmpIds[e.id] = true; });
+            ctrl.companyStats.totalUniqueEmployees = Object.keys(uniqueEmpIds).length;
+
+            var controls = ctrl.controls || [];
+            ctrl.companyStats.completedControls = controls.filter(function(c) {
+                return (c.statusName || '').toLowerCase() === 'completed';
+            }).length;
+            ctrl.companyStats.avgProgress = controls.length > 0
+                ? Math.round(controls.reduce(function(s, c) { return s + (c.progress || 0); }, 0) / controls.length)
+                : 0;
+        };
+
         ctrl.getTeamEmployeeCount = function(teamId) {
             return ctrl.employees.filter(function(e) { return e.teamId === teamId; }).length;
+        };
+
+        ctrl.getTeamAvgProgress = function(teamId) {
+            var tc = ctrl.controls.filter(function(c) { return c.teamId === teamId; });
+            if (!tc.length) return 0;
+            return Math.round(tc.reduce(function(s, c) { return s + (c.progress || 0); }, 0) / tc.length);
+        };
+
+        // Cache role breakdowns to avoid infinite digest
+        ctrl._roleBreakdownCache = {};
+        ctrl.getTeamRoleBreakdown = function(teamId) {
+            if (ctrl._roleBreakdownCache[teamId]) return ctrl._roleBreakdownCache[teamId];
+            var emps = ctrl.employees.filter(function(e) { return e.teamId === teamId; });
+            var roleMap = {};
+            emps.forEach(function(e) {
+                var r = e.role || 'Unknown';
+                roleMap[r] = (roleMap[r] || 0) + 1;
+            });
+            ctrl._roleBreakdownCache[teamId] = Object.keys(roleMap)
+                .map(function(r) { return { role: r, count: roleMap[r] }; })
+                .sort(function(a, b) { return b.count - a.count; })
+                .slice(0, 4);
+            return ctrl._roleBreakdownCache[teamId];
         };
         
         ctrl.getTeamControlCount = function(teamId) {
@@ -244,9 +552,261 @@ app.component('superAdminDashboard', {
         ctrl.getTeamControlTypeCount = function(teamId) {
             return ctrl.controlTypes.filter(function(ct) { return ct.teamId === teamId; }).length;
         };
+
+        // Members list helpers
+        ctrl.memberSearch = '';
+
+        ctrl.getTeamEmployees = function(teamId, search) {
+            return ctrl.employees.filter(function(e) {
+                if (e.teamId !== teamId) return false;
+                if (!search) return true;
+                var s = search.toLowerCase();
+                return (e.employeeName || '').toLowerCase().includes(s) ||
+                       (e.role || '').toLowerCase().includes(s) ||
+                       (e.email || '').toLowerCase().includes(s);
+            });
+        };
+
+        ctrl.getUnassignedEmployees = function(search) {
+            return ctrl.employees.filter(function(e) {
+                if (e.teamId) return false;
+                if (!search) return true;
+                var s = search.toLowerCase();
+                return (e.employeeName || '').toLowerCase().includes(s) ||
+                       (e.role || '').toLowerCase().includes(s);
+            });
+        };
+
+        ctrl.getRoleColor = function(role) {
+            if (!role) return '#94a3b8';
+            var r = role.toLowerCase();
+            if (r.includes('admin')) return '#dc2626';
+            if (r.includes('architect') || r.includes('software')) return '#7c3aed';
+            if (r.includes('team lead') || r.includes('lead')) return '#2563eb';
+            if (r.includes('project manager') || r.includes('manager')) return '#d97706';
+            if (r.includes('qa')) return '#059669';
+            if (r.includes('developer')) return '#0891b2';
+            return '#6366f1';
+        };
+
+        // --- Role Permissions ---
+        ctrl.permissionRoles = ['Admin', 'Software Architecturer', 'Team Lead', 'Project Manager', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer'];
+
+        ctrl.permissionDefs = [
+            { key: 'canAddControl',       label: 'Add Controls',         icon: 'fas fa-plus-circle' },
+            { key: 'canEditControl',      label: 'Edit Controls',        icon: 'fas fa-edit' },
+            { key: 'canDeleteControl',    label: 'Delete Controls',      icon: 'fas fa-trash' },
+            { key: 'canAddEmployee',      label: 'Add Employees',        icon: 'fas fa-user-plus' },
+            { key: 'canEditEmployee',     label: 'Edit Employees',       icon: 'fas fa-user-edit' },
+            { key: 'canDeleteEmployee',   label: 'Delete Employees',     icon: 'fas fa-user-minus' },
+            { key: 'canMarkProgress',     label: 'Mark Progress',        icon: 'fas fa-chart-line' },
+            { key: 'canAddComment',       label: 'Add Comments',         icon: 'fas fa-comment-dots' },
+            { key: 'canEditSubDescription', label: 'Edit Sub-Objectives', icon: 'fas fa-tasks' }
+        ];
+
+        var PERM_KEY = 'rolePermissions';
+
+        var defaultPermissions = {
+            canAddControl:        { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': true,  'QA Engineer': true,  'Intern Developer': true,  'Intern QA Engineer': true  },
+            canEditControl:       { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canDeleteControl:     { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canAddEmployee:       { 'Admin': true, 'Software Architecturer': false, 'Team Lead': false, 'Project Manager': true, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canEditEmployee:      { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canDeleteEmployee:    { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canMarkProgress:      { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': true,  'QA Engineer': false, 'Intern Developer': true,  'Intern QA Engineer': false },
+            canAddComment:        { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
+            canEditSubDescription:{ 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': true,  'QA Engineer': true,  'Intern Developer': true,  'Intern QA Engineer': true  }
+        };
+
+        ctrl._loadPermissions = function() {
+            try {
+                var stored = localStorage.getItem(PERM_KEY);
+                ctrl.permissions = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(defaultPermissions));
+            } catch(e) {
+                ctrl.permissions = JSON.parse(JSON.stringify(defaultPermissions));
+            }
+            // Always ensure Admin = true for all
+            ctrl.permissionDefs.forEach(function(p) {
+                if (!ctrl.permissions[p.key]) ctrl.permissions[p.key] = JSON.parse(JSON.stringify(defaultPermissions[p.key]));
+                ctrl.permissions[p.key]['Admin'] = true;
+            });
+        };
+
+        ctrl.savePermissions = function() {
+            ctrl.permissionDefs.forEach(function(p) { ctrl.permissions[p.key]['Admin'] = true; });
+            localStorage.setItem(PERM_KEY, JSON.stringify(ctrl.permissions));
+            Swal.fire({ icon: 'success', title: 'Saved', text: 'Permissions updated. Members need to re-login for changes to take effect.', timer: 2500, showConfirmButton: false });
+        };
+
+        ctrl.resetPermissions = function() {
+            ctrl.permissions = JSON.parse(JSON.stringify(defaultPermissions));
+            localStorage.setItem(PERM_KEY, JSON.stringify(ctrl.permissions));
+            Swal.fire({ icon: 'info', title: 'Reset', text: 'Permissions reset to defaults.', timer: 1800, showConfirmButton: false });
+        };
+
+        ctrl._loadPermissions();
+
+        // --- User Permission Overrides ---
+        var USER_PERM_KEY = 'userPermissionOverrides';
+
+        ctrl.overrideModal = null;
+        ctrl.overrideTeamFilter = '';
+        ctrl.userTeamMap = {};
+
+        ctrl._loadUserOverrides = function() {
+            try {
+                var stored = localStorage.getItem(USER_PERM_KEY);
+                ctrl.userOverrides = stored ? JSON.parse(stored) : {};
+            } catch(e) { ctrl.userOverrides = {}; }
+        };
+        ctrl._loadUserOverrides();
+
+        ctrl.getFilteredEmployeesForOverride = function() {
+            if (!ctrl.employees) return [];
+            return ctrl.employees.filter(function(e) {
+                if (!ctrl.overrideTeamFilter) return true;
+                var tid = parseInt(ctrl.overrideTeamFilter);
+                // Check primary team
+                if (e.teamId === tid) return true;
+                // Check additional teams via userTeamMap
+                if (e.userId && ctrl.userTeamMap && ctrl.userTeamMap[e.userId]) {
+                    return ctrl.userTeamMap[e.userId].indexOf(tid) !== -1;
+                }
+                return false;
+            });
+        };
+
+        ctrl.getTeamName = function(teamId) {
+            if (!teamId || !ctrl.teams) return 'No Team';
+            var t = ctrl.teams.find(function(t) { return t.teamId === teamId; });
+            return t ? t.teamName : 'Unknown';
+        };
+
+        ctrl.hasOverrides = function(empId) {
+            var o = ctrl.userOverrides[String(empId)];
+            return o && Object.keys(o).length > 0;
+        };
+
+        ctrl.getUserOverrideLabels = function(empId) {
+            var o = ctrl.userOverrides[String(empId)];
+            if (!o) return [];
+            return Object.keys(o).filter(function(k) { return o[k]; }).map(function(k) {
+                var def = ctrl.permissionDefs.find(function(p) { return p.key === k; });
+                return def ? def.label : k;
+            });
+        };
+
+        ctrl.getRoleDefault = function(permKey, role) {
+            if (!ctrl.permissions || !ctrl.permissions[permKey]) return false;
+            return ctrl.permissions[permKey][role] === true;
+        };
+
+        ctrl.openUserOverride = function(emp) {
+            var key = String(emp.id) + '_' + String(emp.teamId || '0');
+            var existing = ctrl.userOverrides[key] || {};
+            var overrides = {};
+            ctrl.permissionDefs.forEach(function(p) {
+                overrides[p.key] = existing.hasOwnProperty(p.key)
+                    ? existing[p.key]
+                    : ctrl.getRoleDefault(p.key, emp.role);
+            });
+            ctrl.overrideModal = { emp: emp, key: key, overrides: overrides };
+        };
+
+        ctrl.saveUserOverride = function() {
+            if (!ctrl.overrideModal) return;
+            ctrl.userOverrides[ctrl.overrideModal.key] = angular.copy(ctrl.overrideModal.overrides);
+            localStorage.setItem(USER_PERM_KEY, JSON.stringify(ctrl.userOverrides));
+            ctrl.overrideModal = null;
+            Swal.fire({ icon: 'success', title: 'Saved', text: 'User permissions updated for this team.', timer: 1800, showConfirmButton: false });
+        };
+
+        ctrl.clearUserOverride = function(empId) {
+            var emp = ctrl.overrideModal ? ctrl.overrideModal.emp : null;
+            var key = emp ? String(emp.id) + '_' + String(emp.teamId || '0') : String(empId);
+            delete ctrl.userOverrides[key];
+            localStorage.setItem(USER_PERM_KEY, JSON.stringify(ctrl.userOverrides));
+            ctrl.overrideModal = null;
+            Swal.fire({ icon: 'info', title: 'Reset', text: 'User permissions reset to role defaults for this team.', timer: 1800, showConfirmButton: false });
+        };
+
+        // --- Team Access Management ---
+        ctrl.teamAccessModal = null;
+
+        ctrl.openTeamAccess = function(emp) {
+            // Build current team access map from UserTeams (use employees data as proxy)
+            // We need the user's userId — find it via the employee's userId field
+            var teamAccess = {};
+            ctrl.teams.forEach(function(t) {
+                // Check if this employee appears in any team's employee list
+                // We use the employees array which has teamId per employee record
+                // But an employee can only be in one team in the employees table
+                // The real source is UserTeams — we'll check via the API
+                teamAccess[t.teamId] = false;
+            });
+            // Mark current team as true
+            if (emp.teamId) teamAccess[emp.teamId] = true;
+
+            // Load actual UserTeams from API
+            ApiService.get('/api/teams/' + (emp.teamId || 0) + '/members').then(function() {
+                // For now use what we know from the employees list
+            }).catch(function() {});
+
+            // Check all teams for this employee's userId
+            if (emp.userId) {
+                ctrl.teams.forEach(function(t) {
+                    ApiService.get('/api/teams/' + t.teamId + '/members').then(function(r) {
+                        var members = r.data || [];
+                        if (members.some(function(m) { return m.userId === emp.userId; })) {
+                            teamAccess[t.teamId] = true;
+                        }
+                    }).catch(function() {});
+                });
+            }
+
+            ctrl.teamAccessModal = { emp: emp, teamAccess: teamAccess };
+        };
+
+        ctrl.toggleTeamAccess = function(emp, team) {
+            if (!emp.userId) {
+                Swal.fire({ icon: 'warning', title: 'No User Account', text: 'This employee has no linked user account.', timer: 2000, showConfirmButton: false });
+                ctrl.teamAccessModal.teamAccess[team.teamId] = !ctrl.teamAccessModal.teamAccess[team.teamId];
+                return;
+            }
+            var adding = ctrl.teamAccessModal.teamAccess[team.teamId];
+            var url = '/api/teams/' + team.teamId + '/members/' + emp.userId;
+            var req = adding ? ApiService.post(url, {}) : ApiService.delete(url);
+            req.then(function() {
+                var msg = adding ? (emp.employeeName + ' added to ' + team.teamName) : (emp.employeeName + ' removed from ' + team.teamName);
+                Swal.fire({ icon: 'success', title: 'Done', text: msg, timer: 1800, showConfirmButton: false });
+            }).catch(function(err) {
+                // Revert toggle on error
+                ctrl.teamAccessModal.teamAccess[team.teamId] = !ctrl.teamAccessModal.teamAccess[team.teamId];
+                var msg = err && err.status === 405 ? 'Backend restart required for this feature.' : 'Failed to update team access.';
+                Swal.fire({ icon: 'error', title: 'Error', text: msg, timer: 2500, showConfirmButton: false });
+            });
+        };
+
+        ctrl.hasOverrides = function(empId) {
+            // Check if any team-scoped override exists for this employee
+            return Object.keys(ctrl.userOverrides).some(function(k) {
+                return k.startsWith(String(empId) + '_');
+            });
+        };
+
+        ctrl.getUserOverrideLabels = function(empId) {
+            var emp = (ctrl.employees || []).find(function(e) { return e.id === empId; });
+            var key = emp ? String(emp.id) + '_' + String(emp.teamId || '0') : String(empId) + '_0';
+            var o = ctrl.userOverrides[key];
+            if (!o) return [];
+            return Object.keys(o).filter(function(k) { return o[k]; }).map(function(k) {
+                var def = ctrl.permissionDefs.find(function(p) { return p.key === k; });
+                return def ? def.label : k;
+            });
+        };
         
         ctrl.createTeam = function() {
-            $location.path('/teams');
+            $location.path('/teams').search({ action: 'create' });
         };
         
         ctrl.goToTeamManagement = function() {
@@ -254,7 +814,7 @@ app.component('superAdminDashboard', {
         };
         
         ctrl.assignEmployees = function() {
-            $location.path('/controls/employees');
+            $location.path('/teams').search({ action: 'assign' });
         };
         
         ctrl.viewTeamControls = function(team) {

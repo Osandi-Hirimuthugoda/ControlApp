@@ -3,11 +3,12 @@
 
 <head>
     <base href="/">
-    <meta charset="UTF-8">
+       <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Control Management</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.14/dist/browser/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -16,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/styles.css?v=3" rel="stylesheet">
+    <link href="/styles.css?v=14" rel="stylesheet">
 </head>
 
 <body ng-controller="MainController as main">
@@ -33,7 +34,7 @@
     <div ng-controller="ToastController as toast" ng-if="toast.message" class="position-fixed top-0 end-0 p-3"
         style="z-index: 9999">
         <div class="toast show text-white"
-            ng-class="{'bg-success': toast.type==='success', 'bg-danger': toast.type==='error'}">
+            ng-class="{'bg-success': toast.type==='success', 'bg-danger': toast.type==='error', 'bg-info': toast.type==='info', 'bg-warning': toast.type==='warning'}">
             <div class="d-flex">
                 <div class="toast-body">{{toast.message}}</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toast.clear()"></button>
@@ -42,29 +43,35 @@
     </div>
 
     <!-- JS files Loading -->
-    <script src="/app.module.js"></script>
-    <script src="/services/notification.service.js"></script>
-    <script src="/services/auth.service.js"></script>
-    <script src="/services/api.service.js"></script>
-    <script src="/components/navbar.component.js"></script>
+    <script src="/app.module.js?v=9"></script>
+    <script src="/services/notification.service.js?v=9"></script>
+    <script src="/services/auth.service.js?v=15"></script>
+    <script src="/services/api.service.js?v=12"></script>
+    <script src="/services/signalr.service.js?v=3"></script>
+    <script src="/components/navbar.component.js?v=10"></script>
     <script src="/components/login.component.js"></script>
-    <script src="/components/dashboard.component.js"></script>
+    <script src="/components/dashboard.component.js?v=27"></script>
     <script src="/components/controls-sidebar.component.js"></script>
-    <script src="/components/controls-view.component.js"></script>
-    <script src="/components/control-board.component.js?v=3"></script>
+    <script src="/components/controls-view.component.js?v=2"></script>
+    <script src="/components/control-board.component.js?v=28"></script>
+    <script src="/components/qa-defects.component.js?v=33"></script>
+    <script src="/components/test-cases-grid.component.js?v=34"></script>
     <script src="/components/qa-progress.component.js"></script>
     <script src="/components/qa-progress-view.component.js"></script>
+    <script src="/components/qa-test-cases.component.js?v=11"></script>
     <script src="/components/developer-progress.component.js"></script>
     <script src="/components/developer-progress-view.component.js"></script>
     <script src="/components/add-control-type.component.js"></script>
-    <script src="/components/control-types-list.component.js"></script>
+    <script src="/components/control-types-list.component.js?v=5"></script>
     <script src="/components/control-types-management.component.js"></script>
     <script src="/components/sub-objectives-view.component.js"></script>
+    <script src="/components/sub-objectives-qa.component.js"></script>
     <script src="/components/new-employee.component.js"></script>
     <script src="/components/employees-list.component.js"></script>
     <script src="/components/profile.component.js"></script>
-    <script src="/components/team-management.component.js"></script>
-    <script src="/components/super-admin-dashboard.component.js"></script>
+    <script src="/components/team-management.component.js?v=4"></script>
+    <script src="/components/rc-matrix.component.js?v=14"></script>
+    <script src="/components/super-admin-dashboard.component.js?v=16"></script>
     <script src="/components/access-denied.component.js"></script>
 
 </body>

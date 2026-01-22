@@ -40,9 +40,17 @@ app.component('controlsSidebar', {
                     ng-click="$ctrl.switchSection('controls')">
                 <i class="fas fa-list-check me-2"></i>Controls Board
             </button>
+            
+            <!-- My Test Cases (QA Engineers) -->
+            <button class="sidebar-btn" 
+                    ng-if="$ctrl.isQAEngineer()"
+                    ng-click="$ctrl.goToTestCases()">
+                <i class="fas fa-clipboard-check me-2"></i>My Test Cases
+            </button>
 
             <!-- Add New Control -->
             <button class="sidebar-btn" 
+                    ng-if="$ctrl.canAddControl()"
                     ng-class="{'active': $ctrl.currentSection === 'addControlType'}" 
                     ng-click="$ctrl.switchSection('addControlType')">
                 <i class="fas fa-plus-circle me-2"></i>Add Controls
@@ -135,10 +143,27 @@ app.component('controlsSidebar', {
         };
         
         /**
+         * Checks if user is QA Engineer
+         */
+        ctrl.isQAEngineer = function () {
+            var role = AuthService.getRole();
+            if (!role) return false;
+            var roleStr = role.toLowerCase().trim();
+            return roleStr === 'qa engineer' || roleStr === 'qa' || roleStr === 'intern qa engineer';
+        };
+        
+        /**
          * Navigate to Team Management page
          */
         ctrl.goToTeamManagement = function () {
             $location.path('/teams');
+        };
+        
+        /**
+         * Navigate to Test Cases page
+         */
+        ctrl.goToTestCases = function () {
+            $location.path('/qa-test-cases');
         };
         
         /**

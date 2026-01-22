@@ -41,6 +41,7 @@ namespace ControlApp.API.Repositories
         public async Task<IEnumerable<Controls>> GetControlsWithDetailsAsync(string? searchTerm = null)
         {
             var query = _dbSet
+                .AsNoTracking()
                 .Include(c => c.Type)
                 .Include(c => c.Employee)
                 .Include(c => c.QAEmployee)

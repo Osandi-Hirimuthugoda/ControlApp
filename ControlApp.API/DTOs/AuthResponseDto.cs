@@ -10,6 +10,7 @@ namespace ControlApp.API.DTOs
         public int? CurrentTeamId { get; set; }
         public string? CurrentTeamName { get; set; }
         public bool IsSuperAdmin { get; set; }
+        public int? EmployeeId { get; set; }
         public List<UserTeamDto> Teams { get; set; } = new List<UserTeamDto>();
     }
 

@@ -13,9 +13,16 @@ namespace ControlApp.API.Services
             _releaseRepository = releaseRepository;
         }
 
-        public async Task<IEnumerable<ReleaseDto>> GetAllReleasesAsync()
+        public async Task<IEnumerable<ReleaseDto>> GetAllReleasesAsync(int? teamId = null)
         {
             var releases = await _releaseRepository.GetAllAsync();
+            
+            // If teamId is provided, filter releases that have controls for that team
+            if (teamId.HasValue)
+            {
+                releases = releases.Where(r => r.Controls != null && r.Controls.Any(c => c.TeamId == teamId.Value));
+            }
+            
             return releases.Select(MapToDto);
         }
 

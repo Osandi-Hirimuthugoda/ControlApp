@@ -139,6 +139,42 @@ namespace ControlApp.API.Services
             return teams.Select(t => MapToDto(t));
         }
 
+        public async Task<bool> AddUserToTeamAsync(int userId, int teamId)
+        {
+            // Check if already a member
+            var existing = await _context.Set<UserTeam>()
+                .FirstOrDefaultAsync(ut => ut.UserId == userId && ut.TeamId == teamId);
+            if (existing != null)
+            {
+                existing.IsActive = true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            _context.Set<UserTeam>().Add(new UserTeam { UserId = userId, TeamId = teamId, IsActive = true });
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveUserFromTeamAsync(int userId, int teamId)
+        {
+            var existing = await _context.Set<UserTeam>()
+                .FirstOrDefaultAsync(ut => ut.UserId == userId && ut.TeamId == teamId);
+            if (existing == null) return false;
+            existing.IsActive = false;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<object>> GetTeamMembersAsync(int teamId)
+        {
+            var members = await _context.Set<UserTeam>()
+                .Include(ut => ut.User)
+                .Where(ut => ut.TeamId == teamId && ut.IsActive)
+                .Select(ut => new { ut.UserId, ut.User.Username, ut.User.Role })
+                .ToListAsync();
+            return members.Cast<object>();
+        }
+
         private TeamDto MapToDto(Team team)
         {
             return new TeamDto

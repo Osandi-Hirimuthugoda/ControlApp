@@ -149,5 +149,58 @@ namespace ControlApp.API.Controllers
                 return StatusCode(500, "Error deleting team");
             }
         }
+
+        // POST: api/teams/{teamId}/members/{userId}
+        [HttpPost("{teamId}/members/{userId}")]
+        [Authorize]
+        public async Task<ActionResult> AddUserToTeam(int teamId, int userId)
+        {
+            try
+            {
+                var result = await _teamService.AddUserToTeamAsync(userId, teamId);
+                if (!result) return BadRequest("Could not add user to team");
+                return Ok(new { message = "User added to team" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding user {UserId} to team {TeamId}", userId, teamId);
+                return StatusCode(500, "Error adding user to team");
+            }
+        }
+
+        // DELETE: api/teams/{teamId}/members/{userId}
+        [HttpDelete("{teamId}/members/{userId}")]
+        [Authorize]
+        public async Task<ActionResult> RemoveUserFromTeam(int teamId, int userId)
+        {
+            try
+            {
+                var result = await _teamService.RemoveUserFromTeamAsync(userId, teamId);
+                if (!result) return BadRequest("Could not remove user from team");
+                return Ok(new { message = "User removed from team" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing user {UserId} from team {TeamId}", userId, teamId);
+                return StatusCode(500, "Error removing user from team");
+            }
+        }
+
+        // GET: api/teams/{teamId}/members
+        [HttpGet("{teamId}/members")]
+        [Authorize]
+        public async Task<ActionResult> GetTeamMembers(int teamId)
+        {
+            try
+            {
+                var members = await _teamService.GetTeamMembersAsync(teamId);
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting members for team {TeamId}", teamId);
+                return StatusCode(500, "Error getting team members");
+            }
+        }
     }
 }

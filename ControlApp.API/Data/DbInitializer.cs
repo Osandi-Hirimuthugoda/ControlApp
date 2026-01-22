@@ -106,17 +106,23 @@ namespace ControlApp.API.Data
         {
             var requiredStatuses = new[] 
             { 
-                new { Name = "Analyze", Order = 1 },
-                new { Name = "HLD", Order = 2 },
-                new { Name = "LLD", Order = 3 },
+                new { Name = "Analyze",     Order = 1 },
+                new { Name = "HLD",         Order = 2 },
+                new { Name = "LLD",         Order = 3 },
                 new { Name = "Development", Order = 4 },
                 new { Name = "Dev Testing", Order = 5 },
-                new { Name = "QA", Order = 6 }
+                new { Name = "QA",          Order = 6 },
+                new { Name = "On Hold",     Order = 7 },
+                new { Name = "Completed",   Order = 8 }
             };
-            
+
+            // Old status names to remove (if no controls reference them)
+            var obsoleteNames = new[] { "Not Started", "In Progress", "Testing" };
+
             var existingStatuses = context.Statuses.ToList();
             bool hasChanges = false;
 
+            // Add or update required statuses
             foreach (var statusDef in requiredStatuses)
             {
                 var existing = existingStatuses.FirstOrDefault(s => s.StatusName == statusDef.Name);
@@ -139,6 +145,35 @@ namespace ControlApp.API.Data
             }
 
             if (hasChanges) context.SaveChanges();
+
+            // Remove obsolete statuses that have no controls referencing them
+            var toRemove = context.Statuses
+                .Where(s => obsoleteNames.Contains(s.StatusName))
+                .ToList();
+
+            foreach (var old in toRemove)
+            {
+                bool inUse = context.Controls.Any(c => c.StatusId == old.Id);
+                if (!inUse)
+                {
+                    context.Statuses.Remove(old);
+                    logger.LogInformation("Removed obsolete status: {StatusName}", old.StatusName);
+                }
+                else
+                {
+                    // Remap controls using obsolete status to "Analyze"
+                    var analyzeStatus = context.Statuses.FirstOrDefault(s => s.StatusName == "Analyze");
+                    if (analyzeStatus != null)
+                    {
+                        var affected = context.Controls.Where(c => c.StatusId == old.Id).ToList();
+                        foreach (var ctrl in affected) ctrl.StatusId = analyzeStatus.Id;
+                        context.Statuses.Remove(old);
+                        logger.LogInformation("Remapped {Count} controls from '{Old}' to 'Analyze' and removed old status", affected.Count, old.StatusName);
+                    }
+                }
+            }
+
+            context.SaveChanges();
         }
 
         private static void EnsureDefaultAdminUser(AppDbContext context, ILogger logger)

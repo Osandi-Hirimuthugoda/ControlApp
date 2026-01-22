@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
+using ControlApp.API.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControlApp.API.Controllers
@@ -13,11 +15,13 @@ namespace ControlApp.API.Controllers
     {
         private readonly IControlService _controlService;
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public ControlsController(IControlService controlService, AppDbContext context)// dependency 
+        public ControlsController(IControlService controlService, AppDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _controlService = controlService;
             _context = context;
+            _hubContext = hubContext;
         }
 
          
@@ -137,8 +141,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
-        // Admin, Team Lead, and Software Architecturer can update controls
-        [Authorize(Roles = "Admin, Team Lead, Software Architecturer")]
+        [Authorize]
         public async Task<ActionResult<ControlDto>> UpdateControl(int id, [FromBody] UpdateControlDto updateControlDto)
         {
             try
@@ -149,9 +152,50 @@ namespace ControlApp.API.Controllers
                 if (id != updateControlDto.ControlId)
                     return BadRequest($"Control ID mismatch. URL ID: {id}, Body ID: {updateControlDto.ControlId}");
 
+                // Team-scoped access: verify the control belongs to the user's team
+                // Super Admin and Admin bypass this check
+                var isSuperAdmin = User.Claims.FirstOrDefault(c => c.Type == "IsSuperAdmin")?.Value == "True";
+                var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+                
+                if (!isSuperAdmin && !string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    var teamIdClaim = User.Claims.FirstOrDefault(c => c.Type == "TeamId")?.Value;
+                    if (int.TryParse(teamIdClaim, out int userTeamId))
+                    {
+                        var existingControl = await _controlService.GetControlByIdAsync(id);
+                        if (existingControl != null && existingControl.TeamId.HasValue && existingControl.TeamId.Value != userTeamId)
+                        {
+                            return Forbid(); // Cannot edit controls from other teams
+                        }
+                    }
+                }
+
+                var oldControl = await _controlService.GetControlByIdAsync(id);
                 var control = await _controlService.UpdateControlAsync(id, updateControlDto);
                 if (control == null)
                     return NotFound($"Control with ID {id} not found.");
+
+                // Send SignalR notification if QA Engineer was newly assigned
+                if (updateControlDto.QAEmployeeId.HasValue &&
+                    (oldControl == null || oldControl.QAEmployeeId != updateControlDto.QAEmployeeId))
+                {
+                    try
+                    {
+                        var qaEmployee = await _context.Employees
+                            .Include(e => e.User)
+                            .FirstOrDefaultAsync(e => e.Id == updateControlDto.QAEmployeeId.Value);
+
+                        if (qaEmployee?.UserId != null)
+                        {
+                            await _hubContext.Clients.User(qaEmployee.UserId.Value.ToString())
+                                .SendAsync("QAAssigned", control.Description, control.ControlId);
+                        }
+                    }
+                    catch (Exception signalREx)
+                    {
+                        Console.WriteLine($"Error sending QA assignment notification: {signalREx.Message}");
+                    }
+                }
 
                 return Ok(control);
             }
@@ -162,6 +206,49 @@ namespace ControlApp.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Error updating control: {ex.Message}" });
+            }
+        }
+
+        // POST: api/controls/{id}/activity  — log a sub-description status change
+        [HttpPost("{id}/activity")]
+        [Authorize]
+        public async Task<IActionResult> LogSubDescriptionActivity(int id, [FromBody] LogSubDescActivityDto dto)
+        {
+            try
+            {
+                var control = await _context.Controls.FirstOrDefaultAsync(c => c.ControlId == id);
+                if (control == null) return NotFound();
+
+                string? performerName = dto.PerformedByName;
+                if (string.IsNullOrEmpty(performerName) && dto.PerformedByEmployeeId.HasValue)
+                {
+                    var emp = await _context.Employees.FirstOrDefaultAsync(e => e.Id == dto.PerformedByEmployeeId.Value);
+                    performerName = emp?.EmployeeName;
+                }
+
+                var log = new ControlApp.API.Models.ActivityLog
+                {
+                    EntityType = "SubDescription",
+                    EntityId = id,
+                    ControlId = id,
+                    Action = "StatusChanged",
+                    OldValue = dto.OldStatus,
+                    NewValue = dto.NewStatus,
+                    Description = $"Sub-objective '{dto.SubDescription}' status changed from '{dto.OldStatus}' to '{dto.NewStatus}'",
+                    PerformedByEmployeeId = dto.PerformedByEmployeeId,
+                    PerformedByName = performerName,
+                    Timestamp = DateTime.UtcNow,
+                    TeamId = control.TeamId ?? 0
+                };
+
+                _context.ActivityLogs.Add(log);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Activity logged" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error logging activity: {ex.Message}" });
             }
         }
 

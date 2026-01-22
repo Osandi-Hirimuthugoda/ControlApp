@@ -20,6 +20,9 @@ namespace ControlApp.API
             public DbSet<Insight> Insights { get; set; }
             public DbSet<Team> Teams { get; set; }
             public DbSet<UserTeam> UserTeams { get; set; }
+            public DbSet<Defect> Defects { get; set; }
+            public DbSet<TestCase> TestCases { get; set; }
+            public DbSet<ActivityLog> ActivityLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -232,6 +235,93 @@ namespace ControlApp.API
                     .HasForeignKey(ct => ct.TeamId)
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Configure Defect entity
+            modelBuilder.Entity<Defect>(entity =>
+            {
+                entity.HasKey(e => e.DefectId);
+                
+                entity.HasOne(d => d.Control)
+                    .WithMany()
+                    .HasForeignKey(d => d.ControlId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ReportedBy)
+                    .WithMany()
+                    .HasForeignKey(d => d.ReportedByEmployeeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.AssignedTo)
+                    .WithMany()
+                    .HasForeignKey(d => d.AssignedToEmployeeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(d => d.Team)
+                    .WithMany()
+                    .HasForeignKey(d => d.TeamId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indexes for efficient querying
+                entity.HasIndex(d => d.ControlId);
+                entity.HasIndex(d => d.Status);
+                entity.HasIndex(d => d.Severity);
+                entity.HasIndex(d => d.TeamId);
+            });
+
+            // Configure TestCase entity
+            modelBuilder.Entity<TestCase>(entity =>
+            {
+                entity.HasKey(e => e.TestCaseId);
+                
+                entity.HasOne(tc => tc.Control)
+                    .WithMany()
+                    .HasForeignKey(tc => tc.ControlId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(tc => tc.TestedBy)
+                    .WithMany()
+                    .HasForeignKey(tc => tc.TestedByEmployeeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(tc => tc.Defect)
+                    .WithMany()
+                    .HasForeignKey(tc => tc.DefectId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(tc => tc.Team)
+                    .WithMany()
+                    .HasForeignKey(tc => tc.TeamId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indexes for efficient querying
+                entity.HasIndex(tc => tc.ControlId);
+                entity.HasIndex(tc => tc.Status);
+                entity.HasIndex(tc => tc.TeamId);
+            });
+
+            // Configure ActivityLog entity
+            modelBuilder.Entity<ActivityLog>(entity =>
+            {
+                entity.HasKey(e => e.ActivityLogId);
+
+                entity.HasOne(a => a.Control)
+                    .WithMany()
+                    .HasForeignKey(a => a.ControlId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.PerformedBy)
+                    .WithMany()
+                    .HasForeignKey(a => a.PerformedByEmployeeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(a => new { a.ControlId, a.Timestamp });
+                entity.HasIndex(a => new { a.EntityType, a.EntityId });
             });
         }
 

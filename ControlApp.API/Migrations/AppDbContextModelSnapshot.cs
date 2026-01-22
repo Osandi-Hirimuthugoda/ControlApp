@@ -22,6 +22,66 @@ namespace ControlApp.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ControlApp.API.Models.ActivityLog", b =>
+                {
+                    b.Property<int>("ActivityLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityLogId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ControlId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("NewValue")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OldValue")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("PerformedByEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PerformedByName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ActivityLogId");
+
+                    b.HasIndex("PerformedByEmployeeId");
+
+                    b.HasIndex("ControlId", "Timestamp");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("ActivityLogs");
+                });
+
             modelBuilder.Entity("ControlApp.API.Models.ControlType", b =>
                 {
                     b.Property<int>("ControlTypeId")
@@ -113,6 +173,87 @@ namespace ControlApp.API.Migrations
                     b.HasIndex("TypeId");
 
                     b.ToTable("Controls");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Defect", b =>
+                {
+                    b.Property<int>("DefectId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DefectId"));
+
+                    b.Property<int?>("AssignedToEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AttachmentUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ControlId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ReportedByEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReportedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResolutionNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ResolvedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("SubDescriptionIndex")
+                        .HasColumnType("int");
+
+                    b.HasKey("DefectId");
+
+                    b.HasIndex("AssignedToEmployeeId");
+
+                    b.HasIndex("ControlId");
+
+                    b.HasIndex("ReportedByEmployeeId");
+
+                    b.HasIndex("Severity");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Defects");
                 });
 
             modelBuilder.Entity("ControlApp.API.Models.Employee", b =>
@@ -359,6 +500,75 @@ namespace ControlApp.API.Migrations
                     b.ToTable("Teams", "osandi");
                 });
 
+            modelBuilder.Entity("ControlApp.API.Models.TestCase", b =>
+                {
+                    b.Property<int>("TestCaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestCaseId"));
+
+                    b.Property<string>("ActualResult")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ControlId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DefectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExpectedResult")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TestCaseTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SubDescriptionIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TestSteps")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TestType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TestedByEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("TestedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TestCaseId");
+
+                    b.HasIndex("ControlId");
+
+                    b.HasIndex("DefectId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("TestedByEmployeeId");
+
+                    b.ToTable("TestCases");
+                });
+
             modelBuilder.Entity("ControlApp.API.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -440,6 +650,24 @@ namespace ControlApp.API.Migrations
                     b.ToTable("UserTeams");
                 });
 
+            modelBuilder.Entity("ControlApp.API.Models.ActivityLog", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Controls", "Control")
+                        .WithMany()
+                        .HasForeignKey("ControlId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.Employee", "PerformedBy")
+                        .WithMany()
+                        .HasForeignKey("PerformedByEmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Control");
+
+                    b.Navigation("PerformedBy");
+                });
+
             modelBuilder.Entity("ControlApp.API.Models.ControlType", b =>
                 {
                     b.HasOne("ControlApp.API.Models.Team", "Team")
@@ -494,6 +722,39 @@ namespace ControlApp.API.Migrations
                     b.Navigation("Team");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Defect", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Employee", "AssignedTo")
+                        .WithMany()
+                        .HasForeignKey("AssignedToEmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ControlApp.API.Models.Controls", "Control")
+                        .WithMany()
+                        .HasForeignKey("ControlId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.Employee", "ReportedBy")
+                        .WithMany()
+                        .HasForeignKey("ReportedByEmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedTo");
+
+                    b.Navigation("Control");
+
+                    b.Navigation("ReportedBy");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("ControlApp.API.Models.Employee", b =>
@@ -591,6 +852,39 @@ namespace ControlApp.API.Migrations
                     b.Navigation("ProjectManager");
 
                     b.Navigation("TeamLead");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.TestCase", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Controls", "Control")
+                        .WithMany()
+                        .HasForeignKey("ControlId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.Defect", "Defect")
+                        .WithMany()
+                        .HasForeignKey("DefectId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.Employee", "TestedBy")
+                        .WithMany()
+                        .HasForeignKey("TestedByEmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Control");
+
+                    b.Navigation("Defect");
+
+                    b.Navigation("Team");
+
+                    b.Navigation("TestedBy");
                 });
 
             modelBuilder.Entity("ControlApp.API.Models.UserTeam", b =>

@@ -115,9 +115,23 @@ app.component('controlBoard', {
                             <td class="py-3">
                                 <div class="control-content-card p-3 rounded-4 shadow-sm" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.03); max-height: 60vh; overflow-y: auto;">
                                     <div ng-if="!control.editing">
-                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
                                             <h6 class="fw-bold text-dark mb-0 fs-5 line-height-base">{{control.description}}</h6>
                                             <div class="d-flex gap-2 align-items-center">
+                                                <button class="btn btn-sm btn-outline-primary rounded-3 px-3 py-2" ng-click="$ctrl.openTestCasesGrid(control)" title="Manage Test Cases">
+                                                    <i class="fas fa-table me-1"></i>Test Cases
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-3 px-3 py-2" ng-click="$ctrl.openDefectsModal(control)" title="Manage Defects">
+                                                    <i class="fas fa-bug me-1"></i>Defects
+                                                    <span class="badge bg-danger ms-2" ng-if="control._defectCount > 0">{{control._defectCount}}</span>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-indigo rounded-3 px-3 py-2"
+                                                        ng-if="control._subDescriptionsArray && control._subDescriptionsArray.length > 0"
+                                                        ng-click="$ctrl.selectedControlForSubQA = control; $event.stopPropagation()"
+                                                        title="Sub-Objectives QA View"
+                                                        style="border-color:#6366f1;color:#6366f1;">
+                                                    <i class="fas fa-layer-group me-1"></i>Sub QA
+                                                </button>
                                                 <span class="badge bg-light text-success border border-success-subtle rounded-3 py-2 px-3 fw-bold" ng-if="control.releaseDate">
                                                     <i class="fas fa-calendar-check me-2"></i>Deadline: {{$ctrl.formatDate(control.releaseDate)}}
                                                 </span>
@@ -163,6 +177,21 @@ app.component('controlBoard', {
                                                                            ng-keypress="$event.keyCode === 13 && $ctrl.updateSubDescriptionFieldQuick(control, subDesc); $event.keyCode === 13 && (subDesc._showDescriptionPicker = false)"
                                                                            ng-blur="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showDescriptionPicker = false"
                                                                            id="subdesc-desc-{{$index}}">
+                                                                    <!-- Sub-description level Test Cases & Defects buttons -->
+                                                                    <div class="d-flex gap-1 mt-2">
+                                                                        <button class="btn btn-xs btn-outline-primary rounded-2 px-2 py-1"
+                                                                                style="font-size:0.7rem;"
+                                                                                ng-click="$ctrl.openTestCasesGrid(control, (control._currentSubIndex || 0)); $event.stopPropagation()"
+                                                                                title="Test Cases for this sub-objective">
+                                                                            <i class="fas fa-clipboard-check me-1"></i>TC
+                                                                        </button>
+                                                                        <button class="btn btn-xs btn-outline-danger rounded-2 px-2 py-1"
+                                                                                style="font-size:0.7rem;"
+                                                                                ng-click="$ctrl.openDefectsModal(control, (control._currentSubIndex || 0)); $event.stopPropagation()"
+                                                                                title="Defects for this sub-objective">
+                                                                            <i class="fas fa-bug me-1"></i>Bug
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                                 <input ng-if="subDesc.editing" type="text" class="form-control form-control-sm border-success shadow-none" ng-model="subDesc.editModel.description">
                                                             </td>
@@ -230,58 +259,51 @@ app.component('controlBoard', {
                                                                     <span ng-if="!subDesc._showDatePicker" ng-click="subDesc._showDatePicker = true; $event.stopPropagation()" class="text-success fw-bold cursor-pointer hover-underline" style="font-size: 0.85rem;">
                                                                         <i class="fas fa-calendar-alt me-1 opacity-75"></i>{{$ctrl.formatDate(subDesc.releaseDate) || 'Date'}}
                                                                     </span>
-                                                                    <input ng-if="subDesc._showDatePicker" type="date" class="form-control form-control-sm border-success p-1 h-auto" style="width: 110px; font-size: 0.8rem;" 
-                                                                           ng-model="subDesc.releaseDateInputFormatted" 
-                                                                           ng-change="$ctrl.updateSubDescriptionReleaseQuick(control, subDesc, $index); subDesc._showDatePicker = false;"
+                                                                    <input ng-if="subDesc._showDatePicker" type="date" class="form-control form-control-sm border-success p-1 h-auto" style="width: 140px; font-size: 0.8rem;" 
+                                                                           ng-model="subDesc._releaseDatePicker"
+                                                                           ng-change="$ctrl.onSubDescDatePick(control, subDesc, $index)"
                                                                            ng-blur="subDesc._showDatePicker = false">
                                                                 </div>
-                                                                <input ng-if="subDesc.editing" type="date" class="form-control form-control-sm border-success h-auto" ng-model="subDesc.editModel.releaseDateInputFormatted">
+                                                                <input ng-if="subDesc.editing" type="date" class="form-control form-control-sm border-success h-auto" ng-model="subDesc.editModel._releaseDatePicker" ng-change="$ctrl.onSubDescEditDatePick(subDesc)">
                                                             </td>
                                                             <td class="py-4" style="vertical-align: top;">
                                                                 <!-- Comments Section with Scroll -->
                                                                 <div>
-                                                                    <!-- Comments List - Scrollable -->
-                                                                    <div class="comment-scroller" style="max-height: 180px; overflow-y: auto; margin-bottom: 0.5rem; padding-right: 0.5rem;">
-                                                                        <!-- Date Groups -->
-                                                                        <div ng-repeat="dateGroup in $ctrl.groupCommentsByDate(subDesc) track by $index" class="mb-3">
-                                                                            <!-- Date Header -->
-                                                                            <div class="fw-bold text-success mb-2" style="font-size: 0.9rem; padding: 0.25rem 0.5rem; background: #f0fdf4; border-radius: 4px;">[{{dateGroup.date}}]</div>
-                                                                            
-                                                                            <!-- Comments for this date -->
-                                                                            <div ng-repeat="comment in dateGroup.comments track by $index" class="ps-2 mb-2">
-                                                                                <div class="d-flex justify-content-between align-items-start p-3 rounded-3 bg-light border-start border-3" style="font-size: 0.95rem; border-color: #10b981 !important; line-height: 1.6;">
-                                                                                     <div class="flex-grow-1" ng-if="!comment._editing">
-                                                                                         <div ng-click="$ctrl.canEditSubDescription() && !comment.text.includes('[SYSTEM]') && $ctrl.startEditComment(subDesc.comments[comment._originalIndex]); $event.stopPropagation()" 
-                                                                                              class="text-dark" 
-                                                                                              ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription() && !comment.text.includes('[SYSTEM]'), 'text-muted fst-italic small': comment.text.includes('[SYSTEM]')}">
-                                                                                             <i class="fas fa-history me-1 opacity-50" ng-if="comment.text.includes('[SYSTEM]')"></i>
-                                                                                             {{comment.text}}
-                                                                                         </div>
-                                                                                     </div>
-                                                                                    <div class="flex-grow-1" ng-if="comment._editing">
-                                                                                        <input type="text" class="form-control form-control-sm border-success shadow-none py-1" style="font-size: 0.9rem;" 
-                                                                                               ng-model="comment._editText"
-                                                                                               ng-keypress="$event.keyCode === 13 && $ctrl.saveEditedComment(control, comment._originalIndex, $parent.$parent.$index)"
-                                                                                               ng-blur="$ctrl.saveEditedComment(control, comment._originalIndex, $parent.$parent.$index)"
-                                                                                               id="comment-edit-{{$parent.$parent.$index}}-{{comment._originalIndex}}">
-                                                                                    </div>
-                                                                                    <button ng-if="$ctrl.canEditSubDescription() && !comment._editing" class="btn btn-link p-0 text-danger ms-2" style="font-size: 0.75rem;" ng-click="$ctrl.deleteCommentFromSubDescription(control, $parent.$parent.$index, comment._originalIndex)" title="Delete">
-                                                                                        <i class="fas fa-trash-alt"></i>
-                                                                                    </button>
+                                                                    <!-- Last 3 comments inline -->
+                                                                    <div ng-if="subDesc.comments && subDesc.comments.length > 0">
+                                                                        <div ng-repeat="comment in $ctrl.getLastComments(subDesc, 3) track by $index"
+                                                                             class="p-2 rounded-3 mb-1 border-start border-2"
+                                                                             ng-class="$index === 0 ? 'border-success' : 'border-light'"
+                                                                             ng-style="{'background': $index === 0 ? '#f0fdf4' : '#f8fafc', 'border-color': $index === 0 ? '#10b981 !important' : '#e2e8f0 !important'}"
+                                                                             style="font-size:0.8rem;">
+                                                                            <div class="d-flex justify-content-between align-items-start">
+                                                                                <div class="flex-grow-1" ng-class="{'text-muted fst-italic': comment.text.includes('[SYSTEM]'), 'text-dark': !comment.text.includes('[SYSTEM]')}">
+                                                                                    <i class="fas fa-history me-1 opacity-40" ng-if="comment.text.includes('[SYSTEM]')"></i>
+                                                                                    {{comment.text}}
                                                                                 </div>
+                                                                                <span class="text-muted ms-2 flex-shrink-0" style="font-size:0.65rem;white-space:nowrap;">{{$ctrl.getTimeAgoFromDate(comment.date)}}</span>
                                                                             </div>
                                                                         </div>
-                                                                        
-                                                                        <div ng-if="!subDesc.comments || subDesc.comments.length === 0" class="text-center py-2 text-muted small">
-                                                                            <i class="fas fa-comment-slash opacity-50 me-2"></i>No recent insights
-                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- View all button -->
+                                                                    <div ng-if="subDesc.comments && subDesc.comments.length > 3" class="mb-1">
+                                                                        <button class="btn btn-sm w-100 rounded-2"
+                                                                                style="background:#eef2ff;color:#4f46e5;font-size:0.72rem;padding:3px 8px;border:1px solid #c7d2fe;"
+                                                                                ng-click="$ctrl.openInsightsModal(control, subDesc, $index); $event.stopPropagation()">
+                                                                            <i class="fas fa-expand-alt me-1"></i>View all ({{subDesc.comments.length}})
+                                                                        </button>
+                                                                    </div>
+
+                                                                    <div ng-if="!subDesc.comments || subDesc.comments.length === 0" class="text-center py-2 text-muted small">
+                                                                        <i class="fas fa-comment-slash opacity-50 me-2"></i>No recent insights
                                                                     </div>
                                                                     
-                                                                    <!-- Add Comment Input - Always Visible -->
-                                                                    <div class="input-group input-group-sm">
-                                                                        <input type="text" class="form-control border-0 shadow-none bg-light small" ng-model="subDesc.newComment" placeholder="Add Insight..." ng-keyup="$event.keyCode === 13 && $ctrl.addCommentToSubDescriptionQuick(control, $index)" style="font-size: 0.85rem;">
+                                                                    <!-- Add Comment Input -->
+                                                                    <div ng-if="$ctrl.canAddComment()" class="input-group input-group-sm mt-2">
+                                                                        <input type="text" class="form-control border-0 shadow-none bg-light small" ng-model="subDesc.newComment" placeholder="Add Insight..." ng-keyup="$event.keyCode === 13 && $ctrl.addCommentToSubDescriptionQuick(control, $index)" style="font-size:0.85rem;">
                                                                         <button class="btn btn-success p-1 border-0" ng-click="$ctrl.addCommentToSubDescriptionQuick(control, $index)" ng-disabled="!subDesc.newComment" title="Add Comment">
-                                                                            <i class="fas fa-paper-plane px-1" style="font-size: 0.7rem;"></i>
+                                                                            <i class="fas fa-paper-plane px-1" style="font-size:0.7rem;"></i>
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -298,6 +320,13 @@ app.component('controlBoard', {
                                         <div class="mb-3">
                                             <label class="form-label small fw-bold text-success border-bottom pb-1 mb-2 d-block">Modify Main Objective</label>
                                             <textarea class="form-control border-success shadow-none fs-6 fw-bold" ng-model="control.editDescription" rows="2"></textarea>
+                                        </div>
+                                        <!-- Release Date -->
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-success border-bottom pb-1 mb-2 d-block">
+                                                <i class="fas fa-calendar-alt me-1"></i>Release Date
+                                            </label>
+                                            <input type="text" class="form-control border-success shadow-none" ng-model="control.releaseDateInputFormatted" placeholder="YYYY-MM-DD">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label small fw-bold text-success border-bottom pb-1 mb-2 d-block">Sub-Objective Architecture</label>
@@ -321,7 +350,7 @@ app.component('controlBoard', {
                                                         </div>
                                                         <div class="col-md-3">
                                                             <label class="x-small fw-bold text-secondary text-uppercase mb-1">Release Target</label>
-                                                            <input type="date" class="form-control form-control-sm" ng-model="subDesc.releaseDateInputFormatted" ng-change="$ctrl.updateEditModeReleaseDate(subDesc, control)">
+                                                            <input type="text" class="form-control form-control-sm" placeholder="YYYY-MM-DD" ng-model="subDesc.releaseDateInputFormatted" ng-change="$ctrl.updateEditModeReleaseDate(subDesc, control)">
                                                         </div>
                                                         <div class="col-md-1 d-flex align-items-end justify-content-center">
                                                             <button class="btn btn-outline-danger btn-sm border-0" ng-click="$ctrl.removeSubDescriptionFromArray(control, $index)">
@@ -369,7 +398,18 @@ app.component('controlBoard', {
                                     <div ng-if="!control.editing">
                                     <div class="mb-2">
                                         <div class="main-desc-box p-3 rounded-4 shadow-sm" style="background: rgba(255,255,255,0.7); border-left: 5px solid #10b981;">
-                                            <div class="fw-bold text-dark fs-5 mb-1">{{control.description}}</div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="fw-bold text-dark fs-5">{{control.description}}</div>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-2 py-1" ng-click="$ctrl.openTestCasesGrid(control)" title="Manage Test Cases">
+                                                        <i class="fas fa-table me-1"></i>Test Cases
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" ng-click="$ctrl.openDefectsModal(control)" title="Manage Defects">
+                                                        <i class="fas fa-bug me-1"></i>Defects
+                                                        <span class="badge bg-danger ms-1" ng-if="control._defectCount > 0">{{control._defectCount}}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <div class="d-flex align-items-center gap-3">
                                                 <span class="badge fw-medium py-2 px-3 rounded-pill {{$ctrl.getStatusBadgeClass(control.statusName)}}">
                                                     <i class="fas fa-signal me-2"></i>{{control.statusName || 'No Stage'}}
@@ -465,8 +505,8 @@ app.component('controlBoard', {
                                                         <div class="d-flex flex-column align-items-center">
                                                             <div class="input-group input-group-sm" style="width: 140px;">
                                                                 <input type="date" class="form-control form-control-sm border-0 bg-transparent x-small text-muted p-0 text-center fw-bold"
-                                                                       ng-model="subDesc.releaseDateInputFormatted"
-                                                                       ng-change="$ctrl.updateSubDescriptionReleaseQuick(control, subDesc, $index)">
+                                                                       ng-model="subDesc._releaseDatePicker"
+                                                                       ng-change="$ctrl.onSubDescDatePick(control, subDesc, $index)">
                                                             </div>
                                                             <div class="x-small text-success fw-bold" ng-if="subDesc.releaseDate"><i class="fas fa-check-circle me-1"></i>Target Acquired</div>
                                                         </div>
@@ -479,7 +519,7 @@ app.component('controlBoard', {
                                     </div>
                                     
                                     <!-- Quick Comment Bar -->
-                                    <div class="mt-3 ps-1">
+                                    <div ng-if="$ctrl.canAddComment()" class="mt-3 ps-1">
                                         <div class="input-group shadow-sm rounded-pill overflow-hidden border">
                                             <span class="input-group-text border-0 bg-white ps-3"><i class="fas fa-comment-dots text-primary opacity-50"></i></span>
                                             <input type="text" class="form-control border-0 bg-white" placeholder="Broadcast progress update..." ng-model="control._quickComment" ng-keyup="$event.keyCode === 13 && $ctrl.addQuickComment(control)">
@@ -547,7 +587,7 @@ app.component('controlBoard', {
                                                         </div>
                                                         <div class="col-md-3">
                                                             <label class="x-small fw-bold text-secondary text-uppercase mb-1">Release Target</label>
-                                                            <input type="date" class="form-control form-control-sm" ng-model="subDesc.releaseDateInputFormatted" ng-change="$ctrl.updateEditModeReleaseDate(subDesc, control)">
+                                                            <input type="text" class="form-control form-control-sm" placeholder="YYYY-MM-DD" ng-model="subDesc.releaseDateInputFormatted" ng-change="$ctrl.updateEditModeReleaseDate(subDesc, control)">
                                                         </div>
                                                         <div class="col-md-1 d-flex align-items-end justify-content-center">
                                                             <button class="btn btn-outline-danger btn-sm border-0" ng-click="$ctrl.removeSubDescriptionFromArray(control, $index)">
@@ -619,32 +659,138 @@ app.component('controlBoard', {
                     <button class="btn-close" ng-click="$ctrl.showAddControlModal = false"></button>
                 </div>
                 <form>
-                    <div class="mb-4">
-                        <label class="form-label x-small fw-bold text-uppercase text-muted">System Category</label>
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label class="form-label x-small fw-bold text-uppercase text-muted">System Category <span class="text-danger">*</span></label>
                         <select class="form-select border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.typeId" required>
-                            <option value="">-- Select Taxonomy --</option>
+                            <option value="">-- Select Category --</option>
                             <option ng-repeat="type in $ctrl.store.controlTypes" value="{{type.controlTypeId}}">{{type.typeName}}</option>
                         </select>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label x-small fw-bold text-uppercase text-muted">Primary Objective</label>
+                    <!-- Primary Objective -->
+                    <div class="mb-3">
+                        <label class="form-label x-small fw-bold text-uppercase text-muted">Primary Objective <span class="text-danger">*</span></label>
                         <textarea class="form-control border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.description" placeholder="What is the main goal?" rows="3" required></textarea>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label x-small fw-bold text-uppercase text-muted">Lead Assignee (Optional)</label>
-                        <select class="form-select border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.employeeId">
-                            <option value="">-- Universal Assign --</option>
-                            <option ng-repeat="emp in $ctrl.getEmployeesForCurrentTeam()" value="{{emp.id}}">{{emp.employeeName}}</option>
-                        </select>
+                    <!-- Developer + QA side by side -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label x-small fw-bold text-uppercase text-muted">Developer</label>
+                            <select class="form-select border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.employeeId">
+                                <option value="">-- Unassigned --</option>
+                                <option ng-repeat="emp in $ctrl.getEmployeesForCurrentTeam()" value="{{emp.id}}">{{emp.employeeName}}</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label x-small fw-bold text-uppercase text-muted">QA Engineer</label>
+                            <select class="form-select border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.qaEmployeeId">
+                                <option value="">-- Unassigned --</option>
+                                <option ng-repeat="emp in $ctrl.getEmployeesForCurrentTeam()" value="{{emp.id}}">{{emp.employeeName}}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label x-small fw-bold text-uppercase text-muted">Target Launch Date</label>
-                        <input type="date" class="form-control border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.releaseDate">
+                    <!-- Status + Release Date side by side -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label x-small fw-bold text-uppercase text-muted">Initial Status</label>
+                            <select class="form-select border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.statusId">
+                                <option value="">-- No Status --</option>
+                                <option ng-repeat="s in $ctrl.store.statuses" value="{{s.id}}">{{s.statusName}}</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label x-small fw-bold text-uppercase text-muted">Target Release Date</label>
+                            <input type="date" class="form-control border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.releaseDate">
+                        </div>
+                    </div>
+                    <!-- Sub-objectives -->
+                    <div class="mb-3">
+                        <label class="form-label x-small fw-bold text-uppercase text-muted">Sub-Objectives</label>
+                        <div ng-repeat="sub in $ctrl.newControl.subObjectives track by $index" class="d-flex gap-2 mb-2">
+                            <input type="text" class="form-control form-control-sm border-0 shadow-sm bg-light" ng-model="sub.text" placeholder="Sub-objective {{$index + 1}}">
+                            <button type="button" class="btn btn-sm btn-outline-danger px-2" ng-click="$ctrl.newControl.subObjectives.splice($index, 1)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" ng-click="$ctrl.newControl.subObjectives.push({text:''})">
+                            <i class="fas fa-plus me-1"></i>Add Sub-Objective
+                        </button>
                     </div>
                     <button class="btn btn-success w-100 py-3 rounded-4 shadow-lg fw-bold mt-2" ng-click="$ctrl.createNewControl()" ng-disabled="$ctrl.isCreatingControl">
-                        <i class="fas fa-rocket me-2"></i>{{$ctrl.isCreatingControl ? 'Initializing Control...' : 'Deploy Control to Board'}}
+                        <i class="fas fa-rocket me-2"></i>{{$ctrl.isCreatingControl ? 'Creating...' : 'Deploy Control to Board'}}
                     </button>
                 </form>
+            </div>
+        </div>
+        
+        <!-- Test Cases Grid Modal -->
+        <test-cases-grid ng-if="$ctrl.selectedControlForTestCases" control="$ctrl.selectedControlForTestCases" sub-description-index="$ctrl.selectedSubDescriptionIndex" on-close="$ctrl.closeTestCasesGrid()"></test-cases-grid>
+        
+        <!-- Defects Modal -->
+        <qa-defects ng-if="$ctrl.selectedControlForDefects" control="$ctrl.selectedControlForDefects" sub-description-index="$ctrl.selectedSubDescriptionIndex" on-close="$ctrl.closeDefectsModal()"></qa-defects>
+
+        <!-- Sub-Objectives QA Modal -->
+        <sub-objectives-qa ng-if="$ctrl.selectedControlForSubQA" control="$ctrl.selectedControlForSubQA" on-close="$ctrl.selectedControlForSubQA = null"></sub-objectives-qa>
+
+        <!-- Insights Full Modal -->
+        <div ng-if="$ctrl.insightsModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9990;display:flex;align-items:center;justify-content:center;" ng-click="$ctrl.insightsModal=null">
+            <div class="card border-0 shadow-lg rounded-4" style="width:560px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;" ng-click="$event.stopPropagation()">
+                <!-- Header -->
+                <div class="card-header border-0 rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-start"
+                     style="background:linear-gradient(135deg,#10b981,#059669);flex-shrink:0;">
+                    <div>
+                        <h6 class="fw-bold text-white mb-0"><i class="fas fa-lightbulb me-2"></i>Latest Insights</h6>
+                        <small class="text-white opacity-75">{{$ctrl.insightsModal.subDesc.description}}</small>
+                    </div>
+                    <button class="btn btn-sm rounded-circle" style="background:rgba(255,255,255,0.2);color:white;width:30px;height:30px;" ng-click="$ctrl.insightsModal=null">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- Add comment -->
+                <div ng-if="$ctrl.canAddComment()" class="px-4 py-2 border-bottom" style="flex-shrink:0;background:#f8fafc;">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control border-0 shadow-none bg-white" ng-model="$ctrl.insightsModal.subDesc.newComment" placeholder="Add new insight..." ng-keyup="$event.keyCode === 13 && $ctrl.addCommentToSubDescriptionQuick($ctrl.insightsModal.control, $ctrl.insightsModal.subIndex)" style="font-size:0.85rem;">
+                        <button class="btn btn-success border-0" ng-click="$ctrl.addCommentToSubDescriptionQuick($ctrl.insightsModal.control, $ctrl.insightsModal.subIndex)" ng-disabled="!$ctrl.insightsModal.subDesc.newComment">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Scrollable comments -->
+                <div style="overflow-y:auto;flex:1;padding:1rem;">
+                    <div ng-if="!$ctrl.insightsModal.subDesc.comments || $ctrl.insightsModal.subDesc.comments.length === 0" class="text-center py-5 text-muted">
+                        <i class="fas fa-comment-slash fa-2x opacity-25 mb-2"></i>
+                        <p class="small">No insights yet</p>
+                    </div>
+                    <div ng-repeat="dateGroup in $ctrl.groupCommentsByDate($ctrl.insightsModal.subDesc) track by $index" class="mb-3">
+                        <div class="fw-bold mb-2 px-2 py-1 rounded-2" style="font-size:0.75rem;background:#f0fdf4;color:#059669;">[{{dateGroup.date}}]</div>
+                        <div ng-repeat="comment in dateGroup.comments track by $index" class="mb-2">
+                            <div class="d-flex justify-content-between align-items-start p-3 rounded-3 border-start border-3"
+                                 style="background:#f8fafc;border-color:#10b981 !important;font-size:0.85rem;line-height:1.5;">
+                                <div class="flex-grow-1" ng-if="!comment._editing">
+                                    <div ng-class="{'text-muted fst-italic small': comment.text.includes('[SYSTEM]'), 'text-dark': !comment.text.includes('[SYSTEM]')}"
+                                         ng-click="$ctrl.canEditSubDescription() && !comment.text.includes('[SYSTEM]') && $ctrl.startEditComment($ctrl.insightsModal.subDesc.comments[comment._originalIndex]); $event.stopPropagation()"
+                                         ng-class="{'cursor-pointer': $ctrl.canEditSubDescription() && !comment.text.includes('[SYSTEM]')}">
+                                        <i class="fas fa-history me-1 opacity-50" ng-if="comment.text.includes('[SYSTEM]')"></i>
+                                        {{comment.text}}
+                                    </div>
+                                    <div class="text-muted mt-1" style="font-size:0.7rem;">
+                                        <i class="fas fa-clock me-1"></i>{{$ctrl.getTimeAgoFromDate(comment.date)}}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1" ng-if="comment._editing">
+                                    <input type="text" class="form-control form-control-sm border-success" ng-model="comment._editText"
+                                           ng-keypress="$event.keyCode === 13 && $ctrl.saveEditedComment($ctrl.insightsModal.control, comment._originalIndex, $ctrl.insightsModal.subIndex)"
+                                           ng-blur="$ctrl.saveEditedComment($ctrl.insightsModal.control, comment._originalIndex, $ctrl.insightsModal.subIndex)">
+                                </div>
+                                <button ng-if="$ctrl.canEditSubDescription() && !comment._editing && !comment.text.includes('[SYSTEM]')" 
+                                        class="btn btn-link p-0 text-danger ms-2" style="font-size:0.75rem;"
+                                        ng-click="$ctrl.deleteCommentFromSubDescription($ctrl.insightsModal.control, $ctrl.insightsModal.subIndex, comment._originalIndex)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -657,6 +803,7 @@ app.component('controlBoard', {
         ctrl.selectedEmployeeFilter = null;
         ctrl.selectedDescriptionFilter = null;
         ctrl.showAddControlModal = false;
+        ctrl.insightsModal = null;
 
         // Pagination State
         ctrl.currentPage = 1;
@@ -796,7 +943,11 @@ app.component('controlBoard', {
         ctrl.newControl = {
             typeId: null,
             description: '',
-            employeeId: null
+            employeeId: null,
+            qaEmployeeId: null,
+            statusId: null,
+            releaseDate: null,
+            subObjectives: []
         };
         ctrl.isCreatingControl = false;
 
@@ -827,7 +978,7 @@ app.component('controlBoard', {
 
         // Only Admin, Team Lead, Software Architecture can add progress comments
         ctrl.canAddComment = function () {
-            return AuthService.canMarkProgress();
+            return AuthService.canAddComment();
         };
 
         // Only Admin, Team Lead, Software Architecture can edit sub-descriptions
@@ -1045,7 +1196,7 @@ app.component('controlBoard', {
         // Listen for control types updates to refresh controls
         var controlTypesUpdateListener = $rootScope.$on('controlTypesUpdated', function () {
             // Reload controls when control types are updated
-            ApiService.loadAllControls().then(function () {
+            ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                 ctrl.ensureDateObjects();
                 // Force view update (only if not already in digest cycle)
                 if (!$scope.$$phase && !$rootScope.$$phase) {
@@ -1080,7 +1231,7 @@ app.component('controlBoard', {
         var employeesUpdateListener = $rootScope.$on('employeesUpdated', function () {
             // Reload employees first, then controls, so new employees appear in controls board
             ApiService.loadEmployees().then(function () {
-                return ApiService.loadAllControls();
+                return ApiService.loadAllControls(AuthService.getTeamId());
             }).then(function () {
                 ctrl.ensureDateObjects();
                 // Force view update (only if not already in digest cycle)
@@ -1094,7 +1245,7 @@ app.component('controlBoard', {
         var routeChangeListener = $rootScope.$on('$routeChangeSuccess', function (event, current) {
             if (current && current.$$route && (current.$$route.originalPath === '/controls' || current.$$route.originalPath === '/controls/:section')) {
                 // Reload controls when navigating back to controls page to ensure fresh data
-                ApiService.loadAllControls().then(function () {
+                ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                     ctrl.ensureDateObjects();
                     // Force view update
                     if (!$scope.$$phase && !$rootScope.$$phase) {
@@ -1536,7 +1687,7 @@ app.component('controlBoard', {
                     // Reload releases first to get latest release data
                     return ApiService.loadReleases().then(function () {
                         // Then reload controls
-                        return ApiService.loadAllControls().then(function () {
+                        return ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                             // After reload, find this specific control and ensure date is properly set
                             var reloadedControl = ctrl.store.allControls.find(function (c) {
                                 return c.controlId === control.controlId;
@@ -1649,22 +1800,12 @@ app.component('controlBoard', {
                 // But allow controls without employeeId to show (they can be assigned later)
                 if (!c.controlId) return;
 
-                // Filter by current team - only show controls from the selected team
-                // If currentTeamId is null (All Teams), show all controls
+                // Filter by current team - only show controls that explicitly belong to the selected team
                 if (currentTeamId !== null && currentTeamId !== undefined) {
-                    // Check if control belongs to current team
-                    var controlTeamId = c.teamId || (c.employeeId ? (function() {
-                        // If control doesn't have teamId, try to get it from employee
-                        var emp = ctrl.store.employees.find(function(e) { return e.id === c.employeeId; });
-                        return emp ? emp.teamId : null;
-                    })() : null);
-                    
-                    // Convert both to numbers for comparison to handle type mismatches
                     var currentTeamIdNum = parseInt(currentTeamId);
-                    var controlTeamIdNum = controlTeamId ? parseInt(controlTeamId) : null;
-                    
+                    var controlTeamIdNum = c.teamId ? parseInt(c.teamId) : null;
                     if (controlTeamIdNum !== currentTeamIdNum) {
-                        return; // Skip controls from other teams
+                        return; // Skip controls from other teams or with no teamId
                     }
                 }
 
@@ -1746,20 +1887,8 @@ app.component('controlBoard', {
                     c._viewSubDescs = null;
                 }
 
-                // Key per (employee, type) so the same type for same employee appears only once
-                // Use 'null' for employeeId if it doesn't exist
-                var empId = c.employeeId || 'null';
-                var empTypeKey = String(empId) + '|' + String(c.typeId);
-                if (!employeeTypeMap.has(empTypeKey)) {
-                    employeeTypeMap.set(empTypeKey, c);
-                } else {
-                    // If we already have a control for this (employee, type),
-                    // keep the one with higher controlId (more recent)
-                    var existing = employeeTypeMap.get(empTypeKey);
-                    if (c.controlId != null && existing.controlId != null && c.controlId > existing.controlId) {
-                        employeeTypeMap.set(empTypeKey, c);
-                    }
-                }
+                // Show every control as its own row — deduplicate only by controlId
+                employeeTypeMap.set(controlIdKey, c);
             });
 
             // Return one control per (employee, type) pair
@@ -1831,22 +1960,12 @@ app.component('controlBoard', {
                 // Filter by typeId - must match the type we're looking for
                 if (c.typeId != typeId) return;
 
-                // Filter by current team - only show controls from the selected team
-                // If currentTeamId is null (All Teams), show all controls
+                // Filter by current team - only show controls that explicitly belong to the selected team
                 if (currentTeamId !== null && currentTeamId !== undefined) {
-                    // Check if control belongs to current team
-                    var controlTeamId = c.teamId || (c.employeeId ? (function() {
-                        // If control doesn't have teamId, try to get it from employee
-                        var emp = ctrl.store.employees.find(function(e) { return e.id === c.employeeId; });
-                        return emp ? emp.teamId : null;
-                    })() : null);
-                    
-                    // Convert both to numbers for comparison to handle type mismatches
                     var currentTeamIdNum = parseInt(currentTeamId);
-                    var controlTeamIdNum = controlTeamId ? parseInt(controlTeamId) : null;
-                    
+                    var controlTeamIdNum = c.teamId ? parseInt(c.teamId) : null;
                     if (controlTeamIdNum !== currentTeamIdNum) {
-                        return; // Skip controls from other teams
+                        return; // Skip controls from other teams or with no teamId
                     }
                 }
 
@@ -2168,6 +2287,16 @@ app.component('controlBoard', {
         };
 
         // Check if control is assigned to QA Engineer
+        // Returns true if the current user can access Test Cases & Defects for this control
+        ctrl.canAccessQAFeatures = function (control) {
+            // Admins, Team Leads, Software Architects always have access
+            if (AuthService.isAdmin() || AuthService.isTeamLead() || AuthService.isSoftwareArchitecture()) return true;
+            // QA Engineers can access only if they are the assigned QA on this control
+            var user = AuthService.getUser();
+            if (!user || !user.employeeId) return false;
+            return control.qaEmployeeId && parseInt(control.qaEmployeeId) === parseInt(user.employeeId);
+        };
+
         ctrl.isQAControl = function (control) {
             if (!control) return false;
             // Check if qaEmployeeId is set
@@ -2308,7 +2437,7 @@ app.component('controlBoard', {
 
             // Fix: Initialize models as Date Objects or null
             c.releaseDateInput = c.releaseDate ? new Date(c.releaseDate) : null;
-            c.releaseDateInputFormatted = c.releaseDate ? new Date(c.releaseDate) : null;
+            c.releaseDateInputFormatted = c.releaseDate ? ctrl.formatDateForInput(c.releaseDate) : '';
             c.editReleaseDate = c.releaseDate ? new Date(c.releaseDate) : null;
 
             // Parse Status Progress History for Edit Mode
@@ -2327,16 +2456,26 @@ app.component('controlBoard', {
             if (!control || !control.editStatusId) return;
 
             var newStatusId = parseInt(control.editStatusId);
+            var oldStatusId = control.statusId ? parseInt(control.statusId) : null;
 
-            // Check if we have a saved progress for this status
-            if (control.statusProgressMap && control.statusProgressMap[newStatusId] !== undefined) {
+            // Save current editProgress for the old status before switching
+            if (!control.statusProgressMap) control.statusProgressMap = {};
+            if (oldStatusId !== null && oldStatusId !== newStatusId) {
+                control.statusProgressMap[oldStatusId] = parseInt(control.editProgress || control.progress || 0);
+                // Persist to statusProgress JSON string so it survives saves
+                control.statusProgress = JSON.stringify(control.statusProgressMap);
+            }
+
+            // Restore saved progress for the new status
+            if (control.statusProgressMap[newStatusId] !== undefined) {
                 control.editProgress = control.statusProgressMap[newStatusId];
+                control.progress = control.editProgress; // update progress bar immediately
                 NotificationService.show('Restored progress for this status: ' + control.editProgress + '%', 'info');
             } else {
-                // If no history, maybe default to 0? Or keep current? 
-                // Let's reset to 0 for a fresh status entry if it's not the current status
-                if (newStatusId !== control.statusId) {
+                // No history for this status — reset to 0 only if it's a different status
+                if (newStatusId !== (control.statusId ? parseInt(control.statusId) : null)) {
                     control.editProgress = 0;
+                    control.progress = 0;
                 }
             }
         };
@@ -2555,124 +2694,116 @@ app.component('controlBoard', {
             });
         };
 
+        // Convert Date object from type="date" picker → string, then trigger save
+        ctrl.onSubDescDatePick = function (control, subDesc, subDescIndex) {
+            if (subDesc._releaseDatePicker instanceof Date && !isNaN(subDesc._releaseDatePicker)) {
+                var d = subDesc._releaseDatePicker;
+                var yyyy = d.getFullYear();
+                var mm = String(d.getMonth() + 1).padStart(2, '0');
+                var dd = String(d.getDate()).padStart(2, '0');
+                subDesc.releaseDateInputFormatted = yyyy + '-' + mm + '-' + dd;
+            } else {
+                subDesc.releaseDateInputFormatted = '';
+            }
+            ctrl.updateSubDescriptionReleaseQuick(control, subDesc, subDescIndex);
+        };
+
+        ctrl.onSubDescEditDatePick = function (subDesc) {
+            if (subDesc.editModel._releaseDatePicker instanceof Date && !isNaN(subDesc.editModel._releaseDatePicker)) {
+                var d = subDesc.editModel._releaseDatePicker;
+                var yyyy = d.getFullYear();
+                var mm = String(d.getMonth() + 1).padStart(2, '0');
+                var dd = String(d.getDate()).padStart(2, '0');
+                subDesc.editModel.releaseDateInputFormatted = yyyy + '-' + mm + '-' + dd;
+            } else {
+                subDesc.editModel.releaseDateInputFormatted = '';
+            }
+        };
+
+        // Shared helper: safely serialize a sub-descriptions array to JSON string
+        ctrl.serializeSubDescriptions = function (subDescArray) {
+            var items = (subDescArray || []).map(function (item) {
+                var safeComments = [];
+                if (item.comments && Array.isArray(item.comments)) {
+                    safeComments = item.comments.map(function (c) {
+                        return typeof c === 'string'
+                            ? { text: c, date: new Date().toISOString() }
+                            : { text: c.text || '', date: c.date || new Date().toISOString(), author: c.author || null };
+                    });
+                }
+                return {
+                    description: (item.description || '').trim(),
+                    employeeId: item.employeeId ? parseInt(item.employeeId) : null,
+                    statusId: item.statusId ? parseInt(item.statusId) : null,
+                    progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
+                    releaseId: item.releaseId ? parseInt(item.releaseId) : null,
+                    releaseDate: item.releaseDate ? new Date(item.releaseDate).toISOString() : null,
+                    comments: safeComments
+                };
+            });
+            return JSON.stringify(items);
+        };
+
         // Quick update for sub-description release date
         ctrl.updateSubDescriptionReleaseQuick = function (control, subDesc, subDescIndex) {
-            ctrl.isLocalSave = true; // Set flag to prevent listener refresh
+            ctrl.isLocalSave = true;
 
             var newDateString = subDesc.releaseDateInputFormatted;
 
-            ApiService.findOrCreateReleaseByDate(newDateString).then(function (newReleaseId) {
-                // Update the local sub-description object
-                subDesc.releaseId = newReleaseId;
-                if (newDateString) {
-                    var d = new Date(newDateString);
-                    d.setHours(12, 0, 0, 0);
-                    subDesc.releaseDate = d;
-                } else {
-                    subDesc.releaseDate = null;
+            // Update display immediately (optimistic)
+            if (newDateString) {
+                var dImmediate = new Date(newDateString);
+                dImmediate.setHours(12, 0, 0, 0);
+                subDesc.releaseDate = dImmediate;
+                subDesc._releaseDatePicker = dImmediate;
+            } else {
+                subDesc.releaseDate = null;
+                subDesc._releaseDatePicker = null;
+            }
+
+            // Build updated sub-descriptions JSON directly — no release API call needed
+            var jsonStr = ctrl.serializeSubDescriptions(control._subDescriptionsArray);
+
+            // Update LOCAL + STORE state immediately
+            control.subDescriptions = jsonStr;
+            control._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(jsonStr);
+            if (ctrl.store && ctrl.store.allControls) {
+                var storeControl = ctrl.store.allControls.find(function (c) { return c.controlId === control.controlId; });
+                if (storeControl) {
+                    storeControl.subDescriptions = jsonStr;
+                    storeControl._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(jsonStr);
                 }
+            }
 
-                // Generate the clean array for JSON serialization
-                var updatedSubDescs = control._subDescriptionsArray.map(function (item) {
-                    return {
-                        description: (item.description || '').trim(),
-                        employeeId: item.employeeId ? parseInt(item.employeeId) : null,
-                        statusId: item.statusId ? parseInt(item.statusId) : null,
-                        progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
-                        releaseId: item.releaseId ? parseInt(item.releaseId) : null,
-                        releaseDate: item.releaseDate || null,
-                        comments: item.comments && Array.isArray(item.comments) ? item.comments : []
-                    };
-                });
+            // Send to API
+            var payload = {
+                controlId: parseInt(control.controlId),
+                employeeId: control.employeeId,
+                typeId: control.typeId,
+                description: control.description,
+                subDescriptions: jsonStr,
+                comments: control.comments,
+                progress: control.progress,
+                statusId: control.statusId,
+                releaseId: control.releaseId,
+                releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null
+            };
 
-                var jsonStr = JSON.stringify(updatedSubDescs);
-
-                // Update LOCAL state immediately to ensure UI reflects changes
-                control.subDescriptions = jsonStr;
-                control._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(jsonStr);
-
-                // CRITICAL: Update the STORE object as well to ensure persistence across filter/sort re-runs
-                if (ctrl.store && ctrl.store.allControls) {
-                    var storeControl = ctrl.store.allControls.find(function (c) {
-                        return c.controlId === control.controlId;
-                    });
-                    if (storeControl) {
-                        storeControl.subDescriptions = jsonStr;
-                        storeControl._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(jsonStr);
-                    }
-                }
-
-                // Send to API
-                var payload = {
-                    controlId: parseInt(control.controlId),
-                    employeeId: control.employeeId,
-                    typeId: control.typeId,
-                    description: control.description,
-                    subDescriptions: jsonStr,
-                    comments: control.comments,
-                    progress: control.progress,
-                    statusId: control.statusId,
-                    releaseId: control.releaseId,
-                    releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null
-                };
-
-                return ApiService.updateControl(control.controlId, payload);
-            }).then(function (updatedControl) {
-                NotificationService.show('Sub-description release date updated', 'success');
-
-                // Reload releases to ensure we have the newly created release if any
-                return ApiService.loadReleases().then(function () {
-                    // Update local control object with data from server immediately
-                    if (updatedControl) {
-                        if (updatedControl.subDescriptions) {
-                            control.subDescriptions = updatedControl.subDescriptions;
-                            control._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(updatedControl.subDescriptions);
-                        }
-                        // Note: If updatedControl.subDescriptions is null, we keep our optimistic update
-
-                        // Update other fields that might have changed
-                        control.releaseId = updatedControl.releaseId;
-                        if (updatedControl.releaseDate) {
-                            control.releaseDate = new Date(updatedControl.releaseDate);
-                            control.releaseDateInputFormatted = ctrl.formatDateForInput(control.releaseDate);
-                        } else {
-                            control.releaseDate = null;
-                            control.releaseDateInputFormatted = '';
+            ApiService.updateControl(control.controlId, payload).then(function (updatedControl) {
+                // Patch from server response to ensure consistency
+                if (updatedControl && updatedControl.subDescriptions) {
+                    control.subDescriptions = updatedControl.subDescriptions;
+                    control._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(updatedControl.subDescriptions);
+                    if (ctrl.store && ctrl.store.allControls) {
+                        var sc = ctrl.store.allControls.find(function (c) { return c.controlId === control.controlId; });
+                        if (sc) {
+                            sc.subDescriptions = updatedControl.subDescriptions;
+                            sc._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(updatedControl.subDescriptions);
                         }
                     }
-
-                    // CRITICAL: Re-populate _subDescriptionsArray on the fresh array from server
-                    ctrl.ensureDateObjects();
-
-                    // FORCE REFRESH: Explicitly update the sub-descriptions array to ensure dates display
-                    if (control.subDescriptions) {
-                        var parsedSubDescs = typeof control.subDescriptions === 'string'
-                            ? JSON.parse(control.subDescriptions)
-                            : control.subDescriptions;
-
-                        control._subDescriptionsArray = parsedSubDescs.map(function (sd) {
-                            var releaseObj = null;
-                            if (sd.releaseId && ctrl.store && ctrl.store.releases) {
-                                releaseObj = ctrl.store.releases.find(function (r) { return r.releaseId === parseInt(sd.releaseId); });
-                            }
-
-                            return {
-                                description: sd.description || '',
-                                employeeId: sd.employeeId || null,
-                                statusId: sd.statusId || null,
-                                progress: sd.progress || null,
-                                releaseId: sd.releaseId || null,
-                                releaseDate: releaseObj ? new Date(releaseObj.releaseDate) : null,
-                                releaseDateInputFormatted: releaseObj ? ctrl.formatDateForInput(new Date(releaseObj.releaseDate)) : '',
-                                comments: sd.comments || [],
-                                editing: false
-                            };
-                        });
-                    }
-
-                    // Force Angular digest cycle
-                    $timeout(function () { }, 0);
-                });
+                }
+                NotificationService.show('Release date saved', 'success');
+                $timeout(function () { }, 0);
             }).catch(function (error) {
                 console.error('Error updating sub-description release date:', error);
                 NotificationService.show('Error saving release date', 'error');
@@ -2705,15 +2836,35 @@ app.component('controlBoard', {
                     if (oldStatusId !== newStatusId) {
                         subDesc.statusName = statusObj.statusName;
 
-                        // Reset progress to 0 on manual status change
-                        subDesc.progress = 0;
+                        // Save current progress for the old status before switching
+                        if (!subDesc._statusProgressMap) subDesc._statusProgressMap = {};
+                        if (oldStatusId !== undefined && oldStatusId !== null) {
+                            subDesc._statusProgressMap[oldStatusId] = parseInt(subDesc.progress || 0);
+                        }
+
+                        // Restore saved progress for the new status, or keep current if never set
+                        if (subDesc._statusProgressMap[newStatusId] !== undefined) {
+                            subDesc.progress = subDesc._statusProgressMap[newStatusId];
+                        }
+                        // (do NOT reset to 0 — keep whatever was saved for this status)
 
                         // Add history comment for status change
                         if (!subDesc.comments) subDesc.comments = [];
                         subDesc.comments.push({
-                            text: '[SYSTEM] Status changed to ' + statusObj.statusName + ' (Progress reset to 0%)',
+                            text: '[SYSTEM] Status changed to ' + statusObj.statusName + ' (Progress: ' + subDesc.progress + '%)',
                             date: new Date().toISOString(),
                             user: 'System'
+                        });
+
+                        // Log status change to activity log for QA visibility
+                        var oldStatusObj = ctrl.store.statuses.find(function (s) { return s.id === oldStatusId; });
+                        var user = AuthService.getUser ? AuthService.getUser() : null;
+                        ApiService.logSubDescriptionActivity(control.controlId, {
+                            subDescription: subDesc.description,
+                            oldStatus: oldStatusObj ? oldStatusObj.statusName : null,
+                            newStatus: statusObj.statusName,
+                            performedByEmployeeId: user ? user.employeeId : null,
+                            performedByName: user ? (user.employeeName || user.username) : null
                         });
 
                         // Update tracking
@@ -2727,12 +2878,22 @@ app.component('controlBoard', {
             var newProgress = parseInt(subDesc.progress || 0);
             if (subDesc._lastProgress !== undefined && subDesc._lastProgress !== newProgress) {
                 if (!subDesc.comments) subDesc.comments = [];
+                var statusLabel = '';
+                if (subDesc.statusId && ctrl.store.statuses) {
+                    var progressStatus = ctrl.store.statuses.find(function(s) { return s.id === parseInt(subDesc.statusId); });
+                    if (progressStatus) statusLabel = ' (' + progressStatus.statusName + ')';
+                }
                 subDesc.comments.push({
-                    text: '[SYSTEM] Progress updated to ' + newProgress + '%',
+                    text: '[SYSTEM] Progress updated to ' + newProgress + '%' + statusLabel,
                     date: new Date().toISOString(),
                     user: 'System'
                 });
                 subDesc._lastProgress = newProgress;
+                // Save progress for current status in the map
+                if (!subDesc._statusProgressMap) subDesc._statusProgressMap = {};
+                if (subDesc.statusId) {
+                    subDesc._statusProgressMap[parseInt(subDesc.statusId)] = newProgress;
+                }
             }
 
             // Auto-advance to next status when progress reaches 100%
@@ -2838,6 +2999,29 @@ app.component('controlBoard', {
             }).catch(function (error) {
                 console.error('Error resolving releaseId in edit mode:', error);
             });
+        };
+
+        ctrl.openInsightsModal = function(control, subDesc, subIndex) {
+            ctrl.insightsModal = { control: control, subDesc: subDesc, subIndex: subIndex };
+        };
+
+        ctrl.getTimeAgoFromDate = function(dateStr) {
+            if (!dateStr) return '';
+            var d = new Date(dateStr);
+            if (isNaN(d)) return '';
+            var diff = Math.floor((new Date() - d) / 1000);
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+            return Math.floor(diff/86400) + 'd ago';
+        };
+
+        // Returns last N comments, newest first
+        ctrl.getLastComments = function(subDesc, n) {
+            if (!subDesc || !subDesc.comments || !subDesc.comments.length) return [];
+            var all = subDesc.comments.slice(); // copy
+            all.reverse(); // newest first
+            return all.slice(0, n);
         };
 
         // Quick add comment to sub-description
@@ -3015,7 +3199,15 @@ app.component('controlBoard', {
                 typeId: parseInt(ctrl.newControl.typeId),
                 description: ctrl.newControl.description.trim(),
                 employeeId: ctrl.newControl.employeeId ? parseInt(ctrl.newControl.employeeId) : null,
-                teamId: teamIdToAssign, // Assign to current team or employee's team
+                qaEmployeeId: ctrl.newControl.qaEmployeeId ? parseInt(ctrl.newControl.qaEmployeeId) : null,
+                statusId: ctrl.newControl.statusId ? parseInt(ctrl.newControl.statusId) : null,
+                releaseDate: ctrl.newControl.releaseDate || null,
+                subDescriptions: (function() {
+                    var subs = (ctrl.newControl.subObjectives || []).filter(function(s){ return s.text && s.text.trim(); });
+                    if (!subs.length) return null;
+                    return JSON.stringify(subs.map(function(s){ return { description: s.text.trim(), progress: 0, employeeId: null, statusId: null, releaseDate: null, comments: '' }; }));
+                })(),
+                teamId: teamIdToAssign,
                 progress: 0,
                 comments: ''
             };
@@ -3029,7 +3221,11 @@ app.component('controlBoard', {
                 ctrl.newControl = {
                     typeId: null,
                     description: '',
-                    employeeId: null
+                    employeeId: null,
+                    qaEmployeeId: null,
+                    statusId: null,
+                    releaseDate: null,
+                    subObjectives: []
                 };
                 // Reload controls for current team to show the new one
                 return ApiService.loadAllControls(teamIdForReload);
@@ -3265,7 +3461,7 @@ app.component('controlBoard', {
                     NotificationService.show('QA Engineer assigned successfully.' + statusMsg + ' Control remains in main table with original employee.', 'success');
 
                     // Reload controls in background to sync with server
-                    ApiService.loadAllControls().then(function () {
+                    ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                         // After reload, restore qaEmployeeId from database and ensure status is QA
                         if (ctrl.store.allControls) {
                             ctrl.store.allControls.forEach(function (c) {
@@ -3410,8 +3606,17 @@ app.component('controlBoard', {
                             releaseName: releaseName,
                             releaseDate: releaseDate ? new Date(releaseDate) : null,
                             releaseDateInputFormatted: releaseDate ? ctrl.formatDateForInput(releaseDate) : '',
+                            _releaseDatePicker: releaseDate ? new Date(releaseDate) : null,
                             comments: item.comments && Array.isArray(item.comments) ? item.comments : [],
                             _lastStatusId: item.statusId ? parseInt(item.statusId) : null,
+                            // Seed status→progress map with current status/progress
+                            _statusProgressMap: (function() {
+                                var map = {};
+                                if (item.statusId && item.progress !== undefined && item.progress !== null) {
+                                    map[parseInt(item.statusId)] = parseInt(item.progress);
+                                }
+                                return map;
+                            })(),
                             isNew: item.isNew || false
                         };
                     }).filter(function (item) { return item && item.description && (typeof item.description === 'string' ? item.description.trim().length > 0 : true); });
@@ -3775,6 +3980,16 @@ app.component('controlBoard', {
             if (progressValue < 0) progressValue = 0;
             if (progressValue > 100) progressValue = 100;
 
+            // Optimistic UI update — show restored/new progress immediately before API responds
+            if (isStatusChanging) {
+                // Save current progress for the old status before switching
+                statusProgressMap[oldStatusId] = control.progress || 0;
+                control.statusProgress = JSON.stringify(statusProgressMap);
+                control.statusProgressMap = statusProgressMap;
+            }
+            control.progress = progressValue;
+            control.editProgress = progressValue;
+
             var payload = {
                 controlId: parseInt(control.controlId),
                 employeeId: control.employeeId,
@@ -3855,63 +4070,50 @@ app.component('controlBoard', {
             var needsReleaseCreation = false;
             var releaseDataToCreate = null;
 
-
-            // Check releaseDateInputFormatted first (string format from date input)
-            // Then check editReleaseDate (from edit mode) or releaseDateInput (Date object)
-            var dateToUse = null;
-            if (c.releaseDateInputFormatted instanceof Date) {
-                dateToUse = c.releaseDateInputFormatted;
-            } else if (typeof c.releaseDateInputFormatted === 'string' && c.releaseDateInputFormatted.trim() !== '') {
-                // Use the formatted string from date input
-                dateToUse = new Date(c.releaseDateInputFormatted.trim());
+            // --- Resolve release date ---
+            // Priority: releaseDateInputFormatted (from date input, YYYY-MM-DD string) > editReleaseDate > releaseDateInput
+            var rawDate = null;
+            if (typeof c.releaseDateInputFormatted === 'string' && c.releaseDateInputFormatted.trim() !== '') {
+                rawDate = c.releaseDateInputFormatted.trim(); // YYYY-MM-DD
             } else if (c.editReleaseDate) {
-                // Use editReleaseDate if in edit mode
-                dateToUse = c.editReleaseDate;
+                rawDate = c.editReleaseDate;
             } else if (c.releaseDateInput) {
-                // Fallback to releaseDateInput Date object
-                dateToUse = c.releaseDateInput;
+                rawDate = c.releaseDateInput;
             }
 
-            // Convert string to Date if needed
-            if (dateToUse && typeof dateToUse === 'string') {
-                dateToUse = new Date(dateToUse);
-            }
+            if (rawDate) {
+                // Parse as local date to avoid UTC offset issues
+                var parts = typeof rawDate === 'string' && rawDate.match(/^\d{4}-\d{2}-\d{2}$/)
+                    ? rawDate.split('-').map(Number)
+                    : null;
+                var selectedDate = parts
+                    ? new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0)
+                    : new Date(rawDate);
 
-            if (dateToUse && !isNaN(dateToUse.getTime())) {
-                var selectedDate = new Date(dateToUse);
-                // Set time to noon to avoid timezone-based date shift
-                selectedDate.setHours(12, 0, 0, 0);
-                releaseDateISO = selectedDate.toISOString();
+                if (!isNaN(selectedDate.getTime())) {
+                    releaseDateISO = selectedDate.toISOString();
 
-                var matchingRelease = ctrl.store.releases.find(function (r) {
-                    var rDate = new Date(r.releaseDate);
-                    rDate.setHours(0, 0, 0, 0);
-                    return rDate.getTime() === selectedDate.getTime();
-                });
-
-                if (matchingRelease) {
-                    releaseId = matchingRelease.releaseId;
-                } else {
-                    var matchingUpcomingRelease = ctrl.store.upcomingReleases.find(function (r) {
-                        var rDate = new Date(r.releaseDate);
-                        rDate.setHours(0, 0, 0, 0);
-                        return rDate.getTime() === selectedDate.getTime();
+                    // Try to find existing release for this date
+                    var matchingRelease = ctrl.store.releases.find(function(r) {
+                        var rd = new Date(r.releaseDate);
+                        return rd.getFullYear() === selectedDate.getFullYear() &&
+                               rd.getMonth() === selectedDate.getMonth() &&
+                               rd.getDate() === selectedDate.getDate();
                     });
 
-                    if (matchingUpcomingRelease) {
-                        var isDefaultRelease = matchingUpcomingRelease.releaseId >= 999900;
-                        if (isDefaultRelease) {
-                            var day = ('0' + selectedDate.getDate()).slice(-2);
-                            var month = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
-                            var releaseName = 'Release ' + day + '.' + month;
-
-                            releaseDataToCreate = {
-                                releaseName: releaseName,
-                                releaseDate: releaseDateISO,
-                                description: null
-                            };
-                            needsReleaseCreation = true;
-                        }
+                    if (matchingRelease) {
+                        releaseId = matchingRelease.releaseId;
+                    } else {
+                        // No existing release — create one
+                        var dd = ('0' + selectedDate.getDate()).slice(-2);
+                        var mm = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+                        var yyyy = selectedDate.getFullYear();
+                        releaseDataToCreate = {
+                            releaseName: 'Release ' + dd + '/' + mm + '/' + yyyy,
+                            releaseDate: releaseDateISO,
+                            description: null
+                        };
+                        needsReleaseCreation = true;
                     }
                 }
             }
@@ -3996,6 +4198,7 @@ app.component('controlBoard', {
                 var payload = {
                     controlId: parseInt(c.controlId),
                     employeeId: employeeId,
+                    qaEmployeeId: c.editQAEmployeeId ? parseInt(c.editQAEmployeeId) : (c.qaEmployeeId ? parseInt(c.qaEmployeeId) : null),
                     typeId: typeId,
                     description: c.editDescription || null,
                     subDescriptions: subDescriptionsValue,
@@ -4157,7 +4360,7 @@ app.component('controlBoard', {
 
                         // Reload data in background to ensure sync
                         ApiService.loadReleases().then(function () {
-                            return ApiService.loadAllControls();
+                            return ApiService.loadAllControls(AuthService.getTeamId());
                         }).then(function () {
                             // After reload, ensure status is still correct
                             var progressNum = parseInt(updatedControl.progress) || 0;
@@ -4341,11 +4544,11 @@ app.component('controlBoard', {
                 });
             });
 
-            // Convert to array format for ng-repeat
-            var result = dateOrder.map(function (date) {
+            // Convert to array format for ng-repeat — newest date first, newest comment first within each date
+            var result = dateOrder.reverse().map(function (date) {
                 return {
                     date: date,
-                    comments: grouped[date]
+                    comments: grouped[date].slice().reverse()
                 };
             });
 
@@ -4506,12 +4709,344 @@ app.component('controlBoard', {
                 // Broadcast event immediately to notify all components
                 $rootScope.$broadcast('controlsUpdated');
                 // Reload controls to ensure consistency with backend
-                ApiService.loadAllControls();
+                ApiService.loadAllControls(AuthService.getTeamId());
             }).catch(function (error) {
                 control.deleting = false;
                 console.error('Error deleting control:', error);
                 NotificationService.show('Error deleting control', 'error');
             });
         };
+        
+        // Test Cases Grid Functions
+        ctrl.selectedControlForTestCases = null;
+        ctrl.selectedControlForSubQA = null;
+        
+        ctrl.openTestCasesGrid = function(control, subDescriptionIndex) {
+            ctrl.selectedControlForTestCases = control;
+            ctrl.selectedSubDescriptionIndex = (subDescriptionIndex !== undefined && subDescriptionIndex !== null) ? subDescriptionIndex : null;
+        };
+        
+        ctrl.closeTestCasesGrid = function() {
+            ctrl.selectedControlForTestCases = null;
+            ctrl.selectedSubDescriptionIndex = null;
+        };
+        
+        // Quick Add Defect Functions
+        ctrl.showQuickDefectModal = false;
+        ctrl.selectedControlForQuickDefect = null;
+        ctrl.isCreatingQuickDefect = false;
+        ctrl.quickDefectData = {};
+        ctrl.controlDefects = [];
+        ctrl.defectActiveTab = 'list';
+        
+        ctrl.openQuickDefectModal = function(control) {
+            ctrl.selectedControlForQuickDefect = control;
+            ctrl.showQuickDefectModal = true;
+            ctrl.defectActiveTab = 'list';
+            ctrl.controlDefects = [];
+            ctrl.quickDefectData = {
+                title: '',
+                description: '',
+                severity: 'Medium',
+                priority: 'Medium',
+                assignedToEmployeeId: control.employeeId ? control.employeeId.toString() : '',
+                attachmentUrl: null,
+                imagePreview: null
+            };
+            
+            // Load defects for this control
+            if (control.controlId) {
+                ApiService.getDefectsByControl(control.controlId).then(function(defects) {
+                    ctrl.controlDefects = defects || [];
+                    $scope.$apply();
+                }).catch(function(error) {
+                    console.error('Error loading defects:', error);
+                    ctrl.controlDefects = [];
+                });
+            }
+        };
+        
+        ctrl.closeQuickDefectModal = function() {
+            ctrl.showQuickDefectModal = false;
+            ctrl.selectedControlForQuickDefect = null;
+            ctrl.quickDefectData = {};
+        };
+        
+        ctrl.onQuickDefectImageSelect = function(file) {
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size should be less than 5MB');
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $scope.$apply(function() {
+                    ctrl.quickDefectData.attachmentUrl = e.target.result;
+                    ctrl.quickDefectData.imagePreview = e.target.result;
+                });
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        ctrl.removeQuickDefectImage = function() {
+            ctrl.quickDefectData.attachmentUrl = null;
+            ctrl.quickDefectData.imagePreview = null;
+        };
+        
+        ctrl.submitQuickDefect = function() {
+            if (!ctrl.quickDefectData.title || !ctrl.quickDefectData.title.trim()) {
+                alert('Please enter defect title');
+                return;
+            }
+            
+            ctrl.isCreatingQuickDefect = true;
+            
+            var defectPayload = {
+                controlId: ctrl.selectedControlForQuickDefect.controlId,
+                title: ctrl.quickDefectData.title,
+                description: ctrl.quickDefectData.description,
+                severity: ctrl.quickDefectData.severity,
+                priority: ctrl.quickDefectData.priority,
+                assignedToEmployeeId: ctrl.quickDefectData.assignedToEmployeeId ? parseInt(ctrl.quickDefectData.assignedToEmployeeId) : null,
+                attachmentUrl: ctrl.quickDefectData.attachmentUrl || null
+            };
+            
+            var teamId = ctrl.currentTeamId;
+            
+            console.log('Creating defect with payload:', defectPayload);
+            console.log('TeamId:', teamId);
+            console.log('Control:', ctrl.selectedControlForQuickDefect);
+            
+            ApiService.addDefect(defectPayload, teamId).then(function(defect) {
+                alert('Defect created successfully');
+                
+                // Switch to list tab and reload defects
+                ctrl.defectActiveTab = 'list';
+                
+                // Reload defects for this control
+                if (ctrl.selectedControlForQuickDefect.controlId) {
+                    ApiService.getDefectsByControl(ctrl.selectedControlForQuickDefect.controlId).then(function(defects) {
+                        ctrl.controlDefects = defects || [];
+                        $scope.$apply();
+                    });
+                }
+                
+                // Reset form
+                ctrl.quickDefectData = {
+                    title: '',
+                    description: '',
+                    severity: 'Medium',
+                    priority: 'Medium',
+                    assignedToEmployeeId: ctrl.selectedControlForQuickDefect.employeeId ? ctrl.selectedControlForQuickDefect.employeeId.toString() : '',
+                    attachmentUrl: null,
+                    imagePreview: null
+                };
+                
+                ctrl.loadDefectCounts(); // Reload defect counts
+            }).catch(function(error) {
+                console.error('Error creating defect:', error);
+                console.error('Error response data:', error.data);
+                console.error('Error status:', error.status);
+                var errorMsg = 'Error creating defect: ';
+                if (typeof error.data === 'string') {
+                    errorMsg += error.data;
+                } else if (error.data && error.data.message) {
+                    errorMsg += error.data.message;
+                } else {
+                    errorMsg += 'Unknown error';
+                }
+                alert(errorMsg);
+            }).finally(function() {
+                ctrl.isCreatingQuickDefect = false;
+                $scope.$apply();
+            });
+        };
+        
+        // Defects Management Functions
+        ctrl.selectedControlForDefects = null;
+        
+        // Helper functions for defect display
+        ctrl.getDefectSeverityColor = function(severity) {
+            switch(severity) {
+                case 'Critical': return '#dc2626';
+                case 'High': return '#f59e0b';
+                case 'Medium': return '#3b82f6';
+                case 'Low': return '#10b981';
+                default: return '#6b7280';
+            }
+        };
+        
+        ctrl.getDefectStatusBadgeClass = function(status) {
+            switch(status) {
+                case 'Open': return 'bg-danger';
+                case 'In Progress': return 'bg-warning';
+                case 'Resolved': return 'bg-success';
+                case 'Closed': return 'bg-secondary';
+                case 'Reopened': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        };
+        
+        ctrl.formatDefectDate = function(dateStr) {
+            if (!dateStr) return 'N/A';
+            var d = new Date(dateStr);
+            if (isNaN(d.getTime())) return 'N/A';
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear();
+            return day + '/' + month + '/' + year;
+        };
+        
+        ctrl.viewDefectImage = function(imageUrl) {
+            if (!imageUrl) return;
+            window.open(imageUrl, '_blank');
+        };
+        
+        ctrl.canViewDefects = function(control) {
+            // Admins and Team Leads can view all defects
+            if (AuthService.isAdmin() || AuthService.canMarkProgress()) {
+                return true;
+            }
+            
+            // QA Engineers can only view defects for controls assigned to them
+            var user = AuthService.getUser();
+            if (!user || !user.employeeId) return false;
+            
+            var role = AuthService.getRole();
+            if (!role) return false;
+            
+            var roleStr = role.toLowerCase().trim();
+            var isQA = roleStr === 'qa engineer' || roleStr === 'qa' || roleStr === 'intern qa engineer';
+            
+            if (isQA) {
+                // Check if control is assigned to this QA user
+                return (control.qaEmployeeId && control.qaEmployeeId === user.employeeId) ||
+                       (control.employeeId && control.employeeId === user.employeeId);
+            }
+            
+            // Developers can view defects for their controls
+            if (control.employeeId && control.employeeId === user.employeeId) {
+                return true;
+            }
+            
+            return false;
+        };
+        
+        ctrl.openDefectsModal = function(control, subDescriptionIndex) {
+            ctrl.selectedControlForDefects = control;
+            ctrl.selectedSubDescriptionIndex = (subDescriptionIndex !== undefined && subDescriptionIndex !== null) ? subDescriptionIndex : null;
+        };
+        
+        ctrl.closeDefectsModal = function() {
+            ctrl.selectedControlForDefects = null;
+            // Reload defect counts after closing modal
+            ctrl.loadDefectCounts();
+        };
+        
+        ctrl.loadDefectCounts = function() {
+            if (!ctrl.store || !ctrl.store.allControls) return;
+            
+            ctrl.store.allControls.forEach(function(control) {
+                if (control.controlId) {
+                    ApiService.getDefectsByControl(control.controlId).then(function(defects) {
+                        control._defectCount = defects.length;
+                    }).catch(function(error) {
+                        console.error('Error loading defect count for control:', control.controlId, error);
+                        control._defectCount = 0;
+                    });
+                }
+            });
+        };
+        
+        // Load defect counts on initialization
+        $timeout(function() {
+            ctrl.loadDefectCounts();
+        }, 1000);
+        
+        // Listen for notification defect open event
+        var defectOpenListener = $rootScope.$on('openDefectFromNotification', function(event, data) {
+            console.log('Opening defect from notification:', data);
+            
+            // Try to find control by ID
+            var control = null;
+            
+            if (data.controlId) {
+                control = ctrl.store.allControls.find(function(c) {
+                    return c.controlId === data.controlId;
+                });
+            }
+            
+            // If control not found by ID, try to find it by loading defect details
+            if (!control && data.defectId) {
+                console.log('Control not found by ID, loading defect details...');
+                ApiService.getDefectById(data.defectId).then(function(defect) {
+                    if (defect && defect.controlId) {
+                        control = ctrl.store.allControls.find(function(c) {
+                            return c.controlId === defect.controlId;
+                        });
+                        
+                        if (control) {
+                            openDefectModal(control, data.defectId);
+                        } else {
+                            console.error('Control not found for defect:', defect.controlId);
+                            NotificationService.show('Could not find the control for this defect', 'error');
+                        }
+                    }
+                }).catch(function(error) {
+                    console.error('Error loading defect:', error);
+                    NotificationService.show('Error loading defect details', 'error');
+                });
+            } else if (control) {
+                openDefectModal(control, data.defectId);
+            } else {
+                console.error('Control not found:', data.controlId);
+                NotificationService.show('Could not find the control for this defect', 'error');
+            }
+        });
+        
+        // Helper function to open defect modal
+        function openDefectModal(control, defectId) {
+            // Open defects modal for this control
+            ctrl.selectedControlForDefects = control;
+            
+            // Store defect ID to highlight in qa-defects component
+            $rootScope.highlightDefectId = defectId;
+            
+            $timeout(function() {
+                // Broadcast to qa-defects component to highlight the defect
+                $rootScope.$broadcast('highlightDefect', defectId);
+            }, 500);
+        }
+        
+        // Check sessionStorage on load
+        $timeout(function() {
+            var controlId = sessionStorage.getItem('openDefectsForControl');
+            var defectId = sessionStorage.getItem('highlightDefectId');
+            
+            if (controlId && defectId) {
+                // Clear session storage
+                sessionStorage.removeItem('openDefectsForControl');
+                sessionStorage.removeItem('highlightDefectId');
+                
+                // Trigger the open event
+                $rootScope.$broadcast('openDefectFromNotification', {
+                    controlId: parseInt(controlId),
+                    defectId: parseInt(defectId)
+                });
+            }
+        }, 1500);
+        
+        // Cleanup
+        $scope.$on('$destroy', function() {
+            defectOpenListener();
+        });
     }
 });
+

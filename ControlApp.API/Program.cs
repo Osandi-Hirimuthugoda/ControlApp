@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -8,6 +9,7 @@ using ControlApp.API;
 using ControlApp.API.Repositories;
 using ControlApp.API.Services;
 using ControlApp.API.Models;
+using ControlApp.API.Hubs;
 using System.Text.Json;
 using System.Security.Claims;
 
@@ -18,9 +20,18 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// Add DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Add DbContext with connection pooling
+builder.Services.AddDbContextPool<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.CommandTimeout(60);
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorNumbersToAdd: null);
+        }));
 
 // Add HttpContextAccessor for accessing user claims in repositories
 builder.Services.AddHttpContextAccessor();
@@ -34,6 +45,8 @@ builder.Services.AddScoped<IReleaseRepository, ReleaseRepository>();
 builder.Services.AddScoped<IProgressLogRepository, ProgressLogRepository>();
 builder.Services.AddScoped<IInsightRepository, InsightRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IDefectRepository, DefectRepository>();
+builder.Services.AddScoped<ITestCaseRepository, TestCaseRepository>();
 
 // Register Services
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
@@ -45,6 +58,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProgressLogService, ProgressLogService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IDefectService, DefectService>();
+builder.Services.AddScoped<ITestCaseService, TestCaseService>();
 
 // Add Controllers with JSON camelCase support and validation
 builder.Services.AddControllers()
@@ -113,11 +128,35 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.Zero,
         // Map role claims correctly so [Authorize(Roles)
-        RoleClaimType = ClaimTypes.Role
+        RoleClaimType = ClaimTypes.Role,
+        // Map user identifier for SignalR
+        NameClaimType = ClaimTypes.NameIdentifier
+    };
+    
+    // Configure JWT authentication for SignalR
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            // If the request is for SignalR hub
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken;
+            }
+            
+            return Task.CompletedTask;
+        }
     };
 });
 
 builder.Services.AddAuthorization();
+
+// Add SignalR with custom user ID provider
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSignalR();
 
 // add SWAGGER SERVICES
 builder.Services.AddEndpointsApiExplorer();
@@ -206,6 +245,9 @@ app.UseAuthorization();
 
 // Map controllers
 app.MapControllers();
+
+// Map SignalR Hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 // Default route to index.html
 app.MapFallbackToFile("index.html");

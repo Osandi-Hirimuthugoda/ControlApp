@@ -1,4 +1,4 @@
-app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
+app.service('AuthService', function($http, $q, $rootScope, $window, $location, $injector) {
     var self = this;
     var TOKEN_KEY = 'auth_token';
     var USER_KEY = 'user_data';
@@ -74,71 +74,113 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
         return role === 'intern' || role === 'interns';
     };
     
-    self.isViewOnly = function() {
-        // Developers, QA Engineers and Interns have view-only access
-        return self.isDeveloper() || self.isQAEngineer() || self.isIntern();
+    self.isViewer = function() {
+        var role = self.getRole();
+        return role === 'viewer' || role === 'view only' || role === 'viewonly';
     };
     
-    // Permission checking functions
+    self.isViewOnly = function() {
+        // Developers, QA Engineers, Interns and Viewers have view-only access
+        return self.isDeveloper() || self.isQAEngineer() || self.isIntern() || self.isViewer();
+    };
+    
+    // Permission checking functions — reads from configurable role permissions set by Super Admin
+    var PERM_KEY = 'rolePermissions';
+
+    self._getPermissions = function() {
+        try {
+            var stored = $window.localStorage.getItem(PERM_KEY);
+            return stored ? JSON.parse(stored) : null;
+        } catch(e) { return null; }
+    };
+
+    self._checkPerm = function(permKey) {
+        var user = self.getUser();
+        if (!user) return false;
+        if (self.isSuperAdmin()) return true;
+        if (self.isAdmin()) return true;
+
+        // Check per-user override first (set by Super Admin) — team-scoped
+        var USER_PERM_KEY = 'userPermissionOverrides';
+        try {
+            var stored = $window.localStorage.getItem(USER_PERM_KEY);
+            if (stored) {
+                var userOverrides = JSON.parse(stored);
+                var empId = user.employeeId ? String(user.employeeId) : null;
+                var currentTeamId = self.getTeamId();
+                // Key format: employeeId_teamId (team-scoped override)
+                var teamKey = empId && currentTeamId ? (empId + '_' + String(currentTeamId)) : null;
+                var override = teamKey ? userOverrides[teamKey] : null;
+                if (override && override.hasOwnProperty(permKey)) {
+                    return override[permKey] === true;
+                }
+            }
+        } catch(e) {}
+
+        // Fall back to role-based permissions
+        var perms = self._getPermissions();
+        if (!perms || !perms[permKey]) {
+            return self._defaultPerm(permKey);
+        }
+        var role = user.role || '';
+        return perms[permKey][role] === true;
+    };
+
+    self._defaultPerm = function(permKey) {
+        var isPrivileged = self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        var isDev = self.isDeveloper();
+        var isQA = self.isQAEngineer();
+        var isInternDev = self.getRole() === 'intern developer';
+        var isInternQA = self.getRole() === 'intern qa engineer';
+
+        var defaults = {
+            canAddControl:         isPrivileged || isDev || isQA || isInternDev || isInternQA,
+            canEditControl:        isPrivileged,
+            canDeleteControl:      isPrivileged,
+            canAddEmployee:        self.isAdmin() || self.isProjectManager(),
+            canEditEmployee:       isPrivileged,
+            canDeleteEmployee:     isPrivileged,
+            canMarkProgress:       isPrivileged || isDev || isInternDev,
+            canAddComment:         isPrivileged,
+            canEditSubDescription: isPrivileged || isDev || isQA || isInternDev || isInternQA
+        };
+        return defaults[permKey] || false;
+    };
+
     self.canAddEmployee = function() {
-        // View-only roles cannot add employees
-        if (self.isViewOnly()) return false;
-        // Admin and Project Manager can add employees
-        return self.isAdmin() || self.isProjectManager();
+        return self._checkPerm('canAddEmployee');
     };
     
     self.canAddControl = function() {
-        // Developers, QA Engineers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // All other employees can add controls
-        return true;
+        return self._checkPerm('canAddControl');
     };
     
     self.canEditEmployee = function() {
-        // Developers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // Admin has full access, Team Lead and Software Architecture can edit
-        // Project Manager has view-only access
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        return self._checkPerm('canEditEmployee');
     };
     
     self.canRegisterEmployee = function() {
-        // View-only roles cannot register employees
-        if (self.isViewOnly()) return false;
-        // Admin and Project Manager can register employees
-        return self.isAdmin() || self.isProjectManager();
+        return self._checkPerm('canAddEmployee');
     };
     
     self.canEditControl = function() {
-        // Developers, QA Engineers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // Admin has full access, Team Lead and Software Architecture can edit
-        // Project Manager has view-only access
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        return self._checkPerm('canEditControl');
     };
     
     self.canMarkProgress = function() {
-        // Developers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // Admin has full access, Team Lead and Software Architecture can mark progress
-        // Project Manager has view-only access
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        return self._checkPerm('canMarkProgress');
+    };
+    
+    self.canAddComment = function() {
+        return self._checkPerm('canAddComment');
     };
     
     self.canDeleteControl = function() {
-        // Developers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // Admin has full access, Team Lead and Software Architecture can delete
-        // Project Manager cannot delete
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        return self._checkPerm('canDeleteControl');
     };
     
     self.canDeleteEmployee = function() {
-        // Developers and Interns have view-only access
-        if (self.isViewOnly()) return false;
-        // Admin has full access, Team Lead and Software Architecture can delete
-        // Project Manager cannot delete
-        return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
+        return self._checkPerm('canDeleteEmployee');
     };
     
     // Super Admin and Team functions
@@ -244,11 +286,21 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
                     currentTeamId: response.data.currentTeamId,
                     currentTeamName: response.data.currentTeamName,
                     isSuperAdmin: response.data.isSuperAdmin,
+                    employeeId: response.data.employeeId,
                     teams: response.data.teams || []
                 }));
                 
                 // Broadcast login event
                 $rootScope.$broadcast('userLoggedIn', response.data);
+                
+                // Initialize SignalR connection after login
+                try {
+                    var SignalRService = $injector.get('SignalRService');
+                    SignalRService.start();
+                    console.log('SignalR connection initiated after login');
+                } catch (e) {
+                    console.error('Error starting SignalR:', e);
+                }
                 
                 return response.data;
             }
@@ -282,7 +334,16 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
     };
 
     // Logout
-    self.logout = function() {
+    self.logout = function() { 
+        // Stop SignalR connection before logout
+        try {
+            var SignalRService = $injector.get('SignalRService');
+            SignalRService.stop();
+            console.log('SignalR connection stopped on logout');
+        } catch (e) {
+            console.error('Error stopping SignalR:', e);
+        }
+        
         $window.localStorage.removeItem(TOKEN_KEY);
         $window.localStorage.removeItem(USER_KEY);
         // Broadcast logout event - MainController will handle navigation via routing
@@ -308,7 +369,7 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
             return $q.reject(error);
         });
     };
-});
+}); 
 
 
 

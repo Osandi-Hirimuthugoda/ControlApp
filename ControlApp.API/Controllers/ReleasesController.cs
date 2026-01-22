@@ -18,9 +18,9 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReleaseDto>>> GetAllReleases()
+        public async Task<ActionResult<IEnumerable<ReleaseDto>>> GetAllReleases([FromQuery] int? teamId = null)
         {
-            var releases = await _releaseService.GetAllReleasesAsync();
+            var releases = await _releaseService.GetAllReleasesAsync(teamId);
             return Ok(releases);
         }
 
@@ -35,7 +35,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<ActionResult<ReleaseDto>> CreateRelease([FromBody] CreateReleaseDto createReleaseDto)
         {
             try
@@ -54,7 +54,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<ActionResult<ReleaseDto>>UpdateRelease(int id, [FromBody] CreateReleaseDto updateReleaseDto)
         {
             try

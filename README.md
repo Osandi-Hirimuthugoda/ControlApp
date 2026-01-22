@@ -204,6 +204,8 @@ Key API endpoints:
 - `PUT /api/defects/{id}` - Update defect
 - `GET /api/testcases/control/{id}` - Get test cases for control
 - `POST /api/testcases` - Create test case
+- `GET /api/controls/{id}/activity` - Get activity log for a control
+- `POST /api/controls/{id}/activity` - Log a sub-objective status change
 
 ## 🤝 Contributing
 
@@ -231,6 +233,7 @@ For issues or questions, please contact your system administrator or create an i
 - **v1.1** - Added SignalR real-time notifications
 - **v1.2** - Enhanced defect management with status filtering
 - **v1.3** - Test case management improvements
+- **v1.4** - Activity Log tab, sub-objective status change tracking, defect duration metrics
 
 ## 🎨 Screenshots
 
@@ -379,7 +382,7 @@ DATABASE_NAME=ControlDB
 - Debouncing for search and filter operations
 - Caching of frequently accessed data
 
-## 🔄 CI/CD Pipeline
+<!-- ## 🔄 CI/CD Pipeline
 
 ### Recommended Setup
 ```yaml
@@ -407,7 +410,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish -c Release -o ./publish
-```
+``` -->
 
 ## 📱 Browser Support
 
@@ -461,7 +464,13 @@ Configure Application Insights for production monitoring:
 
 ## 📚 Additional Resources
 
-### Documentation
+### Project Documentation
+- **[User Manual](docs/USER_MANUAL.md)** - Complete guide for end users
+- **[User Manual Update (v1.4)](ControlApp.API/document/USER_MANUAL_UPDATE.md)** - New features added in v1.4
+- **[Quick Reference Guide](docs/QUICK_REFERENCE_GUIDE.md)** - Quick reference for common tasks
+- **[Screenshots](docs/screenshots/)** - Application screenshots
+
+### External Documentation
 - [ASP.NET Core Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
 - [SignalR Documentation](https://docs.microsoft.com/en-us/aspnet/core/signalr/)
@@ -550,7 +559,7 @@ Copyright © 2024 [Your Company Name]. All rights reserved.
 
 This software is proprietary and confidential. Unauthorized copying, distribution, or use of this software, via any medium, is strictly prohibited.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - Thanks to all team members who contributed to this project
 - Built with modern web technologies and best practices
@@ -558,7 +567,7 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 
 ## 📊 Project Statistics
 
-- **Lines of Code**: ~15,000+
+- **Lines of Code**: ~15,000
 - **Components**: 25+ AngularJS components
 - **API Endpoints**: 50+ RESTful endpoints
 - **Database Tables**: 12 core tables

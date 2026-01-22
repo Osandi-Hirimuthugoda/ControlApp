@@ -94,6 +94,16 @@ app.config(function ($routeProvider, $locationProvider) {
                 }
             }
         })
+        .when('/qa-test-cases', {
+            template: '<qa-test-cases></qa-test-cases>',
+            resolve: {
+                auth: function (AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
         .when('/access-denied/:section?', {
             template: '<access-denied></access-denied>',
             resolve: {

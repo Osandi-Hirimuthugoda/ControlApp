@@ -39,7 +39,7 @@ namespace ControlApp.API.Repositories
 
         public async Task<IEnumerable<Employee>> GetEmployeesWithDetailsAsync(int? teamId = null)
         {
-            var query = _dbSet
+            var query = _dbSet.AsNoTracking()
                 .Include(e => e.Type)
                 .Include(e => e.User)
                 .Include(e => e.Team)
@@ -108,4 +108,5 @@ namespace ControlApp.API.Repositories
         }
     }
 }
+
 

@@ -46,7 +46,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ControlDto>> GetControlById(int id)
+        public async Task<ActionResult<ReleaseDto>> GetControlById(int id)
         {
             var control = await _controlService.GetControlByIdAsync(id);
             if (control == null)

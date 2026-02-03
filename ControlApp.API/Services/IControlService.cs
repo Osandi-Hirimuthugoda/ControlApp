@@ -10,6 +10,8 @@ namespace ControlApp.API.Services
         Task<ControlDto?> UpdateControlAsync(int id, UpdateControlDto updateControlDto);
         Task<bool> DeleteControlAsync(int id);
         Task<IEnumerable<ControlDto>> AddAllEmployeesToControlsAsync();
+
+        
     }
 }
 

@@ -9,6 +9,9 @@ namespace ControlApp.API.DTOs
         
         // EmployeeId is optional - can be null for controls without assigned employees
         public int? EmployeeId { get; set; } 
+        
+        // QAEmployeeId is optional - QA Engineer assigned to this control
+        public int? QAEmployeeId { get; set; }
 
         public int? TypeId { get; set; }
         public string? Description { get; set; }

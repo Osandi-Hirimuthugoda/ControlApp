@@ -45,24 +45,7 @@ app.component('addControlType', {
                     <small class="text-muted">Only employees with registered accounts are shown. Leave empty to add control type only.</small>
                 </div>
 
-                <!-- 4. Release Selection -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Release</label>
-                    <select class="form-select"
-                            ng-model="$ctrl.selectedReleaseId"
-                            ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
-                            ng-change="$ctrl.onReleaseChange()">
-                        <option value="">-- Select Release --</option>
-                    </select>
-                </div>
 
-                <!-- 5. Release Date -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Release Date</label>
-                    <input type="date"
-                           class="form-control"
-                           ng-model="$ctrl.newControlType.releaseDate">
-                </div>
 
                 <!-- Submit Button -->
                 <!--  $invalid  -->
@@ -85,68 +68,52 @@ app.component('addControlType', {
     </div>
     `,
 
-    controller: function(ApiService, NotificationService, $rootScope, $scope, $timeout) {
+    controller: function (ApiService, NotificationService, $rootScope, $scope, $timeout) {
         var ctrl = this;
         ctrl.store = ApiService.data;
 
         // Models
-        ctrl.newControlType = { typeName:'', description:'', releaseDate:null };
+        ctrl.newControlType = { typeName: '', description: '' };
         ctrl.assignedEmployeeId = null;
-        ctrl.selectedReleaseId = null;
         ctrl.isSaving = false;
 
         // Get only registered employees 
-        ctrl.getRegisteredEmployees = function() {
-            if(!ctrl.store.employees) return [];
+        ctrl.getRegisteredEmployees = function () {
+            if (!ctrl.store.employees) return [];
             // Filter employees that have email 
-            return ctrl.store.employees.filter(function(emp) {
+            return ctrl.store.employees.filter(function (emp) {
                 return emp.email && emp.email.trim() !== '';
             });
         };
 
         // Format employee option display with role
-        ctrl.formatEmployeeOption = function(employee) {
+        ctrl.formatEmployeeOption = function (employee) {
             var name = employee.employeeName || 'Unknown';
             var role = employee.role || 'No Role';
             return name + ' (' + role + ')';
         };
 
-        ctrl.formatReleaseName = function(r) {
-            if(!r) return '';
-            return r.releaseName || ('Release ' + r.releaseDate);
-        };
 
-        ctrl.onReleaseChange = function() {
-            var rel = ctrl.store.upcomingReleases.find(r => r.releaseId === ctrl.selectedReleaseId);
-            if (rel && rel.releaseDate) {
-                ctrl.newControlType.releaseDate = new Date(rel.releaseDate);
-            }
-        };
 
-        ctrl.addControlType = function(form) {
+        ctrl.addControlType = function (form) {
             // Validate manually even if button is clicked
-            if(form.$invalid) {
+            if (form.$invalid) {
                 NotificationService.show('Please fill all required fields correctly.', 'error');
                 return;
             }
 
             ctrl.isSaving = true;
 
-            var formattedDate = null;
-            if (ctrl.newControlType.releaseDate) {
-                formattedDate = new Date(ctrl.newControlType.releaseDate).toISOString();
-            }
-
             var typePayload = {
                 typeName: ctrl.newControlType.typeName.trim(),
                 description: ctrl.newControlType.description.trim(),
-                releaseDate: formattedDate
+                releaseDate: null
             };
 
             // 1. Add Control Type
             ApiService.addControlType(typePayload)
-                .then(function(addedType) {
-                    
+                .then(function (addedType) {
+
                     var typeId = addedType.controlTypeId || addedType.id;
 
                     if (!typeId) {
@@ -156,13 +123,6 @@ app.component('addControlType', {
                     // 2. Always create a Control row
                     //    - If employee selected -> assign to that employee
                     //    - If not selected      -> backend will auto-assign to 'Unassigned' employee
-                    var controlReleaseDate = null;
-                    if (ctrl.newControlType.releaseDate) {
-                        controlReleaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
-                    } else if (addedType.releaseDate) {
-                        controlReleaseDate = addedType.releaseDate;
-                    }
-
                     var employeeIdValue = null;
                     if (ctrl.assignedEmployeeId && ctrl.assignedEmployeeId !== '' && ctrl.assignedEmployeeId !== 'null') {
                         var parsedId = parseInt(ctrl.assignedEmployeeId);
@@ -178,10 +138,10 @@ app.component('addControlType', {
                         statusId: 1,
                         progress: 0,
                         comments: 'Initial assignment',
-                        releaseDate: controlReleaseDate
+                        releaseDate: addedType.releaseDate || null
                     };
 
-                    return ApiService.addControl(controlPayload).then(function() {
+                    return ApiService.addControl(controlPayload).then(function () {
                         if (employeeIdValue) {
                             return 'Control added to Board and assigned to employee.';
                         } else {
@@ -189,7 +149,7 @@ app.component('addControlType', {
                         }
                     });
                 })
-                .then(function(message) {
+                .then(function (message) {
                     // Toast success
                     NotificationService.show('Success! ' + message, 'success');
 
@@ -202,11 +162,10 @@ app.component('addControlType', {
                     });
 
                     // Reset Form
-                    ctrl.newControlType = { typeName:'', description:'', releaseDate:null };
+                    ctrl.newControlType = { typeName: '', description: '' };
                     ctrl.assignedEmployeeId = null;
-                    ctrl.selectedReleaseId = null;
-                    
-                    if(form) {
+
+                    if (form) {
                         form.$setPristine();
                         form.$setUntouched();
                     }
@@ -214,23 +173,23 @@ app.component('addControlType', {
                     // Refresh data
                     return ApiService.loadAllControls();
                 })
-                .then(function() {
+                .then(function () {
                     $rootScope.$broadcast('controlTypesUpdated');
                     $rootScope.$broadcast('controlsUpdated');
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.error("Error Details:", err);
                     var msg = "Error: ";
                     if (err.status === 404) msg += "API Endpoint not found (404).";
                     else msg += (err.data && err.data.message) ? err.data.message : "Save failed.";
                     NotificationService.show(msg, 'error');
                 })
-                .finally(function() {
+                .finally(function () {
                     ctrl.isSaving = false;
                 });
         };
 
-        ctrl.$onInit = function() {
+        ctrl.$onInit = function () {
             ApiService.loadControlTypes();
             if (ApiService.loadEmployees) {
                 ApiService.loadEmployees();

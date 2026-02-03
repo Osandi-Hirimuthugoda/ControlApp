@@ -1,4 +1,4 @@
-app.service('ApiService', function($http, $q) {
+app.service('ApiService', function ($http, $q) {
     var self = this;
     var apiBaseUrl = '/api';
 
@@ -7,28 +7,29 @@ app.service('ApiService', function($http, $q) {
         employees: [],
         masterEmployees: [], //registered employees
         allControls: [],
-        controlTypes: [], 
+        controlTypes: [],
         statuses: [],
         releases: [],
-        upcomingReleases: []
+        upcomingReleases: [],
+        qaEmployeeMap: {} // Map to track QA Employee assignments (controlId -> qaEmployeeId) - shared across components
     };
 
     //Initialization
-    self.init = function() {
+    self.init = function () {
         console.log('ApiService.init() called');
-        var p1 = self.loadControlTypes(); 
+        var p1 = self.loadControlTypes();
         var p2 = self.loadStatuses();
         var p3 = self.loadReleases();
         var p4 = self.loadMasterEmployees();
 
-        return $q.all([p1, p2, p3]).then(function(results) {
+        return $q.all([p1, p2, p3]).then(function (results) {
             console.log('Initial data loaded. Statuses:', self.data.statuses.length);
             return self.loadEmployees();
-        }).then(function() {
+        }).then(function () {
             return self.loadAllControls();
-        }).then(function() {
+        }).then(function () {
             console.log('All data initialized. Final status count:', self.data.statuses.length);
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Error during initialization:', error);
         });
     };
@@ -36,59 +37,59 @@ app.service('ApiService', function($http, $q) {
 
     //load master Employee Registration Method
 
-    self.loadMasterEmployees = function() {
-        return $http.get(apiBaseUrl + '/master-employees').then(function(r) {
+    self.loadMasterEmployees = function () {
+        return $http.get(apiBaseUrl + '/master-employees').then(function (r) {
             self.data.masterEmployees = r.data || [];
             return self.data.masterEmployees;
-        }).catch(function(err) {
+        }).catch(function (err) {
             console.error('Error loading master employees:', err);
             return [];
         });
     };
 
-    self.registerMasterEmployee = function(empData) {
-        return $http.post(apiBaseUrl + '/master-employees', empData).then(function(r) {
-            return self.loadMasterEmployees().then(function() {
+    self.registerMasterEmployee = function (empData) {
+        return $http.post(apiBaseUrl + '/master-employees', empData).then(function (r) {
+            return self.loadMasterEmployees().then(function () {
                 return r.data;
             });
         });
     };
 
-    self.updateMasterEmployee = function(id, empData) {
-        return $http.put(apiBaseUrl + '/master-employees/' + id, empData).then(function(r) {
-            return self.loadMasterEmployees().then(function() {
+    self.updateMasterEmployee = function (id, empData) {
+        return $http.put(apiBaseUrl + '/master-employees/' + id, empData).then(function (r) {
+            return self.loadMasterEmployees().then(function () {
                 return r.data;
             });
         });
     };
 
-    self.deleteMasterEmployee = function(id) {
-        return $http.delete(apiBaseUrl + '/master-employees/' + id).then(function() {
+    self.deleteMasterEmployee = function (id) {
+        return $http.delete(apiBaseUrl + '/master-employees/' + id).then(function () {
             return self.loadMasterEmployees();
         });
     };
 
-    
+
     // Load Data Methods
-    
-    self.loadEmployees = function() {
-        return $http.get(apiBaseUrl + '/employees').then(function(r) {
+
+    self.loadEmployees = function () {
+        return $http.get(apiBaseUrl + '/employees').then(function (r) {
             self.data.employees = r.data || [];
-            self.data.employees.forEach(function(e) { 
+            self.data.employees.forEach(function (e) {
                 e.editing = false;
-                
+
             });
             return self.data.employees;
         });
     };
 
     // Load Control Types from API
-    self.loadControlTypes = function() {
-        return $http.get(apiBaseUrl + '/controltypes').then(function(r) {
+    self.loadControlTypes = function () {
+        return $http.get(apiBaseUrl + '/controltypes').then(function (r) {
             var newTypes = r.data || [];
-    
-            newTypes.forEach(function(type) {
-                if(type.releaseDate) {
+
+            newTypes.forEach(function (type) {
+                if (type.releaseDate) {
                     type.releaseDate = new Date(type.releaseDate);
                 } else {
                     type.releaseDate = null;
@@ -97,55 +98,55 @@ app.service('ApiService', function($http, $q) {
 
             self.data.controlTypes = newTypes;
             console.log('Control types loaded:', self.data.controlTypes.length);
-            
+
             if (self.data.releases && self.data.releases.length >= 0) {
                 self._processReleases();
             }
             return self.data.controlTypes;
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Error loading control types:', error);
             self.data.controlTypes = [];
             return $q.when(self.data.controlTypes);
         });
-    }; 
- 
-    self.loadStatuses = function() {
-        return $http.get(apiBaseUrl + '/statuses').then(function(r) {
+    };
+
+    self.loadStatuses = function () {
+        return $http.get(apiBaseUrl + '/statuses').then(function (r) {
             var newStatuses = r.data || [];
             self.data.statuses = newStatuses;
             return self.data.statuses;
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Error loading statuses:', error);
             self.data.statuses = [];
             return $q.when(self.data.statuses);
         });
     };
 
-    self.loadReleases = function() {
-        return $http.get(apiBaseUrl + '/releases').then(function(r) {
+    self.loadReleases = function () {
+        return $http.get(apiBaseUrl + '/releases').then(function (r) {
             self.data.releases = r.data || [];
-            self._processReleases(); 
-        }).catch(function() {
+            self._processReleases();
+        }).catch(function () {
             self.data.releases = [];
             self._processReleases();
         });
     };
- 
-    self.loadAllControls = function() {
-        return $http.get(apiBaseUrl + '/controls').then(function(r) {
+
+    self.loadAllControls = function () {
+        return $http.get(apiBaseUrl + '/controls').then(function (r) {
             console.log('API Response - All Controls:', r.data);
             console.log('Total controls received:', r.data ? r.data.length : 0);
-            console.log('Controls without employees:', r.data ? r.data.filter(function(c) { return !c.employeeId; }).length : 0);
-            
+            console.log('Controls without employees:', r.data ? r.data.filter(function (c) { return !c.employeeId; }).length : 0);
+
             self.data.allControls = r.data || [];
-            
-            self.data.allControls.forEach(function(c) {
+
+            self.data.allControls.forEach(function (c) {
                 // Ensure releaseDate is properly set from either releaseDate or release
                 // Always convert to Date object using new Date()
-                if(c.releaseDate) {
+                if (c.releaseDate) {
                     c.releaseDate = new Date(c.releaseDate);
                     c.releaseDateInput = new Date(c.releaseDate);
-                } else if(c.release && c.release.releaseDate) {
+                } else if (c.release && c.release.releaseDate) {
                     // If releaseDate is not set but release object has releaseDate, use it
                     c.releaseDate = new Date(c.release.releaseDate);
                     c.releaseDateInput = new Date(c.release.releaseDate);
@@ -153,11 +154,11 @@ app.service('ApiService', function($http, $q) {
                     c.releaseDate = null;
                     c.releaseDateInput = null;
                 }
-                
+
                 // Set formatted date string for ng-model binding (YYYY-MM-DD format)
-                if(c.releaseDate) {
+                if (c.releaseDate) {
                     var d = new Date(c.releaseDate);
-                    if(!isNaN(d.getTime())) {
+                    if (!isNaN(d.getTime())) {
                         var year = d.getFullYear();
                         var month = ('0' + (d.getMonth() + 1)).slice(-2);
                         var day = ('0' + d.getDate()).slice(-2);
@@ -168,30 +169,30 @@ app.service('ApiService', function($http, $q) {
                 } else {
                     c.releaseDateInputFormatted = '';
                 }
-                
+
                 c.editing = false;
-                
-                if(c.typeId && self.data.controlTypes.length > 0) {
+
+                if (c.typeId && self.data.controlTypes.length > 0) {
                     var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
-                    if(t) c.typeName = t.typeName;
+                    if (t) c.typeName = t.typeName;
                 }
-                
-                if(c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses.length > 0) {
+
+                if (c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses.length > 0) {
                     var s = self.data.statuses.find(x => x.id == c.statusId);
-                    if(s) c.statusName = s.statusName;
+                    if (s) c.statusName = s.statusName;
                 }
-                
-                if(c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
+
+                if (c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
                     var r = self.data.releases.find(x => x.releaseId == c.releaseId);
-                    if(r) {
+                    if (r) {
                         c.releaseName = r.releaseName;
                         // If releaseDate is not set but we found a release, use its date
-                        if(!c.releaseDate && r.releaseDate) {
+                        if (!c.releaseDate && r.releaseDate) {
                             c.releaseDate = new Date(r.releaseDate);
                             c.releaseDateInput = new Date(r.releaseDate);
                             // Update formatted date
                             var d = new Date(c.releaseDate);
-                            if(!isNaN(d.getTime())) {
+                            if (!isNaN(d.getTime())) {
                                 var year = d.getFullYear();
                                 var month = ('0' + (d.getMonth() + 1)).slice(-2);
                                 var day = ('0' + d.getDate()).slice(-2);
@@ -203,12 +204,12 @@ app.service('ApiService', function($http, $q) {
             });
             console.log('Controls loaded:', self.data.allControls.length);
             return self.data.allControls;
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('=== ERROR LOADING CONTROLS ===');
             console.error('Error object:', error);
-            if(error && error.data) {
+            if (error && error.data) {
                 console.error('Error data:', error.data);
-                if(error.data.message) {
+                if (error.data.message) {
                     console.error('ERROR MESSAGE:', error.data.message);
                     alert('Error loading controls: ' + error.data.message);
                 } else {
@@ -228,29 +229,29 @@ app.service('ApiService', function($http, $q) {
     // CRUD Actions 
 
     // Register employee with user account (Admin only)
-    self.registerEmployee = function(empData) {
-        return $http.post(apiBaseUrl + '/employees/register', empData).then(function(r) {
-            return self.loadEmployees().then(function() {
-                self.loadAllControls(); 
+    self.registerEmployee = function (empData) {
+        return $http.post(apiBaseUrl + '/employees/register', empData).then(function (r) {
+            return self.loadEmployees().then(function () {
+                self.loadAllControls();
                 return r.data;
             });
         });
     };
 
-    self.addEmployee = function(empData) {
-        return $http.post(apiBaseUrl + '/employees', empData).then(function(r) {
-            return self.loadEmployees().then(function() {
-                self.loadAllControls(); 
+    self.addEmployee = function (empData) {
+        return $http.post(apiBaseUrl + '/employees', empData).then(function (r) {
+            return self.loadEmployees().then(function () {
+                self.loadAllControls();
                 return r.data;
             });
         });
     };
 
     // --- FIX APPLIED HERE ---
-    self.updateEmployee = function(id, data) {
-        return $http.put(apiBaseUrl + '/employees/' + id, data).then(function(r) {
+    self.updateEmployee = function (id, data) {
+        return $http.put(apiBaseUrl + '/employees/' + id, data).then(function (r) {
             // Reload employees to ensure consistent Date objects
-            return self.loadEmployees().then(function(employees) {
+            return self.loadEmployees().then(function (employees) {
                 // Find and return the processed object
                 var updatedEmp = employees.find(e => e.id == id);
                 return updatedEmp;
@@ -258,55 +259,55 @@ app.service('ApiService', function($http, $q) {
         });
     };
 
-    self.deleteEmployee = function(id) {
-        return $http.delete(apiBaseUrl + '/employees/' + id).then(function() {
+    self.deleteEmployee = function (id) {
+        return $http.delete(apiBaseUrl + '/employees/' + id).then(function () {
             var idx = self.data.employees.findIndex(e => e.id == id);
             if (idx > -1) self.data.employees.splice(idx, 1);
             self.data.allControls = self.data.allControls.filter(c => c.employeeId != id);
         });
     };
 
-    
-    self.updateControl = function(controlId, payload) {
+
+    self.updateControl = function (controlId, payload) {
         console.log('Updating control:', controlId, payload);
-        
-        return $http.put(apiBaseUrl + '/controls/' + controlId, payload).then(function(r) {
-            
-            return self.loadAllControls().then(function(allControls) {
-                
+
+        return $http.put(apiBaseUrl + '/controls/' + controlId, payload).then(function (r) {
+
+            return self.loadAllControls().then(function (allControls) {
+
                 var updatedItem = allControls.find(c => c.controlId == controlId);
                 return updatedItem;
             });
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Update control error:', error);
             throw error;
         });
     };
 
-    self.addControl = function(controlData) {
+    self.addControl = function (controlData) {
         console.log('ApiService.addControl called with:', controlData);
-        return $http.post(apiBaseUrl + '/controls', controlData).then(function(r) {
+        return $http.post(apiBaseUrl + '/controls', controlData).then(function (r) {
             console.log('Control created response:', r.data);
-            return self.loadControlTypes().then(function() {
-                return self.loadAllControls().then(function() {
+            return self.loadControlTypes().then(function () {
+                return self.loadAllControls().then(function () {
                     console.log('Controls reloaded. Total controls:', self.data.allControls ? self.data.allControls.length : 0);
-                    console.log('Controls without employees:', self.data.allControls ? self.data.allControls.filter(function(c) { return !c.employeeId; }).length : 0);
+                    console.log('Controls without employees:', self.data.allControls ? self.data.allControls.filter(function (c) { return !c.employeeId; }).length : 0);
                     return r.data;
                 });
             });
         });
     };
 
-    self.deleteControl = function(controlId) {
+    self.deleteControl = function (controlId) {
         return $http.delete(apiBaseUrl + '/controls/' + controlId);
     };
 
     //  Helper, Release Processing Logic
-    self._processReleases = function() {
+    self._processReleases = function () {
         var today = new Date();
         var currentYear = today.getFullYear();
         //var defaultReleases = '';
-        
+
         var defaultReleases = [
             { releaseId: 999991, releaseName: "Release 26.01", releaseDate: new Date(currentYear, 0, 26) },
             { releaseId: 999992, releaseName: "Release 25.12", releaseDate: new Date(currentYear, 11, 25) },
@@ -318,11 +319,11 @@ app.service('ApiService', function($http, $q) {
         if (defaultReleases[2].releaseDate < today) defaultReleases[2].releaseDate = new Date(currentYear + 1, 11, 24);
 
         self.data.upcomingReleases = angular.copy(self.data.releases);
-        
-        defaultReleases.forEach(function(dr) {
+
+        defaultReleases.forEach(function (dr) {
             var drDate = new Date(dr.releaseDate);
             drDate.setHours(0, 0, 0, 0);
-            var exists = self.data.upcomingReleases.some(function(r) {
+            var exists = self.data.upcomingReleases.some(function (r) {
                 var rDate = new Date(r.releaseDate);
                 rDate.setHours(0, 0, 0, 0);
                 return rDate.getTime() === drDate.getTime();
@@ -333,23 +334,23 @@ app.service('ApiService', function($http, $q) {
         });
 
         if (self.data.controlTypes && self.data.controlTypes.length > 0) {
-            self.data.controlTypes.forEach(function(controlType) {
+            self.data.controlTypes.forEach(function (controlType) {
                 if (controlType.releaseDate) {
                     var ctDate = new Date(controlType.releaseDate);
                     ctDate.setHours(0, 0, 0, 0);
-                    
-                    var exists = self.data.upcomingReleases.some(function(r) {
+
+                    var exists = self.data.upcomingReleases.some(function (r) {
                         var rDate = new Date(r.releaseDate);
                         rDate.setHours(0, 0, 0, 0);
                         return rDate.getTime() === ctDate.getTime();
                     });
-                    
+
                     if (!exists && ctDate >= today) {
                         var day = ('0' + ctDate.getDate()).slice(-2);
                         var month = ('0' + (ctDate.getMonth() + 1)).slice(-2);
                         var releaseName = 'Release ' + day + '.' + month;
                         var controlTypeReleaseId = 999900 + controlType.controlTypeId;
-                        
+
                         self.data.upcomingReleases.push({
                             releaseId: controlTypeReleaseId,
                             releaseName: releaseName,
@@ -360,89 +361,122 @@ app.service('ApiService', function($http, $q) {
             });
         }
 
-        today.setHours(0,0,0,0);
-        self.data.upcomingReleases = self.data.upcomingReleases.filter(function(r) {
+        today.setHours(0, 0, 0, 0);
+        self.data.upcomingReleases = self.data.upcomingReleases.filter(function (r) {
             var rd = new Date(r.releaseDate);
             rd.setHours(0, 0, 0, 0);
             return rd >= today;
-        }).sort(function(a, b) {
+        }).sort(function (a, b) {
             return new Date(a.releaseDate) - new Date(b.releaseDate);
         });
     };
 
     // Control Type CRUD
-    self.addControlType = function(controlTypeData) {
-        return $http.post(apiBaseUrl + '/controltypes', controlTypeData).then(function(r) {
-          return self.loadControlTypes().then(function() {
+    self.addControlType = function (controlTypeData) {
+        return $http.post(apiBaseUrl + '/controltypes', controlTypeData).then(function (r) {
+            return self.loadControlTypes().then(function () {
                 self._processReleases();
                 return r.data;
             });
-        }).catch(function(error) {
+        }).catch(function (error) {
             throw error;
         });
     };
 
-    self.updateControlType = function(controlTypeId, controlTypeData) {
-        return $http.put(apiBaseUrl + '/controltypes/' + controlTypeId, controlTypeData).then(function(r) {
-            return self.loadControlTypes().then(function() {
+    self.updateControlType = function (controlTypeId, controlTypeData) {
+        return $http.put(apiBaseUrl + '/controltypes/' + controlTypeId, controlTypeData).then(function (r) {
+            return self.loadControlTypes().then(function () {
                 self._processReleases();
                 return r.data;
             });
-        }).catch(function(error) {
+        }).catch(function (error) {
             throw error;
         });
     };
 
-    self.deleteControlType = function(controlTypeId) {
-        return $http.delete(apiBaseUrl + '/controltypes/' + controlTypeId).then(function() {
+    self.deleteControlType = function (controlTypeId) {
+        return $http.delete(apiBaseUrl + '/controltypes/' + controlTypeId).then(function () {
             var idx = self.data.controlTypes.findIndex(t => t.controlTypeId == controlTypeId);
             if (idx > -1) {
                 self.data.controlTypes.splice(idx, 1);
             }
-            return self.loadEmployees().then(function() { 
-                return self.loadAllControls();  
+            return self.loadEmployees().then(function () {
+                return self.loadAllControls();
             });
         });
     };
 
-    self.addRelease = function(releaseData) {
-        return $http.post(apiBaseUrl + '/releases', releaseData).then(function(r) {
-            return self.loadReleases().then(function() {
+    self.addRelease = function (releaseData) {
+        return $http.post(apiBaseUrl + '/releases', releaseData).then(function (r) {
+            return self.loadReleases().then(function () {
                 return r.data;
             });
-        }).catch(function(error) {
+        }).catch(function (error) {
             throw error;
         });
     };
 
-    self.updateRelease = function(releaseId, releaseData) {
-        return $http.put(apiBaseUrl + '/releases/' + releaseId, releaseData).then(function(r) {
-            return self.loadReleases().then(function() {
+    self.updateRelease = function (releaseId, releaseData) {
+        return $http.put(apiBaseUrl + '/releases/' + releaseId, releaseData).then(function (r) {
+            return self.loadReleases().then(function () {
                 return r.data;
             });
-        }).catch(function(error) {
+        }).catch(function (error) {
             throw error;
         });
     };
 
     // Update user email
-    self.updateEmail = function(emailData) {
-        return $http.put(apiBaseUrl + '/auth/update-email', emailData).then(function(r) {
+    self.updateEmail = function (emailData) {
+        return $http.put(apiBaseUrl + '/auth/update-email', emailData).then(function (r) {
             return r.data;
         });
     };
 
     // Update user password
-    self.updatePassword = function(passwordData) {
-        return $http.put(apiBaseUrl + '/auth/update-password', passwordData).then(function(r) {
+    self.updatePassword = function (passwordData) {
+        return $http.put(apiBaseUrl + '/auth/update-password', passwordData).then(function (r) {
             return r.data;
         });
     };
 
     // Update user phone number
-    self.updatePhoneNumber = function(phoneData) {
-        return $http.put(apiBaseUrl + '/auth/update-phone', phoneData).then(function(r) {
+    self.updatePhoneNumber = function (phoneData) {
+        return $http.put(apiBaseUrl + '/auth/update-phone', phoneData).then(function (r) {
             return r.data;
+        });
+    };
+
+    // Helper to find or create a release by date
+    self.findOrCreateReleaseByDate = function (dateStr) {
+        if (!dateStr) return $q.resolve(null);
+
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return $q.resolve(null);
+
+        d.setHours(0, 0, 0, 0);
+
+        // Find existing release in the full list
+        var existing = self.data.releases.find(function (r) {
+            var rd = new Date(r.releaseDate);
+            rd.setHours(0, 0, 0, 0);
+            return rd.getTime() === d.getTime();
+        });
+
+        if (existing) {
+            return $q.resolve(existing.releaseId);
+        }
+
+        // Create new release if it doesn't exist
+        var day = ('0' + d.getDate()).slice(-2);
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        var releaseName = 'Release ' + month + '/' + day;
+
+        return self.addRelease({
+            releaseName: releaseName,
+            releaseDate: d.toISOString()
+        }).then(function (newRelease) {
+            return newRelease.releaseId;
         });
     };
 });

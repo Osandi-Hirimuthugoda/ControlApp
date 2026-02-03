@@ -117,7 +117,8 @@ app.component('newEmployee', {
             'Team Lead',
             'Developer',
             'QA Engineer',
-            'Intern'
+            'Intern Developer',
+            'Intern QA Engineer'
         ];
         
         // Form Model (default role = Project Manager)

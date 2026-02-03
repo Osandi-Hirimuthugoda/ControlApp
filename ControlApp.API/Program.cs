@@ -241,6 +241,9 @@ static void InitializeDatabase(WebApplication app)
         // Ensure SubDescriptions column exists in Controls table
         EnsureSubDescriptionsColumn(context, logger);
         
+        // Ensure Status table exists (handles migration mismatch when DB was partially created)
+        EnsureStatusTableExists(context, logger);
+        
         // Clean up duplicate control types
         CleanupDuplicateControlTypes(context, logger);
         
@@ -293,6 +296,52 @@ static void EnsureSubDescriptionsColumn(AppDbContext context, ILogger logger)
     {
         logger.LogWarning(ex, "Failed to ensure SubDescriptions column exists, but continuing...");
         // Don't throw - allow the app to continue even if this fails
+    }
+}
+
+// Helper method to ensure Status table exists (handles DB where migration failed partway)
+static void EnsureStatusTableExists(AppDbContext context, ILogger logger)
+{
+    try
+    {
+        var connection = context.Database.GetDbConnection();
+        connection.Open();
+        try
+        {
+            // Check if Status table exists
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Status')
+                    BEGIN
+                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Statuses')
+                        BEGIN
+                            -- Rename Statuses to Status and add DisplayOrder if missing
+                            EXEC sp_rename 'Statuses', 'Status';
+                            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Status' AND COLUMN_NAME = 'DisplayOrder')
+                                ALTER TABLE [Status] ADD DisplayOrder INT NOT NULL DEFAULT 0;
+                        END
+                        ELSE
+                        BEGIN
+                            CREATE TABLE [Status] (
+                                Id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                                StatusName NVARCHAR(MAX) NOT NULL,
+                                DisplayOrder INT NOT NULL DEFAULT 0
+                            );
+                        END
+                    END";
+                cmd.ExecuteNonQuery();
+            }
+            logger.LogInformation("Status table verified/created successfully");
+        }
+        finally
+        {
+            connection.Close();
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to ensure Status table exists, but continuing...");
     }
 }
 
@@ -407,21 +456,41 @@ static void EnsureRequiredControlTypes(AppDbContext context, ILogger logger)
 // Helper method to ensure required statuses exist
 static void EnsureRequiredStatuses(AppDbContext context, ILogger logger)
 {
-    var requiredStatuses = new[] { "Analyze", "Development", "Dev Testing", "QA" };
-    var existingStatuses = context.Set<Status>().Select(s => s.StatusName).ToList();
+    var requiredStatuses = new[] 
+    { 
+        new { Name = "Analyze", Order = 1 },
+        new { Name = "HLD", Order = 2 },
+        new { Name = "LLD", Order = 3 },
+        new { Name = "Development", Order = 4 },
+        new { Name = "Dev Testing", Order = 5 },
+        new { Name = "QA", Order = 6 }
+    };
+    
+    var existingStatuses = context.Set<Status>().ToList();
     
     bool hasChanges = false;
-    foreach (var statusName in requiredStatuses)
+    foreach (var statusDef in requiredStatuses)
     {
-        if (!existingStatuses.Contains(statusName))
+        var existing = existingStatuses.FirstOrDefault(s => s.StatusName == statusDef.Name);
+        if (existing == null)
         {
-            context.Set<Status>().Add(new Status { StatusName = statusName });
-            logger.LogInformation("Created missing status: {StatusName}", statusName);
+            context.Set<Status>().Add(new Status 
+            { 
+                StatusName = statusDef.Name,
+                DisplayOrder = statusDef.Order
+            });
+            logger.LogInformation("Created missing status: {StatusName} with order {Order}", statusDef.Name, statusDef.Order);
+            hasChanges = true;
+        }
+        else if (existing.DisplayOrder != statusDef.Order)
+        {
+            existing.DisplayOrder = statusDef.Order;
+            logger.LogInformation("Updated display order for status: {StatusName} to {Order}", statusDef.Name, statusDef.Order);
             hasChanges = true;
         }
     }
     
-    // Save changes immediately if any statuses were added
+    // Save changes immediately if any statuses were added or updated
     if (hasChanges)
     {
         context.SaveChanges();

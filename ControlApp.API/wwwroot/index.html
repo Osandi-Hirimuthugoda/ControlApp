@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="controlApp">
+
 <head>
     <base href="/">
     <meta charset="UTF-8">
@@ -14,10 +15,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/styles.css" rel="stylesheet">
+    <link href="/styles.css?v=3" rel="stylesheet">
 </head>
+
 <body ng-controller="MainController as main">
-    
+
     <!--Header Component -->
     <app-navbar></app-navbar>
 
@@ -25,10 +27,12 @@
         <!-- ng-view will render the routed templates -->
         <div ng-view></div>
     </div>
-    
+
     <!-- Toast Notifications Container -->
-    <div ng-controller="ToastController as toast" ng-if="toast.message" class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-        <div class="toast show text-white" ng-class="{'bg-success': toast.type==='success', 'bg-danger': toast.type==='error'}">
+    <div ng-controller="ToastController as toast" ng-if="toast.message" class="position-fixed top-0 end-0 p-3"
+        style="z-index: 9999">
+        <div class="toast show text-white"
+            ng-class="{'bg-success': toast.type==='success', 'bg-danger': toast.type==='error'}">
             <div class="d-flex">
                 <div class="toast-body">{{toast.message}}</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toast.clear()"></button>
@@ -46,7 +50,11 @@
     <script src="/components/dashboard.component.js"></script>
     <script src="/components/controls-sidebar.component.js"></script>
     <script src="/components/controls-view.component.js"></script>
-    <script src="/components/control-board.component.js"></script>
+    <script src="/components/control-board.component.js?v=3"></script>
+    <script src="/components/qa-progress.component.js"></script>
+    <script src="/components/qa-progress-view.component.js"></script>
+    <script src="/components/developer-progress.component.js"></script>
+    <script src="/components/developer-progress-view.component.js"></script>
     <script src="/components/add-control-type.component.js"></script>
     <script src="/components/control-types-list.component.js"></script>
     <script src="/components/new-employee.component.js"></script>
@@ -55,4 +63,5 @@
     <script src="/components/access-denied.component.js"></script>
 
 </body>
+
 </html>

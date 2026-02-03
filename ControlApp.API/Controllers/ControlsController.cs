@@ -23,8 +23,8 @@ namespace ControlApp.API.Controllers
         {
             try
             {
-                var controls = await _controlService.GetAllControlsAsync(search);
-                return Ok(controls);
+            var controls = await _controlService.GetAllControlsAsync(search);
+            return Ok(controls);
             }
             catch (Exception ex)
             {
@@ -46,7 +46,7 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReleaseDto>> GetControlById(int id)
+        public async Task<ActionResult<ControlDto>> GetControlById(int id)
         {
             var control = await _controlService.GetControlByIdAsync(id);
             if (control == null)

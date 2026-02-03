@@ -18,7 +18,7 @@ namespace ControlApp.API.DTOs
         public string Password { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Role is required")]
-        public string Role { get; set; } = string.Empty; // Software Architect, Team Leader, Developer, QA Engineer, Intern
+        public string Role { get; set; } = string.Empty; // Software Architect, Team Leader, Developer, QA Engineer, Intern Developer, Intern QA Engineer
         
         [Required(ErrorMessage = "Phone number is required")]
         [StringLength(10, ErrorMessage = "Phone number cannot exceed 10 characters")]

@@ -56,11 +56,11 @@ app.component('accessDenied', {
                 // Add Controls & Assign Owner
                 'addControlType': ['Admin', 'Team Lead', 'Software Architecture', 'Software Architecturer'],
                 // Control List (everyone can view)
-                'controlTypes': ['Admin', 'Software Architecture', 'Software Architecturer', 'Team Lead', 'Developer', 'QA Engineer', 'Intern'],
+                'controlTypes': ['Admin', 'Software Architecture', 'Software Architecturer', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer'],
                 // Add Employee (Admin only)
                 'newEmployee': ['Admin', 'Project Manager'],
                 // Employees List (everyone can view)
-                'employees': ['Admin', 'Software Architecture', 'Software Architecturer', 'Team Lead', 'Developer', 'QA Engineer', 'Intern']
+                'employees': ['Admin', 'Software Architecture', 'Software Architecturer', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer']
             };
             
             // Default: show Admin + Project Manager as allowed roles

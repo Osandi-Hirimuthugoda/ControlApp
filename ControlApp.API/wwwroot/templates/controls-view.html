@@ -1,12 +1,30 @@
 <div ng-controller="ControlsViewController as controlsView">
     <div class="row" style="align-items: flex-start; margin: 0;">
         <!-- Left Side: Sidebar with Buttons -->
-        <div class="col-md-3" style="padding-left: 0; padding-right: 10px;">
-            <controls-sidebar></controls-sidebar>
+        <div class="sidebar-container" ng-class="{'collapsed': controlsView.sidebarCollapsed, 'expanded': !controlsView.sidebarCollapsed, 'minimized': controlsView.sidebarMinimized}">
+            <!-- Anchor Bar with Icons -->
+            <div class="sidebar-anchor-bar">
+                <button class="anchor-btn" ng-click="controlsView.toggleSidebar()" title="Toggle Sidebar">
+                    <i class="fas" ng-class="controlsView.sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+                </button>
+                <button class="anchor-btn" ng-click="controlsView.toggleFullscreen()" title="Toggle Fullscreen">
+                    <i class="fas" ng-class="controlsView.isFullscreen ? 'fa-compress' : 'fa-expand'"></i>
+                </button>
+                <button class="anchor-btn" ng-click="controlsView.resetLayout()" title="Reset Layout">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="anchor-btn" ng-click="controlsView.minimizeSidebar()" title="Minimize Sidebar">
+                    <i class="fas fa-window-minimize"></i>
+                </button>
+            </div>
+            <!-- Sidebar Content -->
+            <div class="sidebar-content" ng-if="!controlsView.sidebarMinimized">
+                <controls-sidebar></controls-sidebar>
+            </div>
         </div>
 
         <!--Right Side: Content Area -->
-        <div class="col-md-9" style="display: flex; flex-direction: column; padding-right: 0; padding-left: 10px;">
+        <div class="content-area" ng-class="{'full-width': controlsView.sidebarCollapsed || controlsView.sidebarMinimized, 'normal-width': !controlsView.sidebarCollapsed && !controlsView.sidebarMinimized}">
             <!-- Controls Table -->
             <div ng-if="controlsView.currentSection === 'controls'">
                 <control-board></control-board>

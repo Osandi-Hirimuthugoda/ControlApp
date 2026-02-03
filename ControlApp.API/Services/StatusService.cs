@@ -16,7 +16,7 @@ namespace ControlApp.API.Services
         public async Task<IEnumerable<StatusDto>> GetAllStatusesAsync()
         {
             var statuses = await _statusRepository.GetAllAsync();
-            return statuses.Select(MapToDto);
+            return statuses.OrderBy(s => s.DisplayOrder).Select(MapToDto);
         }
 
         public async Task<StatusDto?> GetStatusByIdAsync(int id)
@@ -57,7 +57,8 @@ namespace ControlApp.API.Services
             return new StatusDto
             {
                 Id = status.Id,
-                StatusName = status.StatusName
+                StatusName = status.StatusName,
+                DisplayOrder = status.DisplayOrder
             };
         }
     }

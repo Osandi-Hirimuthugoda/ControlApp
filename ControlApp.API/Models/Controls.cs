@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,6 +21,7 @@ namespace ControlApp.API.Models
         
         public int TypeId { get; set; }
         public int? EmployeeId { get; set; }
+        public int? QAEmployeeId { get; set; } // QA Engineer assigned to this control
         
         
         public int? StatusId { get; set; }
@@ -32,10 +34,15 @@ namespace ControlApp.API.Models
         [ForeignKey("EmployeeId")]
         public Employee? Employee { get; set; }
         
+        [ForeignKey("QAEmployeeId")]
+        public Employee? QAEmployee { get; set; }
+        
         [ForeignKey("StatusId")]
         public Status? Status { get; set; }
         
         [ForeignKey("ReleaseId")]
         public Release? Release { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

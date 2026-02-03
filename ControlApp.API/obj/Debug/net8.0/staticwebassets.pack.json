@@ -37,6 +37,14 @@
       "PackagePath": "staticwebassets\\components\\dashboard.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\developer-progress-view.component.js",
+      "PackagePath": "staticwebassets\\components\\developer-progress-view.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\developer-progress.component.js",
+      "PackagePath": "staticwebassets\\components\\developer-progress.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
       "PackagePath": "staticwebassets\\components\\employee-sidebar.component.js"
     },
@@ -59,6 +67,14 @@
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\profile.component.js",
       "PackagePath": "staticwebassets\\components\\profile.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress-view.component.js",
+      "PackagePath": "staticwebassets\\components\\qa-progress-view.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress.component.js",
+      "PackagePath": "staticwebassets\\components\\qa-progress.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",

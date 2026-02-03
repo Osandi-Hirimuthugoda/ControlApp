@@ -32,7 +32,6 @@ namespace ControlApp.API
                     .HasColumnType("nvarchar(max)")
                     .IsRequired(false);
                 
-                
                 entity.HasOne(c => c.Type)
                     .WithMany(t => t.Controls)
                     .HasForeignKey(c => c.TypeId)
@@ -43,6 +42,12 @@ namespace ControlApp.API
                     .HasForeignKey(c => c.EmployeeId)
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(c => c.QAEmployee)
+                    .WithMany()
+                    .HasForeignKey(c => c.QAEmployeeId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne(c => c.Status)
                     .WithMany(s => s.Controls)
@@ -80,6 +85,7 @@ namespace ControlApp.API
             
             modelBuilder.Entity<Status>(entity =>
             {
+                entity.ToTable("Status"); // Map to 'Status' table instead of 'Statuses'
                 entity.HasKey(e => e.Id);
             });
 

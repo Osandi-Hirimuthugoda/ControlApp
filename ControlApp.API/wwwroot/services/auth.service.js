@@ -60,16 +60,17 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
     
     self.isDeveloper = function() {
         var role = self.getRole();
-        return role === 'developer' || role === 'developers';
+        return role === 'developer' || role === 'developers' || role === 'intern developer';
     };
     
     self.isQAEngineer = function() {
         var role = self.getRole();
-        return role === 'qa engineer' || role === 'qa';
+        return role === 'qa engineer' || role === 'qa' || role === 'intern qa engineer';
     };
     
     self.isIntern = function() {
         var role = self.getRole();
+        // Legacy plain 'Intern' role only
         return role === 'intern' || role === 'interns';
     };
     
@@ -109,7 +110,7 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
     };
     
     self.canEditControl = function() {
-        // Developers and Interns have view-only access
+        // Developers, QA Engineers and Interns have view-only access
         if (self.isViewOnly()) return false;
         // Admin has full access, Team Lead and Software Architecture can edit
         // Project Manager has view-only access

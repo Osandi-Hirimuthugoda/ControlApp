@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\ControlApp.API",
+    "\\ControlApp.API\\Controllers",
+    "\\ControlApp.API\\wwwroot"
   ],
   "SelectedNode": "\\Control_App.sln",
   "PreviewInSolutionExplorer": false

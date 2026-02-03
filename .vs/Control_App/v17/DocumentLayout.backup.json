@@ -7,19 +7,22 @@
       "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|c:\\users\\asus\\desktop\\virtusa\\control_app\\controlapp.api\\controllers\\controltypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\controllers\\controltypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|c:\\users\\asus\\desktop\\virtusa\\control_app\\controlapp.api\\controllers\\controlscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\controllers\\controlscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|c:\\users\\asus\\desktop\\virtusa\\control_app\\controlapp.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|c:\\users\\asus\\desktop\\virtusa\\control_app\\controlapp.api\\controllers\\controltypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\controllers\\controltypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/ControlDB/True/SqlTable/dbo.Employees.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\9.0.102\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.NET.TargetFrameworkInference.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|c:\\users\\asus\\desktop\\virtusa\\control_app\\controlapp.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{8FA4A0F5-EC6D-DDC8-D9D8-F12DB0683C1D}|ControlApp.API\\ControlApp.API.csproj|solutionrelative:controlapp.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -29,7 +32,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -37,7 +40,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
+              "Title": "ControlTypesController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlTypesController.cs",
+              "RelativeDocumentMoniker": "ControlApp.API\\Controllers\\ControlTypesController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlTypesController.cs",
+              "RelativeToolTip": "ControlApp.API\\Controllers\\ControlTypesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-11T05:06:00.605Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ControlsController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlsController.cs",
+              "RelativeDocumentMoniker": "ControlApp.API\\Controllers\\ControlsController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlsController.cs",
+              "RelativeToolTip": "ControlApp.API\\Controllers\\ControlsController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAoAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-11T04:55:08.27Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\appsettings.Development.json",
               "RelativeDocumentMoniker": "ControlApp.API\\appsettings.Development.json",
@@ -45,34 +74,16 @@
               "RelativeToolTip": "ControlApp.API\\appsettings.Development.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-12-11T05:35:55.041Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-11T05:35:55.041Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ControlTypesController.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlTypesController.cs",
-              "RelativeDocumentMoniker": "ControlApp.API\\Controllers\\ControlTypesController.cs",
-              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlTypesController.cs",
-              "RelativeToolTip": "ControlApp.API\\Controllers\\ControlTypesController.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAA5wCUAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-11T05:06:00.605Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ControlsController.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlsController.cs",
-              "RelativeDocumentMoniker": "ControlApp.API\\Controllers\\ControlsController.cs",
-              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Controllers\\ControlsController.cs",
-              "RelativeToolTip": "ControlApp.API\\Controllers\\ControlsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-11T04:55:08.27Z",
-              "EditorCaption": ""
+              "DocumentIndex": 3,
+              "Title": "dbo.Employees.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/ControlDB/True/SqlTable/dbo.Employees.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/ControlDB/True/SqlTable/dbo.Employees.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-01-05T11:10:41.629Z"
             },
             {
               "$type": "Document",
@@ -92,9 +103,9 @@
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Program.cs",
               "RelativeDocumentMoniker": "ControlApp.API\\Program.cs",
-              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Program.cs",
-              "RelativeToolTip": "ControlApp.API\\Program.cs",
-              "ViewState": "AgIAANMAAAAAAAAAAAAAANMAAAAKAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\Program.cs*",
+              "RelativeToolTip": "ControlApp.API\\Program.cs*",
+              "ViewState": "AgIAAKgAAAAAAAAAAAAAAMMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-10T15:27:05.564Z",
               "EditorCaption": ""

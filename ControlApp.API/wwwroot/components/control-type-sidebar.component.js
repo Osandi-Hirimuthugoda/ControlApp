@@ -16,19 +16,7 @@ app.component('controlTypeSidebar', {
                         <label class="form-label small fw-bold">Description: <span class="text-danger">*</span></label>
                         <textarea class="form-control form-control-sm" ng-model="$ctrl.newControlType.description" placeholder="Enter description..." rows="2" required></textarea>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-bold">Release:</label>
-                        <select class="form-select form-select-sm" 
-                                ng-model="$ctrl.selectedReleaseId" 
-                                ng-options="r.releaseId as $ctrl.formatReleaseName(r) for r in $ctrl.store.upcomingReleases"
-                                ng-change="$ctrl.onReleaseChange()">
-                            <option value="">-- Select Release --</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-bold">Release Date:</label>
-                        <input type="date" class="form-control form-control-sm" ng-model="$ctrl.newControlType.releaseDate">
-                    </div>
+
                     <button type="submit" class="btn btn-sm btn-info w-100" ng-disabled="$ctrl.isSaving">
                         <span ng-if="!$ctrl.isSaving"><i class="fas fa-plus"></i> Add Type</span>
                         <span ng-if="$ctrl.isSaving"><i class="fas fa-spinner fa-spin"></i> Adding...</span>
@@ -59,9 +47,7 @@ app.component('controlTypeSidebar', {
                                     <strong>{{type.typeName}}</strong>
                                     <br>
                                     <small class="text-muted" style="font-size:0.7em" ng-if="type.description">{{type.description}}</small>
-                                    <small class="text-muted" style="font-size:0.7em" ng-if="type.releaseDate">
-                                        <i class="fas fa-calendar-alt"></i> {{$ctrl.formatDate(type.releaseDate)}}
-                                    </small>
+
                                 </td>
                                 <td class="text-end" style="width:50px;">
                                     <i class="fas fa-trash text-danger" style="cursor:pointer" ng-click="$ctrl.deleteControlType(type)" title="Delete"></i>
@@ -74,30 +60,30 @@ app.component('controlTypeSidebar', {
         </div>
     </div>
     `,
-    controller: function(ApiService, NotificationService, $rootScope, $scope, $timeout) {
+    controller: function (ApiService, NotificationService, $rootScope, $scope, $timeout) {
         var ctrl = this;
         ctrl.store = ApiService.data;
-        ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
-        ctrl.selectedReleaseId = null;
+        ctrl.newControlType = { typeName: '', description: '' };
+        ctrl.assignedEmployeeId = null;
         ctrl.isSaving = false;
         ctrl.searchType = '';
         var listener = null;
 
         // Initial load of control types
-        ApiService.loadControlTypes().then(function() {
+        ApiService.loadControlTypes().then(function () {
             console.log('Control types loaded in sidebar component');
         });
 
         // Listen for control types updates
-        ctrl.$onInit = function() {
+        ctrl.$onInit = function () {
             // Listen for updates from other components
-            listener = $rootScope.$on('controlTypesUpdated', function() {
+            listener = $rootScope.$on('controlTypesUpdated', function () {
                 console.log('Control types updated event received in sidebar');
-                ApiService.loadControlTypes().then(function(types) {
+                ApiService.loadControlTypes().then(function (types) {
                     console.log('Control types reloaded in sidebar, count:', types.length);
                     console.log('Control types:', types);
                     // Use $timeout to ensure digest cycle runs
-                    $timeout(function() {
+                    $timeout(function () {
                         // Force view update by reassigning the store reference
                         ctrl.store = ApiService.data;
                         // Angular will automatically detect the change
@@ -105,57 +91,36 @@ app.component('controlTypeSidebar', {
                 });
             });
         };
-        
-        ctrl.$onDestroy = function() {
-            if(listener) {
+
+        ctrl.$onDestroy = function () {
+            if (listener) {
                 listener();
             }
         };
 
-        ctrl.formatDate = function(date) {
-            if(!date) return '';
+        ctrl.formatDate = function (date) {
+            if (!date) return '';
             var d = new Date(date);
-            if(isNaN(d)) return '';
-            // Format: DD.MM (Day.Month) - e.g., 26.01, 25.12
+            if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            return day + '.' + month;
+            var year = d.getFullYear();
+            return month + '/' + day + '/' + year;
         };
 
-        ctrl.formatReleaseName = function(release) {
-            if(!release) return '';
-            if(release.releaseName) return release.releaseName;
-            var date = new Date(release.releaseDate);
-            var day = ('0' + date.getDate()).slice(-2);
-            var month = ('0' + (date.getMonth() + 1)).slice(-2);
-            return 'Release ' + day + '.' + month;
-        };
 
-        ctrl.onReleaseChange = function() {
-            if(ctrl.selectedReleaseId) {
-                var selectedRelease = ctrl.store.upcomingReleases.find(function(r) {
-                    return r.releaseId === ctrl.selectedReleaseId;
-                });
-                if(selectedRelease && selectedRelease.releaseDate) {
-                    var releaseDate = new Date(selectedRelease.releaseDate);
-                    ctrl.newControlType.releaseDate = releaseDate.toISOString().split('T')[0];
-                }
-            } else {
-                ctrl.newControlType.releaseDate = null;
-            }
-        };
 
-        ctrl.addControlType = function(event) {
-            if(event) event.preventDefault();
-            
+        ctrl.addControlType = function (event) {
+            if (event) event.preventDefault();
+
             console.log('Add control type called', ctrl.newControlType);
-            
-            if(!ctrl.newControlType.typeName || ctrl.newControlType.typeName.trim() === '') {
+
+            if (!ctrl.newControlType.typeName || ctrl.newControlType.typeName.trim() === '') {
                 NotificationService.show('Type Name is required', 'error');
                 return;
             }
 
-            if(!ctrl.newControlType.description || ctrl.newControlType.description.trim() === '') {
+            if (!ctrl.newControlType.description || ctrl.newControlType.description.trim() === '') {
                 NotificationService.show('Description is required', 'error');
                 return;
             }
@@ -163,127 +128,112 @@ app.component('controlTypeSidebar', {
             // Check for duplicate type name AND description combination
             var trimmedName = ctrl.newControlType.typeName.trim();
             var trimmedDescription = ctrl.newControlType.description.trim();
-            var duplicateType = ctrl.store.controlTypes.find(function(t) {
+            var duplicateType = ctrl.store.controlTypes.find(function (t) {
                 var existingName = t.typeName ? t.typeName.trim().toLowerCase() : '';
                 var existingDesc = t.description ? t.description.trim().toLowerCase() : '';
                 return existingName === trimmedName.toLowerCase() && existingDesc === trimmedDescription.toLowerCase();
             });
-            
-            if(duplicateType) {
+
+            if (duplicateType) {
                 NotificationService.show('A control type with the name "' + trimmedName + '" and description "' + trimmedDescription + '" already exists. Please use a different description.', 'error');
                 return;
             }
 
             ctrl.isSaving = true;
-            
-            // Prepare release date - handle both date string and Date object
-            var releaseDate = null;
-            if(ctrl.newControlType.releaseDate) {
-                if(typeof ctrl.newControlType.releaseDate === 'string') {
-                    // If it's already a string, convert to ISO
-                    releaseDate = new Date(ctrl.newControlType.releaseDate + 'T00:00:00').toISOString();
-                } else if(ctrl.newControlType.releaseDate instanceof Date) {
-                    // If it's a Date object, convert to ISO
-                    releaseDate = ctrl.newControlType.releaseDate.toISOString();
-                } else {
-                    releaseDate = new Date(ctrl.newControlType.releaseDate).toISOString();
-                }
-            }
-            
+
             var payload = {
                 typeName: ctrl.newControlType.typeName.trim(),
                 description: ctrl.newControlType.description.trim(),
-                releaseDate: releaseDate
+                releaseDate: null
             };
-            
+
             console.log('Sending payload:', payload);
-            
-            ApiService.addControlType(payload).then(function(addedType) {
+
+            ApiService.addControlType(payload).then(function (addedType) {
                 console.log('Control type added successfully:', addedType);
-                
+
                 // Reset form immediately
-                ctrl.newControlType = { typeName: '', description: '', releaseDate: null };
-                ctrl.selectedReleaseId = null;
-                
+                ctrl.newControlType = { typeName: '', description: '' };
+
                 // Force reload of control types and trigger Angular digest
-                ApiService.loadControlTypes().then(function(types) {
+                ApiService.loadControlTypes().then(function (types) {
                     console.log('Control types reloaded after add, count:', types.length);
                     console.log('Control types:', types);
-                    
+
                     // Use $timeout to ensure digest cycle runs after promise resolves
-                    $timeout(function() {
+                    $timeout(function () {
                         // Reassign store reference to ensure Angular detects the change
                         ctrl.store = ApiService.data;
-                        
+
                         // Show success message
                         NotificationService.show('Control Type "' + payload.typeName + '" Added Successfully!', 'success');
-                        
+
                         // Broadcast event to notify other components (including self)
                         $rootScope.$broadcast('controlTypesUpdated');
                     }, 100);
-                }).catch(function(reloadError) {
+                }).catch(function (reloadError) {
                     console.error('Error reloading control types:', reloadError);
                     NotificationService.show('Control Type Added but failed to refresh list. Please refresh the page.', 'error');
                 });
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error('Error adding control type:', error);
                 var errorMsg = 'Error adding control type';
-                
+
                 // Handle different error response formats
-                if(error && error.data) {
-                    if(typeof error.data === 'string') {
+                if (error && error.data) {
+                    if (typeof error.data === 'string') {
                         errorMsg = error.data;
-                    } else if(error.data.message) {
+                    } else if (error.data.message) {
                         errorMsg = error.data.message;
-                    } else if(error.data.title) {
+                    } else if (error.data.title) {
                         errorMsg = error.data.title;
-                    } else if(Array.isArray(error.data) && error.data.length > 0) {
+                    } else if (Array.isArray(error.data) && error.data.length > 0) {
                         errorMsg = error.data[0];
                     }
-                } else if(error && error.statusText) {
+                } else if (error && error.statusText) {
                     errorMsg = 'Error: ' + error.statusText;
-                } else if(error && error.message) {
+                } else if (error && error.message) {
                     errorMsg = error.message;
                 }
-                
+
                 NotificationService.show(errorMsg, 'error');
-            }).finally(function() { 
-                ctrl.isSaving = false; 
+            }).finally(function () {
+                ctrl.isSaving = false;
             });
         };
 
-        ctrl.deleteControlType = function(type) {
-            if(!confirm('Delete Control Type "' + type.typeName + '"?\n\nThis will reassign all employees and controls using this type to another type.')) {
+        ctrl.deleteControlType = function (type) {
+            if (!confirm('Delete Control Type "' + type.typeName + '"?\n\nThis will reassign all employees and controls using this type to another type.')) {
                 return;
             }
 
-            ApiService.deleteControlType(type.controlTypeId).then(function() {
+            ApiService.deleteControlType(type.controlTypeId).then(function () {
                 // Reload control types to get the updated list
-                ApiService.loadControlTypes().then(function(types) {
+                ApiService.loadControlTypes().then(function (types) {
                     console.log('Control types reloaded after delete, count:', types.length);
                     // Reassign store reference to ensure Angular detects the change
                     ctrl.store = ApiService.data;
-                    
+
                     // Reload controls to update type names
                     ApiService.loadAllControls();
-                    
+
                     // Trigger digest cycle to update the view safely
                     try {
-                        if(!$scope.$$phase && !$rootScope.$$phase) {
+                        if (!$scope.$$phase && !$rootScope.$$phase) {
                             $scope.$apply();
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.error('Error in $apply:', e);
                     }
-                    
+
                     NotificationService.show('Control Type Deleted Successfully!', 'success');
                 });
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error('Error deleting control type:', error);
                 var errorMsg = 'Error deleting control type';
-                if(error && error.data && error.data.message) {
+                if (error && error.data && error.data.message) {
                     errorMsg = error.data.message;
-                } else if(error && error.status === 400) {
+                } else if (error && error.status === 400) {
                     errorMsg = 'Cannot delete this type. ' + (error.data?.title || error.data?.message || '');
                 }
                 NotificationService.show(errorMsg, 'error');

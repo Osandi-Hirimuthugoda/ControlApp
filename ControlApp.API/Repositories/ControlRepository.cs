@@ -15,6 +15,7 @@ namespace ControlApp.API.Repositories
             var query = _dbSet
                 .Include(c => c.Type)
                 .Include(c => c.Employee)
+                .Include(c => c.QAEmployee)
                 .Include(c => c.Status)
                 .Include(c => c.Release) 
                 .AsQueryable();
@@ -37,6 +38,7 @@ namespace ControlApp.API.Repositories
             return await _dbSet
                 .Include(c => c.Type)
                 .Include(c => c.Employee)
+                .Include(c => c.QAEmployee)
                 .Include(c => c.Status)
                 .Include(c => c.Release)
                 .FirstOrDefaultAsync(c => c.ControlId == id);

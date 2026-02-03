@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ControlApp.API.DTOs;
 using ControlApp.API.Models;
@@ -101,7 +104,8 @@ namespace ControlApp.API.Services
                 ReleaseId = (createControlDto.ReleaseId.HasValue && createControlDto.ReleaseId.Value > 0) ? createControlDto.ReleaseId : null, 
                 
                 ReleaseDate = releaseDate,
-                Progress = createControlDto.Progress
+                Progress = createControlDto.Progress,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _logger.LogInformation("Creating control entity: TypeId={TypeId}, EmployeeId={EmployeeId}, StatusId={StatusId}, ReleaseId={ReleaseId}, Progress={Progress}", 
@@ -177,6 +181,23 @@ namespace ControlApp.API.Services
             {
                 // Set to null if not provided or 0
                 control.EmployeeId = null;
+            }
+            
+            // Handle QAEmployeeId - allow null (controls without assigned QA Engineer)
+            if (updateControlDto.QAEmployeeId.HasValue && updateControlDto.QAEmployeeId.Value > 0)
+            {
+                // Validate QA employee exists if provided
+                var qaEmployeeExists = await _context.Set<Employee>().AnyAsync(e => e.Id == updateControlDto.QAEmployeeId.Value);
+                if (!qaEmployeeExists)
+                {
+                    throw new ArgumentException($"Invalid QA Employee ID: {updateControlDto.QAEmployeeId.Value}");
+                }
+                control.QAEmployeeId = updateControlDto.QAEmployeeId.Value;
+            }
+            else
+            {
+                // Set to null if not provided or 0
+                control.QAEmployeeId = null;
             }
             
             
@@ -271,6 +292,8 @@ namespace ControlApp.API.Services
                 }
                 // If StatusId is not provided in DTO (null or 0), keep the existing status unchanged
             }
+
+            control.UpdatedAt = DateTime.UtcNow;
 
             await _controlRepository.UpdateAsync(control);
             
@@ -412,12 +435,15 @@ namespace ControlApp.API.Services
                 TypeName = control.Type?.TypeName,
                 EmployeeId = control.EmployeeId,
                 EmployeeName = control.Employee?.EmployeeName,
+                QAEmployeeId = control.QAEmployeeId,
+                QAEmployeeName = control.QAEmployee?.EmployeeName,
                 StatusId = control.StatusId,
                 StatusName = control.Status?.StatusName,
                 ReleaseId = control.ReleaseId,
                 ReleaseName = control.Release?.ReleaseName, 
                 Progress = control.Progress,
-                ReleaseDate = control.ReleaseDate
+                ReleaseDate = control.ReleaseDate,
+                UpdatedAt = control.UpdatedAt
             };
         }
     }

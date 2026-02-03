@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ControlApp.API.DTOs
@@ -12,12 +13,15 @@ namespace ControlApp.API.DTOs
         public string? TypeName { get; set; }
         public int? EmployeeId { get; set; }
         public string? EmployeeName { get; set; }
+        public int? QAEmployeeId { get; set; }
+        public string? QAEmployeeName { get; set; }
         public int? StatusId { get; set; }
         public string? StatusName { get; set; }
         public int? ReleaseId { get; set; }
         public string? ReleaseName { get; set; }
         public int Progress { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class CreateControlDto

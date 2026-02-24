@@ -28,6 +28,8 @@ namespace ControlApp.API.Services
             {
                 // Find user by username or email
                 var user = await _context.Users
+                    .Include(u => u.UserTeams)
+                        .ThenInclude(ut => ut.Team)
                     .FirstOrDefaultAsync(u => u.Username == loginDto.UsernameOrEmail ||
                                               u.Email == loginDto.UsernameOrEmail);
 
@@ -52,13 +54,43 @@ namespace ControlApp.API.Services
                 // Generate JWT token
                 var token = GenerateJwtToken(user);
 
+                // Get user's teams
+                var userTeams = user.UserTeams
+                    .Where(ut => ut.IsActive && ut.Team.IsActive)
+                    .Select(ut => new UserTeamDto
+                    {
+                        TeamId = ut.TeamId,
+                        TeamName = ut.Team.TeamName,
+                        TeamCode = ut.Team.TeamCode
+                    })
+                    .ToList();
+
+                // Get current team info
+                string currentTeamName = null;
+                if (user.CurrentTeamId.HasValue)
+                {
+                    var currentTeam = userTeams.FirstOrDefault(t => t.TeamId == user.CurrentTeamId.Value);
+                    currentTeamName = currentTeam?.TeamName;
+                }
+                else if (userTeams.Any())
+                {
+                    // Set first team as current if not set
+                    user.CurrentTeamId = userTeams.First().TeamId;
+                    await _context.SaveChangesAsync();
+                    currentTeamName = userTeams.First().TeamName;
+                }
+
                 return new AuthResponseDto
                 {
                     Token = token,
                     Username = user.Username,
                     Email = user.Email,
                     Role = user.Role,
-                    ExpiresAt = DateTime.UtcNow.AddHours(24) // Token expires in 24 hours
+                    ExpiresAt = DateTime.UtcNow.AddHours(24), // Token expires in 24 hours
+                    CurrentTeamId = user.CurrentTeamId,
+                    CurrentTeamName = currentTeamName,
+                    IsSuperAdmin = user.IsSuperAdmin,
+                    Teams = userTeams
                 };
             }
             catch (Exception ex)
@@ -222,6 +254,41 @@ namespace ControlApp.API.Services
             }
         }
 
+        public async Task<bool> SwitchTeamAsync(int userId, int teamId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.UserTeams)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                // Check if user belongs to the team
+                var userTeam = user.UserTeams.FirstOrDefault(ut => ut.TeamId == teamId && ut.IsActive);
+                if (userTeam == null && !user.IsSuperAdmin)
+                {
+                    _logger.LogWarning("User {UserId} attempted to switch to unauthorized team {TeamId}", userId, teamId);
+                    return false;
+                }
+
+                // Update current team
+                user.CurrentTeamId = teamId;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User {UserId} switched to team {TeamId}", userId, teamId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error switching team for user {UserId}", userId);
+                throw;
+            }
+        }
+
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -233,19 +300,26 @@ namespace ControlApp.API.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claimsList = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("IsSuperAdmin", user.IsSuperAdmin.ToString())
             };
+
+            // Add TeamId claim if user belongs to a team
+            if (user.CurrentTeamId.HasValue)
+            {
+                claimsList.Add(new Claim("TeamId", user.CurrentTeamId.Value.ToString()));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
-                claims: claims,
+                claims: claimsList,
                 expires: DateTime.UtcNow.AddHours(expirationHours),
                 signingCredentials: credentials
             );

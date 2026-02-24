@@ -20,8 +20,11 @@ namespace ControlApp.API.DTOs
         public int? ReleaseId { get; set; }
         public string? ReleaseName { get; set; }
         public int Progress { get; set; }
+        public string? StatusProgress { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int? TeamId { get; set; }
+        public string? TeamName { get; set; }
     }
 
     public class CreateControlDto
@@ -44,6 +47,8 @@ namespace ControlApp.API.DTOs
         public int Progress { get; set; }
         
         public DateTime? ReleaseDate { get; set; }
+        
+        public int? TeamId { get; set; }
     }
 }
 

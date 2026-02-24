@@ -4,7 +4,7 @@ namespace ControlApp.API.Services
 {
     public interface IEmployeeService
     {
-        Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync();
+        Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync(int? teamId = null);
         Task<EmployeeDto?> GetEmployeeByIdAsync(int id);
         Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeDto createEmployeeDto);
         Task<EmployeeDto> CreateEmployeeWithControlAsync(CreateEmployeeWithControlDto createEmployeeWithControlDto);

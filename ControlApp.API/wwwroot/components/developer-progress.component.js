@@ -595,31 +595,8 @@ app.component('developerProgress', {
                         var newStatusId = subDesc.statusId;
                         var newStatusName = subDesc.statusName;
 
-                        // Auto-advance status if progress is 100%, then reset progress to 0
-                        if (subDesc.statusId && progressValue === 100 && ctrl.store.statuses) {
-                            var currentStatus = ctrl.store.statuses.find(function (s) {
-                                return s.id === subDesc.statusId;
-                            });
-                            if (currentStatus && currentStatus.statusName) {
-                                var statusOrder = ['Analyze', 'HLD', 'LLD', 'Development', 'Dev Testing', 'QA'];
-                                var currentIndex = statusOrder.findIndex(function (s) {
-                                    return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                                });
-                                if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                                    var nextStatusName = statusOrder[currentIndex + 1];
-                                    var nextStatus = ctrl.store.statuses.find(function (s) {
-                                        return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                                    });
-                                    if (nextStatus) {
-                                        newStatusId = nextStatus.id;
-                                        newStatusName = nextStatus.statusName;
-                                        // Reset progress to 0% for next status
-                                        newProgress = 0;
-                                        NotificationService.show(currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                                    }
-                                }
-                            }
-                        }
+                        // No auto-advance - progress stays at 100% when reached
+                        // User must manually change status if needed
 
                         return {
                             description: subDesc.description || '',
@@ -649,30 +626,8 @@ app.component('developerProgress', {
             var finalProgressValue = progressValue;
             var finalStatusId = control.statusId || null;
 
-            if (finalProgressValue === 100 && ctrl.store.statuses) {
-                var currentStatus = ctrl.store.statuses.find(function (s) {
-                    return s.id === control.statusId;
-                });
-                if (currentStatus && currentStatus.statusName) {
-                    var statusOrder = ['Analyze', 'HLD', 'LLD', 'Development', 'Dev Testing', 'QA'];
-                    var currentIndex = statusOrder.findIndex(function (s) {
-                        return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                    });
-                    if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                        var nextStatusName = statusOrder[currentIndex + 1];
-                        var nextStatus = ctrl.store.statuses.find(function (s) {
-                            return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                        });
-                        if (nextStatus) {
-                            finalStatusId = nextStatus.id;
-                            finalProgressValue = 0;
-                            // Reset quickProgress too
-                            control.quickProgress = null;
-                            NotificationService.show('Main task ' + currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                        }
-                    }
-                }
-            }
+            // No auto-advance - progress stays at 100% when reached
+            // User must manually change status if needed
 
             var payload = {
                 controlId: parseInt(control.controlId),
@@ -896,11 +851,8 @@ app.component('developerProgress', {
                 return s.id == control.editStatusId;
             });
             if (selectedStatus) {
-                var progressMap = { 'Analyze': 25, 'Development': 50, 'Dev Testing': 75, 'QA': 100 };
-                var newProgress = progressMap[selectedStatus.statusName];
-                if (newProgress !== undefined) {
-                    control.editProgress = newProgress;
-                }
+                // Reset progress to 0 on manual status change
+                control.editProgress = 0;
             }
         };
 
@@ -915,6 +867,29 @@ app.component('developerProgress', {
                 return;
             }
 
+            // Parse existing statusProgressMap
+            var statusProgressMap = {};
+            if (control.statusProgress) {
+                try {
+                    statusProgressMap = JSON.parse(control.statusProgress);
+                } catch (e) {
+                    console.error('Error parsing statusProgress:', e);
+                }
+            }
+
+            // Check if status is changing
+            var oldStatusId = control.statusId;
+            var newStatusId = statusId;
+            var isStatusChanging = oldStatusId !== newStatusId;
+
+            // If status is changing, check if we have saved progress for the new status
+            var progressToUse = control.progress || 0;
+            if (isStatusChanging && statusProgressMap[newStatusId] !== undefined) {
+                // Restore the saved progress for this status
+                progressToUse = statusProgressMap[newStatusId];
+                console.log('Restoring saved progress for status ' + newStatusId + ': ' + progressToUse + '%');
+            }
+
             control.updatingStatus = true;
             var payload = {
                 controlId: parseInt(control.controlId),
@@ -923,17 +898,29 @@ app.component('developerProgress', {
                 description: control.description || null,
                 subDescriptions: control.subDescriptions || null,
                 comments: control.comments || null,
-                progress: control.progress || 0,
+                progress: progressToUse,
                 statusId: statusId,
                 releaseId: control.releaseId || null,
-                releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null
+                releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null,
+                statusProgress: control.statusProgress // Send current statusProgress to backend
             };
 
             ApiService.updateControl(control.controlId, payload).then(function (updatedControl) {
-                // Update local control object
+                // Update local control object with backend response
                 control.statusId = updatedControl.statusId;
                 control.statusName = updatedControl.statusName || '';
+                control.progress = updatedControl.progress; // Use progress from backend
+                control.statusProgress = updatedControl.statusProgress; // Update statusProgress from backend
                 control.quickStatusId = null; // Clear selection
+
+                // Parse the updated statusProgressMap for future use
+                if (control.statusProgress) {
+                    try {
+                        control.statusProgressMap = JSON.parse(control.statusProgress);
+                    } catch (e) {
+                        console.error('Error parsing updated statusProgress:', e);
+                    }
+                }
 
                 // Update in store for immediate sync to main table
                 if (ctrl.store && ctrl.store.allControls) {
@@ -943,13 +930,20 @@ app.component('developerProgress', {
                     if (storeControl) {
                         storeControl.statusId = updatedControl.statusId;
                         storeControl.statusName = updatedControl.statusName || '';
+                        storeControl.progress = updatedControl.progress;
+                        storeControl.statusProgress = updatedControl.statusProgress;
                     }
                 }
 
                 // Broadcast update for other components
                 $rootScope.$broadcast('controlsUpdated');
 
-                NotificationService.show('Status updated successfully.', 'success');
+                // Show success notification
+                if (isStatusChanging && statusProgressMap[newStatusId] !== undefined) {
+                    NotificationService.show('Status changed (Progress restored: ' + updatedControl.progress + '%)', 'success');
+                } else {
+                    NotificationService.show('Status updated successfully.', 'success');
+                }
             }).catch(function (err) {
                 console.error('Error updating status:', err);
                 NotificationService.show('Error updating status', 'error');
@@ -1001,31 +995,8 @@ app.component('developerProgress', {
                     var finalProgress = item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null;
                     var finalStatusName = item.statusName;
 
-                    // Auto-advance status if progress is 100%, then reset progress to 0
-                    if (finalStatusId && finalProgress === 100 && ctrl.store.statuses) {
-                        var currentStatus = ctrl.store.statuses.find(function (s) {
-                            return s.id === finalStatusId;
-                        });
-                        if (currentStatus && currentStatus.statusName) {
-                            var statusOrder = ['Analyze', 'HLD', 'LLD', 'Development', 'Dev Testing', 'QA'];
-                            var currentIndex = statusOrder.findIndex(function (s) {
-                                return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                            });
-                            if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                                var nextStatusName = statusOrder[currentIndex + 1];
-                                var nextStatus = ctrl.store.statuses.find(function (s) {
-                                    return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                                });
-                                if (nextStatus) {
-                                    finalStatusId = nextStatus.id;
-                                    finalStatusName = nextStatus.statusName;
-                                    // Reset progress to 0% for next status
-                                    finalProgress = 0;
-                                    NotificationService.show(currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                                }
-                            }
-                        }
-                    }
+                    // No auto-advance - keep progress at 100% if reached
+                    // User can manually change status if needed
 
                     return {
                         description: item.description.trim(),
@@ -1169,7 +1140,7 @@ app.component('developerProgress', {
                         var statusName = null;
                         if (item.statusId && ctrl.store.statuses && ctrl.store.statuses.length > 0) {
                             var status = ctrl.store.statuses.find(function (s) {
-                                return s.id === item.statusId;
+                                return s.id == item.statusId;
                             });
                             if (status) {
                                 statusName = status.statusName;
@@ -1227,31 +1198,8 @@ app.component('developerProgress', {
                     var progress = item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null;
                     var statusName = item.statusName;
 
-                    // Auto-advance status if progress is 100%, then reset progress to 0
-                    if (statusId && progress === 100 && ctrl.store.statuses) {
-                        var currentStatus = ctrl.store.statuses.find(function (s) {
-                            return s.id === statusId;
-                        });
-                        if (currentStatus && currentStatus.statusName) {
-                            var statusOrder = ['Analyze', 'HLD', 'LLD', 'Development', 'Dev Testing', 'QA'];
-                            var currentIndex = statusOrder.findIndex(function (s) {
-                                return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                            });
-                            if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                                var nextStatusName = statusOrder[currentIndex + 1];
-                                var nextStatus = ctrl.store.statuses.find(function (s) {
-                                    return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                                });
-                                if (nextStatus) {
-                                    statusId = nextStatus.id;
-                                    statusName = nextStatus.statusName;
-                                    // Reset progress to 0% for next status
-                                    progress = 0;
-                                    NotificationService.show(currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                                }
-                            }
-                        }
-                    }
+                    // No auto-advance - keep progress at 100% if reached
+                    // User can manually change status if needed
 
                     return {
                         description: item.description.trim(),
@@ -1444,10 +1392,9 @@ app.component('developerProgress', {
         ctrl.loadAndInitialize = function () {
             ctrl.isLoading = true;
             // Ensure statuses are loaded
-            if (!ctrl.store.statuses || ctrl.store.statuses.length === 0) {
-                ApiService.loadStatuses();
-            }
-            return ApiService.loadEmployees().then(function () {
+            return ApiService.loadStatuses().then(function () {
+                return ApiService.loadEmployees();
+            }).then(function () {
                 return ApiService.loadAllControls();
             }).then(function () {
                 // Ensure _subDescriptionsArray for all controls

@@ -18,9 +18,12 @@ namespace ControlApp.API.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync()
+        public async Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync(int? teamId = null)
         {
-            var employees = await _employeeRepository.GetEmployeesWithDetailsAsync();
+            // Pass teamId to repository so it can filter at database level
+            // This ensures JWT-based filtering is overridden when teamId is explicitly provided
+            var employees = await _employeeRepository.GetEmployeesWithDetailsAsync(teamId);
+            
             return employees.Select(MapToDto);
         }
 
@@ -139,6 +142,26 @@ namespace ControlApp.API.Services
                 {
                     existingUser.Role = registerDto.Role.Trim();
                 }
+                
+                // Update team assignment - add to UserTeams if not already there
+                if (registerDto.TeamId.HasValue)
+                {
+                    var userTeamExists = await _context.UserTeams
+                        .AnyAsync(ut => ut.UserId == existingUser.Id && ut.TeamId == registerDto.TeamId.Value);
+                    
+                    if (!userTeamExists)
+                    {
+                        _context.UserTeams.Add(new UserTeam
+                        {
+                            UserId = existingUser.Id,
+                            TeamId = registerDto.TeamId.Value,
+                            IsActive = true
+                        });
+                    }
+                    
+                    // Set as current team
+                    existingUser.CurrentTeamId = registerDto.TeamId;
+                }
 
                 // Check if employee already exists for this user
                 var existingEmployee = await _context.Set<Employee>()
@@ -150,6 +173,7 @@ namespace ControlApp.API.Services
                     existingEmployee.EmployeeName = registerDto.EmployeeName.Trim();
                     existingEmployee.TypeId = registerDto.TypeId;
                     existingEmployee.Description = registerDto.Description?.Trim();
+                    existingEmployee.TeamId = registerDto.TeamId;
 
                     await _employeeRepository.UpdateAsync(existingEmployee);
                 }
@@ -178,11 +202,24 @@ namespace ControlApp.API.Services
                     Role = string.IsNullOrWhiteSpace(registerDto.Role)
                         ? "Employee"
                         : registerDto.Role.Trim(),
+                    CurrentTeamId = registerDto.TeamId,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+                
+                // Add to UserTeams
+                if (registerDto.TeamId.HasValue)
+                {
+                    _context.UserTeams.Add(new UserTeam
+                    {
+                        UserId = user.Id,
+                        TeamId = registerDto.TeamId.Value,
+                        IsActive = true
+                    });
+                    await _context.SaveChangesAsync();
+                }
             }
 
             // Create Employee record linked to User
@@ -191,7 +228,8 @@ namespace ControlApp.API.Services
                 EmployeeName = registerDto.EmployeeName.Trim(),
                 TypeId = registerDto.TypeId,
                 Description = registerDto.Description?.Trim(),
-                UserId = user.Id // Link to User account
+                UserId = user.Id, // Link to User account
+                TeamId = registerDto.TeamId
             };
 
             var createdEmployee = await _employeeRepository.AddAsync(employee);
@@ -249,8 +287,39 @@ namespace ControlApp.API.Services
             employee.EmployeeName = updateEmployeeDto.EmployeeName;
             employee.TypeId = updateEmployeeDto.TypeId;
             employee.Description = updateEmployeeDto.Description;
+            employee.TeamId = updateEmployeeDto.TeamId;
 
             await _employeeRepository.UpdateAsync(employee);
+            
+            // Also update User's team assignment if employee has a linked user account
+            if (employee.UserId.HasValue && updateEmployeeDto.TeamId.HasValue)
+            {
+                var user = await _context.Users.FindAsync(employee.UserId.Value);
+                if (user != null)
+                {
+                    // Check if user is already in this team
+                    var userTeamExists = await _context.UserTeams
+                        .AnyAsync(ut => ut.UserId == user.Id && ut.TeamId == updateEmployeeDto.TeamId.Value);
+                    
+                    if (!userTeamExists)
+                    {
+                        _context.UserTeams.Add(new UserTeam
+                        {
+                            UserId = user.Id,
+                            TeamId = updateEmployeeDto.TeamId.Value,
+                            IsActive = true
+                        });
+                    }
+                    
+                    // Set as current team if user doesn't have one
+                    if (!user.CurrentTeamId.HasValue)
+                    {
+                        user.CurrentTeamId = updateEmployeeDto.TeamId;
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             var employeeWithDetails = await _employeeRepository.GetEmployeeWithDetailsByIdAsync(id);
             return employeeWithDetails != null ? MapToDto(employeeWithDetails) : MapToDto(employee);
@@ -306,7 +375,9 @@ namespace ControlApp.API.Services
                 Role = employee.User?.Role ?? string.Empty,
                 TypeId = employee.TypeId,
                 TypeName = employee.Type?.TypeName,
-                Description = employee.Description
+                Description = employee.Description,
+                TeamId = employee.TeamId,
+                TeamName = employee.Team?.TeamName
             };
         }
     }

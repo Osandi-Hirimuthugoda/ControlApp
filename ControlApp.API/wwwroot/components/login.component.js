@@ -195,9 +195,18 @@ app.component('loginComponent', {
             AuthService.login(vm.credentials).then(function(response) {
                 vm.loading = false;
                 NotificationService.show('Login successful!', 'success');
-                // Redirect to controls page using routing
+                
+                // Check if user is Super Admin
+                var user = AuthService.getUser();
+                var redirectPath = '/controls'; // Default path
+                
+                if (user && user.isSuperAdmin) {
+                    redirectPath = '/super-admin'; // Super Admin dashboard
+                }
+                
+                // Redirect using routing
                 $timeout(function() {
-                    $location.path('/controls');
+                    $location.path(redirectPath);
                 }, 100);
             }).catch(function(error) {
                 vm.loading = false;

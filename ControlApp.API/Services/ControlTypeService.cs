@@ -17,9 +17,16 @@ namespace ControlApp.API.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<ControlTypeDto>> GetAllControlTypesAsync()
+        public async Task<IEnumerable<ControlTypeDto>> GetAllControlTypesAsync(int? teamId = null)
         {
             var controlTypes = await _controlTypeRepository.GetAllAsync();
+            
+            // Filter by team if teamId is provided
+            if (teamId.HasValue)
+            {
+                controlTypes = controlTypes.Where(ct => ct.TeamId == teamId.Value).ToList();
+            }
+            
             return controlTypes.Select(MapToDto);
         }
 

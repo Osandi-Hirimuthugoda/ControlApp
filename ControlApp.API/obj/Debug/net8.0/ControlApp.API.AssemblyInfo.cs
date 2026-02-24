@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ControlApp.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b4263b7fa89651df2e721d6139f5d431e57d12de")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa8d70727eaa9fec8f2217a3471fa5451e0da725")]
 [assembly: System.Reflection.AssemblyProductAttribute("ControlApp.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ControlApp.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

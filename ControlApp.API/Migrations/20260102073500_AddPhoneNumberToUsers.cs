@@ -10,12 +10,14 @@ namespace ControlApp.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "PhoneNumber",
-                table: "Users",
-                type: "nvarchar(20)",
-                maxLength: 20,
-                nullable: true);
+            // Check if PhoneNumber column exists before adding it
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                              WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'PhoneNumber')
+                BEGIN
+                    ALTER TABLE [Users] ADD [PhoneNumber] nvarchar(20) NULL;
+                END
+            ");
         }
 
         /// <inheritdoc />

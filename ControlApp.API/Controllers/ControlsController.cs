@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ControlApp.API.DTOs;
 using ControlApp.API.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace ControlApp.API.Controllers
 {
@@ -11,20 +12,66 @@ namespace ControlApp.API.Controllers
     public class ControlsController : ControllerBase //inherit 
     {
         private readonly IControlService _controlService;
+        private readonly AppDbContext _context;
 
-        public ControlsController(IControlService controlService)// dependency 
+        public ControlsController(IControlService controlService, AppDbContext context)// dependency 
         {
             _controlService = controlService;
+            _context = context;
         }
 
          
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls([FromQuery] string? search = null)
+        public async Task<ActionResult<IEnumerable<ControlDto>>> GetAllControls([FromQuery] string? search = null, [FromQuery] int? teamId = null)
         {
             try
             {
-            var controls = await _controlService.GetAllControlsAsync(search);
-            return Ok(controls);
+                var isSuperAdmin = User.Claims.FirstOrDefault(c => c.Type == "IsSuperAdmin")?.Value == "True";
+                
+                // Determine which teams to show
+                int? filterTeamId = null;
+                
+                if (teamId.HasValue)
+                {
+                    // Explicit teamId provided (from team dropdown selection)
+                    filterTeamId = teamId.Value;
+                }
+                else if (!isSuperAdmin)
+                {
+                    // For non-Super Admin users without explicit teamId:
+                    // Show all their teams' data (Project Managers can see all their teams)
+                    // Pass null to service to get all controls, then filter by user's teams
+                    filterTeamId = null; // Will be handled by checking user's teams
+                }
+                
+                var controls = await _controlService.GetAllControlsAsync(search, filterTeamId);
+                
+                // If no specific team selected and not Super Admin, filter by user's accessible teams
+                if (!teamId.HasValue && !isSuperAdmin)
+                {
+                    // Get user's team IDs from JWT claims or database
+                    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                    if (int.TryParse(userIdClaim, out int userId))
+                    {
+                        // Get user's teams from database
+                        var user = await _context.Users
+                            .Include(u => u.UserTeams)
+                            .FirstOrDefaultAsync(u => u.Id == userId);
+                        
+                        if (user != null && user.UserTeams.Any())
+                        {
+                            var userTeamIds = user.UserTeams
+                                .Where(ut => ut.IsActive)
+                                .Select(ut => ut.TeamId)
+                                .ToList();
+                            
+                            // Filter controls to only show user's teams
+                            controls = controls.Where(c => c.TeamId.HasValue && userTeamIds.Contains(c.TeamId.Value));
+                        }
+                    }
+                }
+                
+                return Ok(controls);
             }
             catch (Exception ex)
             {
@@ -34,7 +81,6 @@ namespace ControlApp.API.Controllers
                     ex.InnerException?.Message ?? "None", 
                     ex.StackTrace ?? "None");
                 
-                // Include inner exception message if available
                 var errorMessage = ex.Message;
                 if (ex.InnerException != null)
                 {

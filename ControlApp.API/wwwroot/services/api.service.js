@@ -1,6 +1,23 @@
-app.service('ApiService', function ($http, $q) {
+app.service('ApiService', function ($http, $q, $rootScope) {
     var self = this;
     var apiBaseUrl = '/api';
+
+    // Generic HTTP methods
+    self.get = function(url) {
+        return $http.get(url);
+    };
+
+    self.post = function(url, data) {
+        return $http.post(url, data);
+    };
+
+    self.put = function(url, data) {
+        return $http.put(url, data);
+    };
+
+    self.delete = function(url) {
+        return $http.delete(url);
+    };
 
     // Shared Data Store
     self.data = {
@@ -72,20 +89,66 @@ app.service('ApiService', function ($http, $q) {
 
     // Load Data Methods
 
-    self.loadEmployees = function () {
-        return $http.get(apiBaseUrl + '/employees').then(function (r) {
-            self.data.employees = r.data || [];
+    self.loadEmployees = function (teamId) {
+        var url = apiBaseUrl + '/employees';
+        
+        // Always include teamId if it's provided (even if 0 or null, we check explicitly)
+        if (teamId !== null && teamId !== undefined) {
+            url += '?teamId=' + teamId;
+        }
+        
+        console.log('Loading employees from URL:', url, 'teamId parameter:', teamId);
+        console.log('Full URL:', url);
+        
+        return $http.get(url).then(function (r) {
+            var employees = r.data || [];
+            console.log('✓ Employees received from API:', employees.length, 'for teamId:', teamId);
+            console.log('API Response status:', r.status);
+            
+            // Log team distribution for debugging
+            if (employees.length > 0) {
+                var teamDistribution = {};
+                employees.forEach(function(emp) {
+                    var empTeamId = emp.teamId || 'null';
+                    teamDistribution[empTeamId] = (teamDistribution[empTeamId] || 0) + 1;
+                });
+                console.log('Employee team distribution from API:', teamDistribution);
+            } else {
+                console.warn('⚠ No employees returned from API for teamId:', teamId);
+            }
+            
+            // Clear existing employees and set new ones
+            self.data.employees = employees;
+            
             self.data.employees.forEach(function (e) {
                 e.editing = false;
-
             });
+            
+            console.log('✓ Employees stored in data.employees:', self.data.employees.length);
             return self.data.employees;
+        }).catch(function(error) {
+            console.error('❌ Error loading employees for teamId:', teamId);
+            console.error('Error status:', error.status);
+            console.error('Error data:', error.data);
+            console.error('Error message:', error.message);
+            console.error('Full error:', error);
+            
+            // Return empty array instead of throwing to prevent breaking the chain
+            self.data.employees = [];
+            return [];
         });
     };
 
     // Load Control Types from API
-    self.loadControlTypes = function () {
-        return $http.get(apiBaseUrl + '/controltypes').then(function (r) {
+    self.loadControlTypes = function (teamId) {
+        var url = apiBaseUrl + '/controltypes';
+        if (teamId !== null && teamId !== undefined) {
+            url += '?teamId=' + teamId;
+        }
+        
+        console.log('Loading control types from URL:', url, 'teamId:', teamId);
+        
+        return $http.get(url).then(function (r) {
             var newTypes = r.data || [];
 
             newTypes.forEach(function (type) {
@@ -132,13 +195,39 @@ app.service('ApiService', function ($http, $q) {
         });
     };
 
-    self.loadAllControls = function () {
-        return $http.get(apiBaseUrl + '/controls').then(function (r) {
-            console.log('API Response - All Controls:', r.data);
-            console.log('Total controls received:', r.data ? r.data.length : 0);
-            console.log('Controls without employees:', r.data ? r.data.filter(function (c) { return !c.employeeId; }).length : 0);
+    self.loadAllControls = function (teamId) {
+        var url = apiBaseUrl + '/controls';
+        
+        // If teamId is provided, add it to query
+        // If teamId is null/undefined, backend will return all user's teams' data
+        if (teamId !== null && teamId !== undefined) {
+            url += '?teamId=' + teamId;
+        }
+        
+        console.log('Loading controls from URL:', url, 'teamId:', teamId);
+        
+        return $http.get(url).then(function (r) {
+            var controls = r.data || [];
+            console.log('✓ API Response - All Controls' + (teamId ? ' (Team ' + teamId + ')' : ' (All User Teams)') + ':', controls.length, 'controls');
+            console.log('API Response status:', r.status);
+            console.log('Total controls received:', controls.length);
+            console.log('Controls without employees:', controls.filter(function (c) { return !c.employeeId; }).length);
+            
+            // Log team distribution for debugging
+            if (controls.length > 0) {
+                var teamDistribution = {};
+                controls.forEach(function(c) {
+                    var cTeamId = c.teamId || 'null';
+                    var teamName = c.teamName || 'Unknown';
+                    var key = cTeamId + ' (' + teamName + ')';
+                    teamDistribution[key] = (teamDistribution[key] || 0) + 1;
+                });
+                console.log('Controls team distribution:', teamDistribution);
+            } else {
+                console.warn('⚠ No controls returned from API' + (teamId ? ' for teamId: ' + teamId : ' for user teams'));
+            }
 
-            self.data.allControls = r.data || [];
+            self.data.allControls = controls;
 
             self.data.allControls.forEach(function (c) {
                 // Ensure releaseDate is properly set from either releaseDate or release
@@ -292,6 +381,10 @@ app.service('ApiService', function ($http, $q) {
                 return self.loadAllControls().then(function () {
                     console.log('Controls reloaded. Total controls:', self.data.allControls ? self.data.allControls.length : 0);
                     console.log('Controls without employees:', self.data.allControls ? self.data.allControls.filter(function (c) { return !c.employeeId; }).length : 0);
+                    
+                    // Broadcast event to notify components that controls have been updated
+                    $rootScope.$broadcast('controlsUpdated');
+                    
                     return r.data;
                 });
             });
@@ -478,5 +571,26 @@ app.service('ApiService', function ($http, $q) {
         }).then(function (newRelease) {
             return newRelease.releaseId;
         });
+    };
+    
+    // Team Management APIs
+    self.getTeams = function() {
+        return $http.get(apiBaseUrl + '/teams');
+    };
+    
+    self.getTeam = function(teamId) {
+        return $http.get(apiBaseUrl + '/teams/' + teamId);
+    };
+    
+    self.createTeam = function(teamData) {
+        return $http.post(apiBaseUrl + '/teams', teamData);
+    };
+    
+    self.updateTeam = function(teamId, teamData) {
+        return $http.put(apiBaseUrl + '/teams/' + teamId, teamData);
+    };
+    
+    self.deleteTeam = function(teamId) {
+        return $http.delete(apiBaseUrl + '/teams/' + teamId);
     };
 });

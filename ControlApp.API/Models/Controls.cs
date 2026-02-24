@@ -16,6 +16,7 @@ namespace ControlApp.API.Models
 
         
         public int Progress { get; set; } = 0; 
+        public string? StatusProgress { get; set; } // JSON map of StatusId to Progress
         public DateTime? ReleaseDate { get; set; } 
 
         
@@ -44,5 +45,11 @@ namespace ControlApp.API.Models
         public Release? Release { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
+        // Team-related properties
+        public int? TeamId { get; set; }
+        
+        [ForeignKey("TeamId")]
+        public Team? Team { get; set; }
     }
 }

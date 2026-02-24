@@ -10,6 +10,7 @@ namespace ControlApp.API.Services
         Task<bool> UpdateEmailAsync(int userId, UpdateEmailDto updateEmailDto);
         Task<bool> UpdatePasswordAsync(int userId, UpdatePasswordDto updatePasswordDto);
         Task<bool> UpdatePhoneNumberAsync(int userId, UpdatePhoneNumberDto updatePhoneNumberDto);
+        Task<bool> SwitchTeamAsync(int userId, int teamId);
     }
 }
 

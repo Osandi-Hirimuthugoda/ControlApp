@@ -4,7 +4,7 @@ namespace ControlApp.API.Services
 {
     public interface IControlService
     {
-        Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null);
+        Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null, int? teamId = null);
         Task<ControlDto?> GetControlByIdAsync(int id);
         Task<ControlDto> CreateControlAsync(CreateControlDto createControlDto);
         Task<ControlDto?> UpdateControlAsync(int id, UpdateControlDto updateControlDto);

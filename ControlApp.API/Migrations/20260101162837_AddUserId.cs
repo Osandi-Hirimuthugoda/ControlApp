@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,43 +11,49 @@ namespace ControlApp.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "UserId",
-                table: "Employees",
-                type: "int",
-                nullable: true);
+            // Check if UserId column exists before adding it
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                              WHERE TABLE_NAME = 'Employees' AND COLUMN_NAME = 'UserId')
+                BEGIN
+                    ALTER TABLE [Employees] ADD [UserId] int NULL;
+                END
+            ");
 
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
+            // Create Users table if it doesn't exist
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
+                BEGIN
+                    CREATE TABLE [Users] (
+                        [Id] int IDENTITY(1,1) NOT NULL,
+                        [Username] nvarchar(100) NOT NULL,
+                        [Email] nvarchar(255) NOT NULL,
+                        [PasswordHash] nvarchar(max) NOT NULL,
+                        [FullName] nvarchar(100) NULL,
+                        [Role] nvarchar(max) NOT NULL,
+                        [CreatedAt] datetime2 NOT NULL,
+                        [LastLoginAt] datetime2 NULL,
+                        CONSTRAINT [PK_Users] PRIMARY KEY ([Id])
+                    );
+                END
+            ");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_UserId",
-                table: "Employees",
-                column: "UserId");
+            // Create index if it doesn't exist
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Employees_UserId')
+                BEGIN
+                    CREATE INDEX [IX_Employees_UserId] ON [Employees] ([UserId]);
+                END
+            ");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Employees_Users_UserId",
-                table: "Employees",
-                column: "UserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+            // Create foreign key if it doesn't exist
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Employees_Users_UserId')
+                BEGIN
+                    ALTER TABLE [Employees] ADD CONSTRAINT [FK_Employees_Users_UserId] 
+                    FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE SET NULL;
+                END
+            ");
         }
 
         /// <inheritdoc />

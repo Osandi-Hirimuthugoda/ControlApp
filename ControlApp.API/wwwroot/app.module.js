@@ -74,6 +74,16 @@ app.config(function ($routeProvider, $locationProvider) {
                 }
             }
         })
+        .when('/inventory', {
+            template: '<inventory-view></inventory-view>',
+            resolve: {
+                auth: function (AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
         .when('/qa-progress', {
             template: '<qa-progress-view></qa-progress-view>',
             resolve: {
@@ -86,6 +96,26 @@ app.config(function ($routeProvider, $locationProvider) {
         })
         .when('/access-denied/:section?', {
             template: '<access-denied></access-denied>',
+            resolve: {
+                auth: function (AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .when('/teams', {
+            template: '<team-management></team-management>',
+            resolve: {
+                auth: function (AuthService, $location) {
+                    if (!AuthService.isAuthenticated()) {
+                        $location.path('/login');
+                    }
+                }
+            }
+        })
+        .when('/super-admin', {
+            template: '<super-admin-dashboard></super-admin-dashboard>',
             resolve: {
                 auth: function (AuthService, $location) {
                     if (!AuthService.isAuthenticated()) {
@@ -144,7 +174,13 @@ app.controller('MainController', function ($rootScope, AuthService, $location, $
     var authListener = $rootScope.$on('userLoggedIn', function () {
         var currentPath = $location.path();
         if (currentPath === '/login' || currentPath === '/' || currentPath === '') {
-            $location.path('/controls');
+            // Redirect Super Admin to Super Admin Dashboard
+            var user = AuthService.getUser();
+            if (user && user.isSuperAdmin) {
+                $location.path('/super-admin');
+            } else {
+                $location.path('/controls');
+            }
         }
     });
 

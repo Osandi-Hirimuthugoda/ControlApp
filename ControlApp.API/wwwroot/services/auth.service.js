@@ -140,6 +140,96 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
         // Project Manager cannot delete
         return self.isAdmin() || self.isTeamLead() || self.isSoftwareArchitecture();
     };
+    
+    // Super Admin and Team functions
+    self.isSuperAdmin = function() {
+        var user = self.getUser();
+        return user && user.isSuperAdmin === true;
+    };
+    
+    self.getTeamId = function() {
+        var user = self.getUser();
+        if (!user) return null;
+        
+        // IMPORTANT: Always return currentTeamId if it's set in localStorage
+        // This allows team switching to work immediately without JWT token refresh
+        if (user.currentTeamId !== null && user.currentTeamId !== undefined) {
+            return user.currentTeamId;
+        }
+        
+        // For Super Admin, if currentTeamId is null but user has teams, return first team's ID
+        if (user.isSuperAdmin && user.teams && user.teams.length > 0) {
+            return user.teams[0].teamId;
+        }
+        
+        // For non-Super Admin users, if no currentTeamId but has teams, use first team
+        // This ensures team switching works even if currentTeamId wasn't initially set
+        if (user.teams && user.teams.length > 0) {
+            return user.teams[0].teamId;
+        }
+        
+        // Only return null if user has no teams at all
+        return null;
+    };
+    
+    self.getTeamName = function() {
+        var user = self.getUser();
+        if (!user) return null;
+        
+        // If currentTeamName is set, return it
+        if (user.currentTeamName) {
+            return user.currentTeamName;
+        }
+        
+        // If currentTeamName is null but user has teams, return first team's name
+        if (user.teams && user.teams.length > 0) {
+            return user.teams[0].teamName;
+        }
+        
+        return null;
+    };
+    
+    self.getTeams = function() {
+        var user = self.getUser();
+        return user && user.teams ? user.teams : [];
+    };
+    
+    // Set current team for Super Admin (when switching teams)
+    self.setCurrentTeam = function(teamId, teamName) {
+        var user = self.getUser();
+        if (user) {
+            console.log('Setting current team - teamId:', teamId, 'teamName:', teamName);
+            
+            user.currentTeamId = teamId;
+            user.currentTeamName = teamName;
+            $window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+            
+            // Broadcast teamChanged immediately so UI updates right away
+            // The API call will update the server-side, but we don't wait for it
+            console.log('Broadcasting teamChanged event with teamId:', teamId, 'teamName:', teamName);
+            $rootScope.$broadcast('teamChanged', { teamId: teamId, teamName: teamName });
+            console.log('teamChanged event broadcast completed');
+            
+            // Call API to update server-side (async, don't block UI)
+            if (teamId) {
+                $http.post('/api/auth/switch-team/' + teamId).then(function(response) {
+                    console.log('Team switched successfully on server:', teamId);
+                    // Update user data if server returned updated info
+                    if (response.data && response.data.currentTeamId !== undefined) {
+                        user.currentTeamId = response.data.currentTeamId;
+                        user.currentTeamName = response.data.currentTeamName;
+                        $window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+                    }
+                }).catch(function(error) {
+                    console.error('Error switching team on server:', error);
+                    // Don't revert the change - UI already updated
+                    // User can manually refresh if needed
+                });
+            }
+        } else {
+            console.error('Cannot set team - user not found');
+        }
+    };
 
     // Login
     self.login = function(credentials) {
@@ -150,7 +240,11 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
                 $window.localStorage.setItem(USER_KEY, JSON.stringify({
                     username: response.data.username,
                     email: response.data.email,
-                    role: response.data.role
+                    role: response.data.role,
+                    currentTeamId: response.data.currentTeamId,
+                    currentTeamName: response.data.currentTeamName,
+                    isSuperAdmin: response.data.isSuperAdmin,
+                    teams: response.data.teams || []
                 }));
                 
                 // Broadcast login event
@@ -171,7 +265,11 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location) {
                 $window.localStorage.setItem(USER_KEY, JSON.stringify({
                     username: response.data.username,
                     email: response.data.email,
-                    role: response.data.role
+                    role: response.data.role,
+                    currentTeamId: response.data.currentTeamId,
+                    currentTeamName: response.data.currentTeamName,
+                    isSuperAdmin: response.data.isSuperAdmin,
+                    teams: response.data.teams || []
                 }));
                 
                 // Broadcast login event

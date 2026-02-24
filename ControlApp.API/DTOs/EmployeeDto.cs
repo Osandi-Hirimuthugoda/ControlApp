@@ -12,6 +12,8 @@ namespace ControlApp.API.DTOs
         public int? TypeId { get; set; }
         public string? TypeName { get; set; }
         public string? Description { get; set; }
+        public int? TeamId { get; set; }
+        public string? TeamName { get; set; }
     }
 
     public class CreateEmployeeDto
@@ -25,6 +27,8 @@ namespace ControlApp.API.DTOs
         
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string? Description { get; set; }
+        
+        public int? TeamId { get; set; }
     }
 
     public class CreateEmployeeWithControlDto

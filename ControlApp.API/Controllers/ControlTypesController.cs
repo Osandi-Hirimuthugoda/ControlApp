@@ -18,9 +18,24 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ControlTypeDto>>> GetAllControlTypes()
+        public async Task<ActionResult<IEnumerable<ControlTypeDto>>> GetAllControlTypes([FromQuery] int? teamId = null)
         {
-            var controlTypes = await _controlTypeService.GetAllControlTypesAsync();
+            // IMPORTANT: If teamId is explicitly provided in query parameter, use it
+            // This allows team switching without requiring JWT token refresh
+            // Only use JWT claims if teamId is NOT provided
+            if (!teamId.HasValue)
+            {
+                var isSuperAdmin = User.Claims.FirstOrDefault(c => c.Type == "IsSuperAdmin")?.Value == "True";
+                var userTeamIdClaim = User.Claims.FirstOrDefault(c => c.Type == "TeamId")?.Value;
+                
+                // If teamId is not provided and user is not Super Admin, use user's team from JWT
+                if (!isSuperAdmin && int.TryParse(userTeamIdClaim, out int userTeamId))
+                {
+                    teamId = userTeamId;
+                }
+            }
+            
+            var controlTypes = await _controlTypeService.GetAllControlTypesAsync(teamId);
             return Ok(controlTypes);
         }
 
@@ -35,8 +50,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPost]
-        // Allow Admin, Team Lead, and Software Architecture to add control types
-        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
+        // Allow Admin, Project Manager, Team Lead, Software Architecture, and Super Admin to add control types
+        [Authorize(Roles = "Admin,Project Manager,Team Lead,Software Architecture,Software Architecturer,Super Admin")]
         public async Task<ActionResult<ControlTypeDto>> CreateControlType([FromBody] CreateControlTypeDto createControlTypeDto)
         {
             try
@@ -51,8 +66,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpPut("{id}")]
-        // Allow Admin, Team Lead, and Software Architecture to update control types
-        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
+        // Allow Admin, Project Manager, Team Lead, Software Architecture, and Super Admin to update control types
+        [Authorize(Roles = "Admin,Project Manager,Team Lead,Software Architecture,Software Architecturer,Super Admin")]
         public async Task<ActionResult<ControlTypeDto>> UpdateControlType(int id, [FromBody] CreateControlTypeDto updateControlTypeDto)
         {
             try
@@ -70,8 +85,8 @@ namespace ControlApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        // Allow Admin, Team Lead, and Software Architecture to delete control types
-        [Authorize(Roles = "Admin,Team Lead,Software Architecture")]
+        // Allow Admin, Project Manager, Team Lead, Software Architecture, and Super Admin to delete control types
+        [Authorize(Roles = "Admin,Project Manager,Team Lead,Software Architecture,Software Architecturer,Super Admin")]
         public async Task<IActionResult> DeleteControlType(int id)
         {
             var deleted = await _controlTypeService.DeleteControlTypeAsync(id);

@@ -544,28 +544,8 @@ app.component('qaProgress', {
             var finalProgressValue = progressValue;
             var finalStatusId = control.statusId || null;
 
-            if (finalProgressValue === 100 && ctrl.store.statuses) {
-                var currentStatus = ctrl.store.statuses.find(function (s) {
-                    return s.id === control.statusId;
-                });
-                if (currentStatus && currentStatus.statusName) {
-                    var statusOrder = ['Analyze', 'HLD', 'LLD', 'Development', 'Dev Testing', 'QA'];
-                    var currentIndex = statusOrder.findIndex(function (s) {
-                        return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                    });
-                    if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                        var nextStatusName = statusOrder[currentIndex + 1];
-                        var nextStatus = ctrl.store.statuses.find(function (s) {
-                            return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                        });
-                        if (nextStatus) {
-                            finalStatusId = nextStatus.id;
-                            finalProgressValue = 0;
-                            NotificationService.show('Main task ' + currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                        }
-                    }
-                }
-            }
+            // No auto-advance - progress stays at 100% when reached
+            // User must manually change status if needed
 
             var payload = {
                 controlId: parseInt(control.controlId),
@@ -804,31 +784,8 @@ app.component('qaProgress', {
                     var progress = item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null;
                     var statusName = item.statusName;
 
-                    // Auto-advance status if progress is 100%, then reset progress to 0
-                    if (statusId && progress === 100 && ctrl.store.statuses) {
-                        var currentStatus = ctrl.store.statuses.find(function (s) {
-                            return s.id === statusId;
-                        });
-                        if (currentStatus && currentStatus.statusName) {
-                            var statusOrder = ['Analyze', 'Development', 'Dev Testing', 'QA'];
-                            var currentIndex = statusOrder.findIndex(function (s) {
-                                return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                            });
-                            if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                                var nextStatusName = statusOrder[currentIndex + 1];
-                                var nextStatus = ctrl.store.statuses.find(function (s) {
-                                    return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                                });
-                                if (nextStatus) {
-                                    statusId = nextStatus.id;
-                                    statusName = nextStatus.statusName;
-                                    // Reset progress to 0% for next status
-                                    progress = 0;
-                                    NotificationService.show(currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                                }
-                            }
-                        }
-                    }
+                    // No auto-advance - progress stays at 100% when reached
+                    // User must manually change status if needed
 
                     return {
                         description: item.description.trim(),
@@ -959,7 +916,7 @@ app.component('qaProgress', {
                         var statusName = null;
                         if (item.statusId && ctrl.store.statuses && ctrl.store.statuses.length > 0) {
                             var status = ctrl.store.statuses.find(function (s) {
-                                return s.id === item.statusId;
+                                return s.id == item.statusId;
                             });
                             if (status) {
                                 statusName = status.statusName;
@@ -1032,31 +989,8 @@ app.component('qaProgress', {
                     var progress = item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null;
                     var statusName = item.statusName;
 
-                    // Auto-advance status if progress is 100%, then reset progress to 0
-                    if (statusId && progress === 100 && ctrl.store.statuses) {
-                        var currentStatus = ctrl.store.statuses.find(function (s) {
-                            return s.id === statusId;
-                        });
-                        if (currentStatus && currentStatus.statusName) {
-                            var statusOrder = ['Analyze', 'Development', 'Dev Testing', 'QA'];
-                            var currentIndex = statusOrder.findIndex(function (s) {
-                                return s.toLowerCase() === currentStatus.statusName.toLowerCase();
-                            });
-                            if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
-                                var nextStatusName = statusOrder[currentIndex + 1];
-                                var nextStatus = ctrl.store.statuses.find(function (s) {
-                                    return s.statusName && s.statusName.toLowerCase() === nextStatusName.toLowerCase();
-                                });
-                                if (nextStatus) {
-                                    statusId = nextStatus.id;
-                                    statusName = nextStatus.statusName;
-                                    // Reset progress to 0% for next status
-                                    progress = 0;
-                                    NotificationService.show(currentStatus.statusName + ' completed! Status automatically changed to ' + nextStatus.statusName + ' with 0% progress.', 'success');
-                                }
-                            }
-                        }
-                    }
+                    // No auto-advance - progress stays at 100% when reached
+                    // User must manually change status if needed
 
                     return {
                         description: item.description.trim(),
@@ -1325,7 +1259,9 @@ app.component('qaProgress', {
         // Function to load and initialize data
         ctrl.loadAndInitialize = function () {
             ctrl.isLoading = true;
-            return ApiService.loadEmployees().then(function () {
+            return ApiService.loadStatuses().then(function () {
+                return ApiService.loadEmployees();
+            }).then(function () {
                 return ApiService.loadAllControls();
             }).then(function () {
                 // Restore qaEmployeeId from database or fallback to map

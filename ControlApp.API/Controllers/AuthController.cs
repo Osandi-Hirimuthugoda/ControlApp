@@ -193,6 +193,34 @@ namespace ControlApp.API.Controllers
                 return StatusCode(500, new { message = "An error occurred while updating phone number" });
             }
         }
+
+        [HttpPost("switch-team/{teamId}")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> SwitchTeam(int teamId)
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized(new { message = "Invalid user token" });
+                }
+
+                var result = await _authService.SwitchTeamAsync(userId, teamId);
+                
+                if (!result)
+                {
+                    return BadRequest(new { message = "Failed to switch team. You may not have access to this team." });
+                }
+
+                return Ok(new { message = "Team switched successfully", teamId = teamId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error switching team");
+                return StatusCode(500, new { message = "An error occurred while switching team" });
+            }
+        }
     }
 }
 

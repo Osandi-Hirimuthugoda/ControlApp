@@ -25,12 +25,20 @@
       "PackagePath": "staticwebassets\\components\\control-types-list.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-types-management.component.js",
+      "PackagePath": "staticwebassets\\components\\control-types-management.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-sidebar.component.js",
       "PackagePath": "staticwebassets\\components\\controls-sidebar.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-view.component.js",
       "PackagePath": "staticwebassets\\components\\controls-view.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\daily-progress.component.js",
+      "PackagePath": "staticwebassets\\components\\daily-progress.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\dashboard.component.js",
@@ -51,6 +59,10 @@
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employees-list.component.js",
       "PackagePath": "staticwebassets\\components\\employees-list.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\latest-insights.component.js",
+      "PackagePath": "staticwebassets\\components\\latest-insights.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\login.component.js",
@@ -75,6 +87,14 @@
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress.component.js",
       "PackagePath": "staticwebassets\\components\\qa-progress.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\sub-objectives-view.component.js",
+      "PackagePath": "staticwebassets\\components\\sub-objectives-view.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\super-admin-dashboard.component.js",
+      "PackagePath": "staticwebassets\\components\\super-admin-dashboard.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",

@@ -10,11 +10,14 @@ namespace ControlApp.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "SubDescriptions",
-                table: "Controls",
-                type: "nvarchar(max)",
-                nullable: true);
+            // Check if SubDescriptions column exists before adding it
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                              WHERE TABLE_NAME = 'Controls' AND COLUMN_NAME = 'SubDescriptions')
+                BEGIN
+                    ALTER TABLE [Controls] ADD [SubDescriptions] nvarchar(max) NULL;
+                END
+            ");
         }
 
         /// <inheritdoc />

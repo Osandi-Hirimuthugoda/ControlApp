@@ -19,11 +19,27 @@ namespace ControlApp.API.Controllers
 
         // GET: api/employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAllEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAllEmployees([FromQuery] int? teamId = null)
         {
             try
             {
-                var employees = await _employeeService.GetAllEmployeesAsync();
+                // IMPORTANT: If teamId is explicitly provided in query parameter, use it
+                // This allows team switching without requiring JWT token refresh
+                // Only use JWT claims if teamId is NOT provided
+                if (!teamId.HasValue)
+                {
+                    var isSuperAdmin = User.Claims.FirstOrDefault(c => c.Type == "IsSuperAdmin")?.Value == "True";
+                    var userTeamIdClaim = User.Claims.FirstOrDefault(c => c.Type == "TeamId")?.Value;
+                    
+                    // If teamId is not provided and user is not Super Admin, use user's team from JWT
+                    if (!isSuperAdmin && int.TryParse(userTeamIdClaim, out int userTeamId))
+                    {
+                        teamId = userTeamId;
+                    }
+                }
+                
+                // Pass teamId to service - repository will use it if provided, otherwise use JWT claims
+                var employees = await _employeeService.GetAllEmployeesAsync(teamId);
                 return Ok(employees);
             }
             catch (Exception ex)

@@ -8,25 +8,35 @@ using ControlApp.API.Repositories;
 using ControlApp.API;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace ControlApp.API.Services
 {
-    public class ControlService : IControlService
+    public class ControlService : IControlService //implementation 
     {
         private readonly IControlRepository _controlRepository;
         private readonly AppDbContext _context;
         private readonly ILogger<ControlService> _logger;
+        private readonly IProgressLogService _progressLogService;
 
-        public ControlService(IControlRepository controlRepository, AppDbContext context, ILogger<ControlService> logger)
+        public ControlService(IControlRepository controlRepository, AppDbContext context, ILogger<ControlService> logger, IProgressLogService progressLogService)
         {
             _controlRepository = controlRepository;
             _context = context;
             _logger = logger;
+            _progressLogService = progressLogService;
         }
     
-        public async Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null)
+        public async Task<IEnumerable<ControlDto>> GetAllControlsAsync(string? searchTerm = null, int? teamId = null)
         {
             var controls = await _controlRepository.GetControlsWithDetailsAsync(searchTerm);
+            
+            // Filter by team if teamId is provided
+            if (teamId.HasValue)
+            {
+                controls = controls.Where(c => c.TeamId == teamId.Value).ToList();
+            }
+            
             return controls.Select(MapToDto);
         }
 
@@ -105,7 +115,8 @@ namespace ControlApp.API.Services
                 
                 ReleaseDate = releaseDate,
                 Progress = createControlDto.Progress,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                TeamId = createControlDto.TeamId
             };
 
             _logger.LogInformation("Creating control entity: TypeId={TypeId}, EmployeeId={EmployeeId}, StatusId={StatusId}, ReleaseId={ReleaseId}, Progress={Progress}", 
@@ -162,10 +173,25 @@ namespace ControlApp.API.Services
                 if (!statusExists) throw new ArgumentException($"Invalid Status ID");
             }
 
+            // Handle Per-Status Progress Preservation
+            var statusProgressMap = new Dictionary<int, int>();
+            if (!string.IsNullOrEmpty(control.StatusProgress))
+            {
+                try { statusProgressMap = JsonSerializer.Deserialize<Dictionary<int, int>>(control.StatusProgress) ?? new Dictionary<int, int>(); }
+                catch { /* fallback to empty */ }
+            }
+
+            // Determine if Status is changing (manually or via auto-advance)
+            int? oldStatusId = control.StatusId;
+            int? newStatusId = updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0 
+                ? updateControlDto.StatusId.Value 
+                : control.StatusId;
+
+            // Update main fields
             control.Description = updateControlDto.Description;
             control.SubDescriptions = updateControlDto.SubDescriptions;
             control.Comments = updateControlDto.Comments;
-            
+
             // Handle EmployeeId - allow null (controls without assigned employees)
             if (updateControlDto.EmployeeId.HasValue && updateControlDto.EmployeeId.Value > 0)
             {
@@ -200,16 +226,13 @@ namespace ControlApp.API.Services
                 control.QAEmployeeId = null;
             }
             
-            
             // Handle ReleaseId - only set if it exists in database
-            // If ReleaseId is provided, get the ReleaseDate from the Release table
             if (updateControlDto.ReleaseId.HasValue && updateControlDto.ReleaseId.Value > 0)
             {
                 var release = await _context.Set<Release>().FirstOrDefaultAsync(r => r.ReleaseId == updateControlDto.ReleaseId.Value);
                 if (release != null)
                 {
                     control.ReleaseId = updateControlDto.ReleaseId.Value;
-                    // If ReleaseDate is not explicitly provided in DTO, get it from Release table
                     if (!updateControlDto.ReleaseDate.HasValue)
                     {
                         control.ReleaseDate = release.ReleaseDate;
@@ -228,72 +251,115 @@ namespace ControlApp.API.Services
             else
             {
                 control.ReleaseId = null;
-                // If ReleaseId is removed but ReleaseDate is provided, use it
                 control.ReleaseDate = updateControlDto.ReleaseDate;
-            } 
-     
-            // Update progress first
-            control.Progress = updateControlDto.Progress;
-            
-            // Check if progress reached 100% and automatically advance to next status
-            if (updateControlDto.Progress >= 100)
+            }
+
+            // If status is NOT changing, just update progress for current status
+            if (oldStatusId == newStatusId)
             {
-                // Get current status (use the one from control object, not DTO, to check current state)
+                control.Progress = updateControlDto.Progress;
+                if (oldStatusId.HasValue)
+                {
+                    statusProgressMap[oldStatusId.Value] = control.Progress;
+                }
+                _logger.LogInformation("Status NOT changing. StatusId: {StatusId}, Progress: {Progress}", oldStatusId, control.Progress);
+            }
+            else
+            {
+                // Status IS changing manually
+                _logger.LogInformation("Status IS changing. Old: {OldStatusId}, New: {NewStatusId}, Current Progress: {CurrentProgress}", 
+                    oldStatusId, newStatusId, control.Progress);
+                
+                // 1. Save progress for the OLD status
+                if (oldStatusId.HasValue)
+                {
+                    statusProgressMap[oldStatusId.Value] = control.Progress;
+                    _logger.LogInformation("Saved progress {Progress}% for old status {StatusId}", control.Progress, oldStatusId.Value);
+                }
+
+                // 2. Set the NEW status
+                control.StatusId = newStatusId;
+
+                // 3. Load progress for the NEW status if it exists in map, else use DTO progress
+                if (newStatusId.HasValue && statusProgressMap.ContainsKey(newStatusId.Value))
+                {
+                    control.Progress = statusProgressMap[newStatusId.Value];
+                    _logger.LogInformation("Restored progress {Progress}% for new status {StatusId}", control.Progress, newStatusId.Value);
+                }
+                else
+                {
+                    control.Progress = updateControlDto.Progress;
+                    if (newStatusId.HasValue)
+                    {
+                        statusProgressMap[newStatusId.Value] = control.Progress;
+                    }
+                    _logger.LogInformation("No saved progress for new status {StatusId}, using DTO progress: {Progress}%", newStatusId, control.Progress);
+                }
+            }
+            
+            // Handle Auto-Advancement logic (if progress reaches 100%)
+            if (control.Progress >= 100)
+            {
                 Status? currentStatus = null;
                 if (control.StatusId.HasValue)
                 {
                     currentStatus = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == control.StatusId.Value);
                 }
                 
-                // If we have a current status, try to advance to the next one
                 if (currentStatus != null)
                 {
                     var nextStatus = await GetNextStatusAsync(currentStatus.StatusName);
                     if (nextStatus != null)
                     {
+                        // Save the 100% for the status we just finished
+                        statusProgressMap[currentStatus.Id] = 100;
+
+                        // Advance to next status
                         control.StatusId = nextStatus.Id;
                         
-                        // Update progress to match the default progress for the new status
-                        var newProgress = GetProgressByStatus(nextStatus.StatusName);
-                        if (newProgress.HasValue)
+                        // Load progress for next status if it exists, otherwise 0
+                        if (statusProgressMap.ContainsKey(nextStatus.Id))
                         {
-                            control.Progress = newProgress.Value;
-                            _logger.LogInformation("Progress reached 100%. Auto-advancing status from '{CurrentStatus}' to '{NextStatus}' and setting progress to {Progress}% for ControlId: {ControlId}", 
-                                currentStatus.StatusName, nextStatus.StatusName, newProgress.Value, control.ControlId);
+                            control.Progress = statusProgressMap[nextStatus.Id];
                         }
                         else
                         {
-                            _logger.LogInformation("Progress reached 100%. Auto-advancing status from '{CurrentStatus}' to '{NextStatus}' for ControlId: {ControlId}", 
-                                currentStatus.StatusName, nextStatus.StatusName, control.ControlId);
+                            control.Progress = 0;
+                            statusProgressMap[nextStatus.Id] = 0;
                         }
-                    }
-                    else
-                    {
-                        // Already at the final status (QA), keep it at 100%
-                        _logger.LogInformation("Progress reached 100% but already at final status '{StatusName}' for ControlId: {ControlId}", 
-                            currentStatus.StatusName, control.ControlId);
+
+                        _logger.LogInformation("Auto-advancing status from '{CurrentStatus}' to '{NextStatus}' for ControlId: {ControlId}", 
+                            currentStatus.StatusName, nextStatus.StatusName, control.ControlId);
                     }
                 }
-                else
-                {
-                    // No current status, use the one from DTO if provided
-                    if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
-                    {
-                        control.StatusId = updateControlDto.StatusId.Value;
-                    }
-                }
-            }
-            else
-            {
-                // Progress is not 100%, use the status from DTO if provided
-                if (updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0)
-                {
-                    control.StatusId = updateControlDto.StatusId.Value;
-                }
-                // If StatusId is not provided in DTO (null or 0), keep the existing status unchanged
             }
 
+            // Serialize the updated map back to JSON
+            control.StatusProgress = JsonSerializer.Serialize(statusProgressMap);
+            _logger.LogInformation("Updated StatusProgress JSON for ControlId {ControlId}: {StatusProgress}", control.ControlId, control.StatusProgress);
+
             control.UpdatedAt = DateTime.UtcNow;
+
+            // Log daily progress if requested
+            if (updateControlDto.LogDailyProgress)
+            {
+                try
+                {
+                    await _progressLogService.LogDailyProgressAsync(
+                        control.ControlId,
+                        control.Progress,
+                        updateControlDto.DailyComments,
+                        updateControlDto.WorkDescription
+                    );
+                    _logger.LogInformation("Daily progress logged for Control {ControlId} with {Progress}% progress", 
+                        control.ControlId, control.Progress);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to log daily progress for Control {ControlId}", control.ControlId);
+                    // Don't fail the update if progress logging fails
+                }
+            }
 
             await _controlRepository.UpdateAsync(control);
             
@@ -386,17 +452,6 @@ namespace ControlApp.API.Services
                 .Select(MapToDto);
         }
 
-        private static int? GetProgressByStatus(string statusName)
-        {
-            return statusName switch
-            {
-                "Analyze" => 25,
-                "Development" => 50,
-                "Dev Testing" => 75,
-                "QA" => 100,
-                _ => null
-            };
-        }
 
         /// <summary>
         /// Gets the next status in the sequence when progress reaches 100%
@@ -442,8 +497,11 @@ namespace ControlApp.API.Services
                 ReleaseId = control.ReleaseId,
                 ReleaseName = control.Release?.ReleaseName, 
                 Progress = control.Progress,
+                StatusProgress = control.StatusProgress,
                 ReleaseDate = control.ReleaseDate,
-                UpdatedAt = control.UpdatedAt
+                UpdatedAt = control.UpdatedAt,
+                TeamId = control.TeamId,
+                TeamName = control.Team?.TeamName
             };
         }
     }

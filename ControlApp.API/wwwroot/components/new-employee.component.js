@@ -33,6 +33,18 @@ app.component('newEmployee', {
                     </select>
                 </div>
 
+                <!-- Team Selection (Super Admin / Admin only) -->
+                <div class="mb-3" ng-if="$ctrl.canAssignTeam()">
+                    <label class="form-label fw-bold">Assign to Team:</label>
+                    <select class="form-select"
+                            ng-model="$ctrl.newEmployee.teamId"
+                            ng-options="team.teamId as team.teamName for team in $ctrl.teams"
+                            required>
+                        <option value="">-- Select Team --</option>
+                    </select>
+                    <small class="text-muted">Assign this employee to a specific team</small>
+                </div>
+
                 <!-- Control Type Selection (Optional) -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Assign Control Type (Optional):</label>
@@ -106,9 +118,10 @@ app.component('newEmployee', {
     </div>
     `,
 
-    controller: function(ApiService, NotificationService, $rootScope) {
+    controller: function(ApiService, NotificationService, AuthService, $rootScope) {
         var ctrl = this;
         ctrl.store = ApiService.data;
+        ctrl.teams = [];
 
         // Roles List
         ctrl.roles = [
@@ -128,7 +141,8 @@ app.component('newEmployee', {
             email: '',
             password: '',
             phoneNumber: '',
-            typeId: null
+            typeId: null,
+            teamId: null
         };
         
         ctrl.$onInit = function() {
@@ -140,6 +154,24 @@ app.component('newEmployee', {
             if(!ctrl.store.employees || ctrl.store.employees.length === 0) {
                 ApiService.loadEmployees();
             }
+            // Load teams for Super Admin / Admin
+            if(ctrl.canAssignTeam()) {
+                ApiService.getTeams().then(function(response) {
+                    ctrl.teams = response.data;
+                    // Auto-select current team if not Super Admin
+                    if(!AuthService.isSuperAdmin()) {
+                        ctrl.newEmployee.teamId = AuthService.getTeamId();
+                    }
+                });
+            } else {
+                // Regular users - auto-assign to their team
+                ctrl.newEmployee.teamId = AuthService.getTeamId();
+            }
+        };
+        
+        // Check if user can assign team (Super Admin or Admin)
+        ctrl.canAssignTeam = function() {
+            return AuthService.isSuperAdmin() || AuthService.isAdmin();
         };
         
         
@@ -232,6 +264,9 @@ app.component('newEmployee', {
         ctrl.proceedWithRegistration = function() {
             ctrl.isSaving = true;
 
+            // Get current team ID - use selected teamId or current user's team
+            var teamIdToAssign = ctrl.newEmployee.teamId || AuthService.getTeamId();
+
             // Payload for backend API
             var payload = {
                 employeeName: ctrl.newEmployee.employeeName.trim(),
@@ -240,8 +275,12 @@ app.component('newEmployee', {
                 password: ctrl.newEmployee.password,
                 phoneNumber: ctrl.newEmployee.phoneNumber.trim(),
                 typeId: ctrl.newEmployee.typeId || null,
+                teamId: teamIdToAssign, // Include teamId in payload
                 description: null 
             };
+
+            var currentTeamId = AuthService.getTeamId();
+            console.log('Registering employee with teamId:', teamIdToAssign, 'Current teamId:', currentTeamId);
 
             ApiService.registerEmployee(payload)
                 .then(function () {
@@ -256,12 +295,17 @@ app.component('newEmployee', {
                         confirmButtonText: 'OK'
                     });
                     
-                    // Trigger update in sidebar or employee list
-                    $rootScope.$broadcast('employeesUpdated');
+                    // Reload employees for the team the employee was assigned to (not current team)
+                    // This ensures the new employee appears in the list when viewing that team
+                    var reloadTeamId = teamIdToAssign || currentTeamId;
+                    console.log('Reloading employees for team:', reloadTeamId, 'Employee was assigned to team:', teamIdToAssign);
                     
-                    // Reload employees and controls, then ensure controls are created
-                    ApiService.loadEmployees().then(function() {
-                        return ApiService.loadAllControls();
+                    // Trigger update in sidebar or employee list with teamId info
+                    $rootScope.$broadcast('employeesUpdated', { teamId: teamIdToAssign });
+                    
+                    // Also reload employees for the assigned team
+                    ApiService.loadEmployees(reloadTeamId).then(function() {
+                        return ApiService.loadAllControls(reloadTeamId);
                     }).then(function() {
                         // If employee was added without a control type, create a control for them
                         // This ensures all employees appear in the controls table

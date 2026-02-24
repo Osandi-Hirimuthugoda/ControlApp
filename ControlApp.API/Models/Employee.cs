@@ -21,6 +21,12 @@ namespace ControlApp.API.Models
         [ForeignKey("UserId")]
         public User? User { get; set; }
 
+        // Team-related properties
+        public int? TeamId { get; set; }
+        
+        [ForeignKey("TeamId")]
+        public Team? Team { get; set; }
+
         public ICollection<Controls> Controls { get; set; } = new List<Controls>();
     }
 }

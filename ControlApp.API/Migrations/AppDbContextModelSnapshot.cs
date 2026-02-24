@@ -36,11 +36,16 @@ namespace ControlApp.API.Migrations
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TypeName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ControlTypeId");
+
+                    b.HasIndex("TeamId");
 
                     b.ToTable("ControlTypes");
                 });
@@ -77,16 +82,21 @@ namespace ControlApp.API.Migrations
                     b.Property<int?>("StatusId")
                         .HasColumnType("int");
 
+                    b.Property<string>("StatusProgress")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SubDescriptions")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SubDescriptions");
+
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
-
 
                     b.HasKey("ControlId");
 
@@ -97,6 +107,8 @@ namespace ControlApp.API.Migrations
                     b.HasIndex("ReleaseId");
 
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("TeamId");
 
                     b.HasIndex("TypeId");
 
@@ -118,6 +130,9 @@ namespace ControlApp.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("TypeId")
                         .HasColumnType("int");
 
@@ -126,11 +141,124 @@ namespace ControlApp.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TeamId");
+
                     b.HasIndex("TypeId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Insight", b =>
+                {
+                    b.Property<int>("InsightId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InsightId"));
+
+                    b.Property<int?>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RelatedControlId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("InsightId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("Category");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("IsPinned");
+
+                    b.HasIndex("Priority");
+
+                    b.HasIndex("RelatedControlId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("Insights");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.ProgressLog", b =>
+                {
+                    b.Property<int>("ProgressLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProgressLogId"));
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ControlId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LogDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProgressLogId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("ControlId", "LogDate");
+
+                    b.ToTable("ProgressLogs");
                 });
 
             modelBuilder.Entity("ControlApp.API.Models.Release", b =>
@@ -176,6 +304,61 @@ namespace ControlApp.API.Migrations
                     b.ToTable("Status", (string)null);
                 });
 
+            modelBuilder.Entity("ControlApp.API.Models.Team", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamId"));
+
+                    b.Property<int?>("ArchitectId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ProjectManagerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeamCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("TeamLeadId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeamName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TeamId");
+
+                    b.HasIndex("ArchitectId");
+
+                    b.HasIndex("ProjectManagerId");
+
+                    b.HasIndex("TeamCode")
+                        .IsUnique();
+
+                    b.HasIndex("TeamLeadId");
+
+                    b.ToTable("Teams", "osandi");
+                });
+
             modelBuilder.Entity("ControlApp.API.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -187,6 +370,9 @@ namespace ControlApp.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CurrentTeamId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -195,6 +381,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("FullName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsSuperAdmin")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
@@ -221,6 +410,46 @@ namespace ControlApp.API.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ControlApp.API.Models.UserTeam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId", "TeamId")
+                        .IsUnique();
+
+                    b.ToTable("UserTeams");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.ControlType", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("ControlApp.API.Models.Controls", b =>
                 {
                     b.HasOne("ControlApp.API.Models.Employee", "Employee")
@@ -243,6 +472,11 @@ namespace ControlApp.API.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ControlApp.API.Models.ControlType", "Type")
                         .WithMany("Controls")
                         .HasForeignKey("TypeId")
@@ -257,11 +491,18 @@ namespace ControlApp.API.Migrations
 
                     b.Navigation("Status");
 
+                    b.Navigation("Team");
+
                     b.Navigation("Type");
                 });
 
             modelBuilder.Entity("ControlApp.API.Models.Employee", b =>
                 {
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ControlApp.API.Models.ControlType", "Type")
                         .WithMany()
                         .HasForeignKey("TypeId")
@@ -272,7 +513,101 @@ namespace ControlApp.API.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("Team");
+
                     b.Navigation("Type");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Insight", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Employee", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlApp.API.Models.Controls", "RelatedControl")
+                        .WithMany()
+                        .HasForeignKey("RelatedControlId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlApp.API.Models.Employee", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("RelatedControl");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.ProgressLog", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Controls", "Control")
+                        .WithMany()
+                        .HasForeignKey("ControlId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlApp.API.Models.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Control");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Team", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Employee", "Architect")
+                        .WithMany()
+                        .HasForeignKey("ArchitectId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ControlApp.API.Models.Employee", "ProjectManager")
+                        .WithMany()
+                        .HasForeignKey("ProjectManagerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ControlApp.API.Models.Employee", "TeamLead")
+                        .WithMany()
+                        .HasForeignKey("TeamLeadId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Architect");
+
+                    b.Navigation("ProjectManager");
+
+                    b.Navigation("TeamLead");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.UserTeam", b =>
+                {
+                    b.HasOne("ControlApp.API.Models.Team", "Team")
+                        .WithMany("UserTeams")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ControlApp.API.Models.User", "User")
+                        .WithMany("UserTeams")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
 
                     b.Navigation("User");
                 });
@@ -295,6 +630,16 @@ namespace ControlApp.API.Migrations
             modelBuilder.Entity("ControlApp.API.Models.Status", b =>
                 {
                     b.Navigation("Controls");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.Team", b =>
+                {
+                    b.Navigation("UserTeams");
+                });
+
+            modelBuilder.Entity("ControlApp.API.Models.User", b =>
+                {
+                    b.Navigation("UserTeams");
                 });
 #pragma warning restore 612, 618
         }

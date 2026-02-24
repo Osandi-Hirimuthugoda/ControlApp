@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 
 namespace ControlApp.API.Repositories
 {
+    // Repositories/IRepository.cs - Base Interface
     public interface IRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAllAsync();

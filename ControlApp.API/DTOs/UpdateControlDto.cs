@@ -21,8 +21,15 @@ namespace ControlApp.API.DTOs
         [Range(0, 100)]
         public int Progress { get; set; }
 
+        public string? StatusProgress { get; set; }
+
         public int? StatusId { get; set; }
         public int? ReleaseId { get; set; }
         public DateTime? ReleaseDate { get; set; }
+
+        // Progress logging fields
+        public bool LogDailyProgress { get; set; } = false;
+        public string? DailyComments { get; set; }
+        public string? WorkDescription { get; set; }
     }
 }

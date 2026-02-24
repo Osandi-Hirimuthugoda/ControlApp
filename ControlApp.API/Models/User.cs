@@ -30,6 +30,14 @@ namespace ControlApp.API.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? LastLoginAt { get; set; }
+
+        // Team-related properties - User can belong to multiple teams
+        public ICollection<UserTeam> UserTeams { get; set; } = new List<UserTeam>();
+
+        // Current active team for the session
+        public int? CurrentTeamId { get; set; }
+
+        public bool IsSuperAdmin { get; set; } = false;
     }
 }
 

@@ -8,6 +8,13 @@ app.component('controlsSidebar', {
                     ng-click="$ctrl.switchToDashboard()">
                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
             </button>
+            
+            <!-- Super Admin Dashboard (Super Admin Only) -->
+            <button class="sidebar-btn" 
+                    ng-if="$ctrl.isSuperAdmin()"
+                    ng-click="$ctrl.goToSuperAdminDashboard()">
+                <i class="fas fa-crown me-2 text-warning"></i>Super Admin
+            </button>
 
             <hr class="sidebar-divider">
 
@@ -47,6 +54,47 @@ app.component('controlsSidebar', {
                     ng-click="$ctrl.switchSection('controlTypes')">
                 <i class="fas fa-tags me-2"></i>Control List
             </button>
+
+            <!-- Control Types Management -->
+            <button class="sidebar-btn" 
+                    ng-class="{'active': $ctrl.currentSection === 'controlTypesManagement'}" 
+                    ng-click="$ctrl.switchSection('controlTypesManagement'); console.log('Control Types clicked, switching to controlTypesManagement')">
+                <i class="fas fa-cogs me-2"></i>Control Types
+                <small class="d-block text-muted" style="font-size: 0.7rem;">{{$ctrl.currentSection}}</small>
+            </button>
+            
+            <!-- Sub Objectives Master List -->
+            <!-- <button class="sidebar-btn" 
+                    ng-class="{'active': $ctrl.currentSection === 'subObjectives'}" 
+                    ng-click="$ctrl.switchSection('subObjectives')">
+                <i class="fas fa-tasks me-2"></i>Sub Objectives
+            </button> -->
+
+            <hr class="sidebar-divider">
+
+            
+            <!-- Daily Progress Tracking -->
+            <!-- <button class="sidebar-btn" 
+                    ng-class="{'active': $ctrl.currentSection === 'dailyProgress'}" 
+                    ng-click="$ctrl.switchSection('dailyProgress')">
+                <i class="fas fa-calendar-check me-2"></i>Daily Progress
+            </button> -->
+
+            <!-- Latest Insights -->
+            <!-- <button class="sidebar-btn" 
+                    ng-class="{'active': $ctrl.currentSection === 'latestInsights'}" 
+                    ng-click="$ctrl.switchSection('latestInsights')">
+                <i class="fas fa-lightbulb me-2"></i>Latest Insights
+            </button> -->
+            
+            <hr class="sidebar-divider" ng-if="$ctrl.isSuperAdmin()">
+            
+            <!-- Team Management (Super Admin Only) -->
+            <button class="sidebar-btn" 
+                    ng-if="$ctrl.isSuperAdmin()"
+                    ng-click="$ctrl.goToTeamManagement()">
+                <i class="fas fa-users-cog me-2"></i>Team Management
+            </button>
         </div>
     </div>
     `,
@@ -77,6 +125,27 @@ app.component('controlsSidebar', {
          */
         ctrl.canAddControl = function () {
             return AuthService.canAddControl();
+        };
+        
+        /**
+         * Checks if user is Super Admin
+         */
+        ctrl.isSuperAdmin = function () {
+            return AuthService.isSuperAdmin();
+        };
+        
+        /**
+         * Navigate to Team Management page
+         */
+        ctrl.goToTeamManagement = function () {
+            $location.path('/teams');
+        };
+        
+        /**
+         * Navigate to Super Admin Dashboard
+         */
+        ctrl.goToSuperAdminDashboard = function () {
+            $location.path('/super-admin');
         };
 
         ctrl.$onInit = function () {
@@ -152,14 +221,18 @@ app.component('controlsSidebar', {
             }
 
             ctrl.currentSection = section;
-            // Update URL with routing
-            if (section && section !== 'controls') {
-                $location.path('/controls/' + section);
-            } else {
-                $location.path('/controls');
-            }
-            // Also broadcast for components that still listen to it
+            
+            // Broadcast section change first
             $rootScope.$broadcast('controlsSectionChanged', section);
+            
+            // Update URL without reloading - use $location.search() instead of path()
+            // This prevents the component from reloading
+            if (section && section !== 'controls') {
+                // Use replace() to update URL without adding to history
+                $location.path('/controls/' + section).replace();
+            } else {
+                $location.path('/controls').replace();
+            }
         };
 
         /**
@@ -171,6 +244,14 @@ app.component('controlsSidebar', {
                     return AuthService.canAddControl();
                 case 'controlTypes':
                     return true; // Everyone can view control types
+                case 'controlTypesManagement':
+                    return AuthService.isAdmin() || AuthService.isSoftwareArchitecture() || AuthService.isTeamLead();
+                case 'subObjectives':
+                    return true; // Everyone can view sub objectives
+                case 'dailyProgress':
+                    return true; // Everyone can view daily progress
+                case 'latestInsights':
+                    return true; // Everyone can view and add insights
                 case 'newEmployee':
                     return AuthService.canAddEmployee(); // Admin & Project Manager
                 case 'employees':
@@ -214,6 +295,10 @@ app.component('controlsSidebar', {
                 'addControlType': ['Admin', 'Team Lead', 'Software Architecture'],
                 // Control List (everyone can view)
                 'controlTypes': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer'],
+                // Control Types Management (Admin, Software Architecture, Team Lead only)
+                'controlTypesManagement': ['Admin', 'Software Architecture', 'Team Lead'],
+                // Sub Objectives (everyone can view)
+                'subObjectives': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer'],
                 // Add Employee (Admin & Project Manager)
                 'newEmployee': ['Admin', 'Project Manager'],
                 // Employees List (everyone can view)

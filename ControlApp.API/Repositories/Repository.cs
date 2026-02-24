@@ -4,6 +4,7 @@ using ControlApp.API;
 
 namespace ControlApp.API.Repositories
 {
+    // Repositories/Repository.cs - Base Implementation
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly AppDbContext _context;

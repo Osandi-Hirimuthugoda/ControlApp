@@ -29,6 +29,8 @@ namespace ControlApp.API.DTOs
         
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string? Description { get; set; }
+        
+        public int? TeamId { get; set; }
     }
 }
 

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ControlApp.API.Models
 {
-    public class Release
+    public class Release : ISoftDelete
     {
         [Key]
         public int ReleaseId { get; set; }
@@ -11,5 +11,7 @@ namespace ControlApp.API.Models
         public string? Description { get; set; }
 
         public ICollection<Controls> Controls { get; set; } = new List<Controls>();
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

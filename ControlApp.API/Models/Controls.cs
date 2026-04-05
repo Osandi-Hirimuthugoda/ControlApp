@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ControlApp.API.Models
 {
-    public class Controls
+    public class Controls : ISoftDelete
     {
         [Key]
         public int ControlId { get; set; }
@@ -51,5 +51,7 @@ namespace ControlApp.API.Models
         
         [ForeignKey("TeamId")]
         public Team? Team { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

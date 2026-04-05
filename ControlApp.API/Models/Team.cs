@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ControlApp.API.Models
 {
-    public class Team
+    public class Team : ISoftDelete
     {
         [Key]
         public int TeamId { get; set; }
@@ -37,5 +37,7 @@ namespace ControlApp.API.Models
 
         // Users in this team
         public ICollection<UserTeam> UserTeams { get; set; } = new List<UserTeam>();
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

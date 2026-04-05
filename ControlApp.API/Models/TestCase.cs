@@ -1,6 +1,6 @@
 namespace ControlApp.API.Models
 {
-    public class TestCase
+    public class TestCase : ISoftDelete
     {
         public int TestCaseId { get; set; }
         public int ControlId { get; set; }
@@ -23,5 +23,7 @@ namespace ControlApp.API.Models
         public Employee? TestedBy { get; set; }
         public Defect? Defect { get; set; }
         public Team? Team { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

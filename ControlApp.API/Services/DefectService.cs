@@ -1,7 +1,10 @@
-using ControlApp.API.DTOs;
 using ControlApp.API.Models;
+using ControlApp.API.DTOs;
+using System.Text.Json;
 using ControlApp.API.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using ControlApp.API.Hubs;
 
 namespace ControlApp.API.Services
 {
@@ -9,11 +12,13 @@ namespace ControlApp.API.Services
     {
         private readonly IDefectRepository _defectRepository;
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public DefectService(IDefectRepository defectRepository, AppDbContext context)
+        public DefectService(IDefectRepository defectRepository, AppDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _defectRepository = defectRepository;
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<IEnumerable<DefectDto>> GetAllAsync(int teamId)
@@ -87,6 +92,7 @@ namespace ControlApp.API.Services
                 ReportedByEmployeeId = reportedByEmployeeId,
                 AssignedToEmployeeId = createDto.AssignedToEmployeeId,
                 AttachmentUrl = createDto.AttachmentUrl,
+                AttachmentUrls = createDto.AttachmentUrls != null ? JsonSerializer.Serialize(createDto.AttachmentUrls) : null,
                 Category = createDto.Category,
                 ReportedDate = DateTime.UtcNow,
                 TeamId = teamId
@@ -99,6 +105,20 @@ namespace ControlApp.API.Services
                 null, "Open", $"Defect '{createDto.Title}' reported", reportedByEmployeeId, reporter.EmployeeName, teamId);
 
             var reloaded = await _defectRepository.GetByIdAsync(created.DefectId);
+
+            // Send Real-time Notification to Assigned Developer
+            if (defect.AssignedToEmployeeId.HasValue)
+            {
+                var assignedDev = await _context.Set<Employee>().FindAsync(defect.AssignedToEmployeeId.Value);
+                if (assignedDev?.UserId != null)
+                {
+                    await _hubContext.Clients.User(assignedDev.UserId.ToString()!)
+                        .SendAsync("ReceiveNotification", $"New defect assigned: {defect.Title}", "info");
+                    await _hubContext.Clients.User(assignedDev.UserId.ToString()!)
+                        .SendAsync("DefectAssigned", defect.Title, defect.DefectId);
+                }
+            }
+
             return MapToDto(reloaded!);
         }
 
@@ -116,6 +136,8 @@ namespace ControlApp.API.Services
             if (updateDto.AssignedToEmployeeId.HasValue) defect.AssignedToEmployeeId = updateDto.AssignedToEmployeeId;
             if (updateDto.ResolutionNotes != null) defect.ResolutionNotes = updateDto.ResolutionNotes;
             if (updateDto.AttachmentUrl != null) defect.AttachmentUrl = updateDto.AttachmentUrl;
+            if (updateDto.AttachmentUrls != null) defect.AttachmentUrls = JsonSerializer.Serialize(updateDto.AttachmentUrls);
+            if (updateDto.SubDescriptionIndex.HasValue || updateDto.SubDescriptionIndex == null) defect.SubDescriptionIndex = updateDto.SubDescriptionIndex;
             if (!string.IsNullOrEmpty(updateDto.Category)) defect.Category = updateDto.Category;
 
             if (!string.IsNullOrEmpty(updateDto.Status))
@@ -140,6 +162,18 @@ namespace ControlApp.API.Services
                     oldStatus, updateDto.Status,
                     $"Status changed from '{oldStatus}' to '{updateDto.Status}'",
                     updatedByEmployeeId, performerName, defect.TeamId);
+
+                // Send Real-time Notification to Reporter (QA)
+                // Only notify if someone else (e.g. Developer) changed the status
+                if (defect.ReportedByEmployeeId != updatedByEmployeeId)
+                {
+                    var reporter = await _context.Set<Employee>().FindAsync(defect.ReportedByEmployeeId);
+                    if (reporter?.UserId != null)
+                    {
+                        await _hubContext.Clients.User(reporter.UserId.ToString()!)
+                            .SendAsync("DefectStatusChanged", defect.Title, id, defect.ControlId, updateDto.Status);
+                    }
+                }
             }
             else if (updatedByEmployeeId.HasValue)
             {
@@ -230,6 +264,7 @@ namespace ControlApp.API.Services
                 ResolvedDate = defect.ResolvedDate,
                 ResolutionNotes = defect.ResolutionNotes,
                 AttachmentUrl = defect.AttachmentUrl,
+                AttachmentUrls = string.IsNullOrEmpty(defect.AttachmentUrls) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(defect.AttachmentUrls),
                 Category = defect.Category,
                 TeamId = defect.TeamId,
                 TeamName = defect.Team?.TeamName

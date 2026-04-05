@@ -28,6 +28,14 @@ namespace ControlApp.API
         {
             base.OnModelCreating(modelBuilder);
 
+            // Global Query Filters for Soft Delete
+            modelBuilder.Entity<Controls>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Team>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Defect>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<TestCase>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Release>().HasQueryFilter(e => !e.IsDeleted);
+
             
             modelBuilder.Entity<Controls>(entity =>
             {

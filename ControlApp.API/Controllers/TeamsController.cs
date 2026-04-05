@@ -152,7 +152,7 @@ namespace ControlApp.API.Controllers
 
         // POST: api/teams/{teamId}/members/{userId}
         [HttpPost("{teamId}/members/{userId}")]
-        [Authorize]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult> AddUserToTeam(int teamId, int userId)
         {
             try
@@ -170,7 +170,7 @@ namespace ControlApp.API.Controllers
 
         // DELETE: api/teams/{teamId}/members/{userId}
         [HttpDelete("{teamId}/members/{userId}")]
-        [Authorize]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult> RemoveUserFromTeam(int teamId, int userId)
         {
             try

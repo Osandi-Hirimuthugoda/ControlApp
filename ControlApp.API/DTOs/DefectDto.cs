@@ -19,6 +19,7 @@ namespace ControlApp.API.DTOs
         public DateTime? ResolvedDate { get; set; }
         public string? ResolutionNotes { get; set; }
         public string? AttachmentUrl { get; set; }
+        public List<string>? AttachmentUrls { get; set; }
         public string? Category { get; set; }
         public int TeamId { get; set; }
         public string? TeamName { get; set; }
@@ -34,6 +35,7 @@ namespace ControlApp.API.DTOs
         public string Priority { get; set; } = "Medium";
         public int? AssignedToEmployeeId { get; set; }
         public string? Category { get; set; }
+        public List<string>? AttachmentUrls { get; set; }
         public string? AttachmentUrl { get; set; }
     }
 
@@ -47,6 +49,8 @@ namespace ControlApp.API.DTOs
         public int? AssignedToEmployeeId { get; set; }
         public string? ResolutionNotes { get; set; }
         public string? Category { get; set; }
+        public List<string>? AttachmentUrls { get; set; }
         public string? AttachmentUrl { get; set; }
+        public int? SubDescriptionIndex { get; set; }
     }
 }

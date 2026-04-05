@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ControlApp.API.Models
 {
-    public class Employee
+    public class Employee : ISoftDelete
     {
         [Key]
         public int Id { get; set; } 
@@ -28,5 +28,7 @@ namespace ControlApp.API.Models
         public Team? Team { get; set; }
 
         public ICollection<Controls> Controls { get; set; } = new List<Controls>();
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

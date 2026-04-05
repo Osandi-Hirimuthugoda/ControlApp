@@ -46,7 +46,7 @@ namespace ControlApp.API.Services
             return control != null ? MapToDto(control) : null;
         }
 
-        public async Task<ControlDto> CreateControlAsync(CreateControlDto createControlDto)
+        public async Task<ControlDto> CreateControlAsync(CreateControlDto createControlDto, int? performerEmployeeId = null)
         {
             _logger.LogInformation("CreateControlAsync called with TypeId: {TypeId}, EmployeeId: {EmployeeId}", 
                 createControlDto.TypeId, createControlDto.EmployeeId);
@@ -130,6 +130,17 @@ namespace ControlApp.API.Services
                 _logger.LogInformation("Control saved to database successfully. ControlId: {ControlId}, EmployeeId: {EmployeeId}", 
                     createdControl.ControlId, createdControl.EmployeeId);
                 
+                // Log activity
+                string? performerName = null;
+                if (performerEmployeeId.HasValue)
+                {
+                    var performer = await _context.Set<Employee>().FirstOrDefaultAsync(e => e.Id == performerEmployeeId.Value);
+                    performerName = performer?.EmployeeName;
+                }
+                await LogActivityAsync("Control", createdControl.ControlId, createdControl.ControlId, "Created",
+                    null, "Analyze", $"Control '{createdControl.Description}' created", 
+                    performerEmployeeId, performerName, createdControl.TeamId);
+                
                 // Verify the control was saved by retrieving it
                 var controlWithDetails = await _controlRepository.GetControlWithDetailsByIdAsync(createdControl.ControlId);
                 if (controlWithDetails == null)
@@ -151,7 +162,7 @@ namespace ControlApp.API.Services
             }
         }
 
-        public async Task<ControlDto?> UpdateControlAsync(int id, UpdateControlDto updateControlDto)
+        public async Task<ControlDto?> UpdateControlAsync(int id, UpdateControlDto updateControlDto, int? performerEmployeeId = null)
         {
             var control = await _controlRepository.GetByIdAsync(id);
             if (control == null) return null;
@@ -179,11 +190,17 @@ namespace ControlApp.API.Services
                 catch { /* fallback to empty */ }
             }
 
-            // Determine if Status is changing (manually or via auto-advance)
             int? oldStatusId = control.StatusId;
+            var oldStatus = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == (oldStatusId ?? 0));
+            var oldStatusName = oldStatus?.StatusName ?? "None";
+
             int? newStatusId = updateControlDto.StatusId.HasValue && updateControlDto.StatusId.Value > 0 
                 ? updateControlDto.StatusId.Value 
                 : control.StatusId;
+
+            int? oldEmployeeId = control.EmployeeId;
+            int? oldQAEmployeeId = control.QAEmployeeId;
+            double oldProgress = control.Progress;
 
             // Update main fields
             control.Description = updateControlDto.Description;
@@ -361,6 +378,50 @@ namespace ControlApp.API.Services
 
             await _controlRepository.UpdateAsync(control);
             
+            // Log Activities
+            string? performerName = null;
+            if (performerEmployeeId.HasValue)
+            {
+                var performer = await _context.Set<Employee>().FirstOrDefaultAsync(e => e.Id == performerEmployeeId.Value);
+                performerName = performer?.EmployeeName;
+            }
+
+            // Log Status Change
+            if (oldStatusId != control.StatusId)
+            {
+                var newStatus = await _context.Set<Status>().FirstOrDefaultAsync(s => s.Id == (control.StatusId ?? 0));
+                var newStatusName = newStatus?.StatusName ?? "None";
+                await LogActivityAsync("Control", control.ControlId, control.ControlId, "StatusChanged",
+                    oldStatusName, newStatusName, $"Status changed from '{oldStatusName}' to '{newStatusName}'",
+                    performerEmployeeId, performerName, control.TeamId);
+            }
+
+            // Log Employee Change
+            if (oldEmployeeId != control.EmployeeId)
+            {
+                var newEmp = await _context.Set<Employee>().FirstOrDefaultAsync(e => e.Id == (control.EmployeeId ?? 0));
+                await LogActivityAsync("Control", control.ControlId, control.ControlId, "OwnerAssigned",
+                    null, newEmp?.EmployeeName, $"Control assigned to {newEmp?.EmployeeName ?? "Unassigned"}",
+                    performerEmployeeId, performerName, control.TeamId);
+            }
+
+            // Log QA Employee Change
+            if (oldQAEmployeeId != control.QAEmployeeId)
+            {
+                var newQA = await _context.Set<Employee>().FirstOrDefaultAsync(e => e.Id == (control.QAEmployeeId ?? 0));
+                await LogActivityAsync("Control", control.ControlId, control.ControlId, "QAAssigned",
+                    null, newQA?.EmployeeName, $"QA Engineer assigned: {newQA?.EmployeeName ?? "Unassigned"}",
+                    performerEmployeeId, performerName, control.TeamId);
+            }
+
+            // Log significant progress change (every 10% or if it hits 100%)
+            if (Math.Abs(oldProgress - control.Progress) >= 10 || (control.Progress == 100 && oldProgress != 100))
+            {
+                await LogActivityAsync("Control", control.ControlId, control.ControlId, "ProgressUpdated",
+                    $"{oldProgress}%", $"{control.Progress}%", $"Progress updated to {control.Progress}%",
+                    performerEmployeeId, performerName, control.TeamId);
+            }
+            
             var controlWithDetails = await _controlRepository.GetControlWithDetailsByIdAsync(id);
             return controlWithDetails != null ? MapToDto(controlWithDetails) : MapToDto(control);
         }
@@ -474,6 +535,53 @@ namespace ControlApp.API.Services
                 .FirstOrDefaultAsync(s => s.StatusName == nextStatusName);
             
             return nextStatus;
+        }
+
+        public async Task<IEnumerable<ActivityLogDto>> GetActivityLogsAsync(int controlId)
+        {
+            var logs = await _context.ActivityLogs
+                .Where(a => a.ControlId == controlId)
+                .OrderByDescending(a => a.Timestamp)
+                .Take(50)
+                .ToListAsync();
+
+            return logs.Select(a => new ActivityLogDto
+            {
+                ActivityLogId = a.ActivityLogId,
+                EntityType = a.EntityType,
+                EntityId = a.EntityId,
+                ControlId = a.ControlId,
+                Action = a.Action,
+                OldValue = a.OldValue,
+                NewValue = a.NewValue,
+                Description = a.Description,
+                PerformedByEmployeeId = a.PerformedByEmployeeId,
+                PerformedByName = a.PerformedByName,
+                Timestamp = a.Timestamp,
+                TeamId = a.TeamId
+            });
+        }
+
+        private async Task LogActivityAsync(string entityType, int entityId, int controlId,
+            string action, string? oldValue, string? newValue, string? description,
+            int? employeeId, string? employeeName, int? teamId)
+        {
+            var log = new ActivityLog
+            {
+                EntityType = entityType,
+                EntityId = entityId,
+                ControlId = controlId,
+                Action = action,
+                OldValue = oldValue,
+                NewValue = newValue,
+                Description = description,
+                PerformedByEmployeeId = employeeId,
+                PerformedByName = employeeName,
+                Timestamp = DateTime.UtcNow,
+                TeamId = teamId ?? 0
+            };
+            _context.ActivityLogs.Add(log);
+            await _context.SaveChangesAsync();
         }
 
         private static ControlDto MapToDto(Controls control)

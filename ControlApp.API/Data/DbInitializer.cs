@@ -23,6 +23,7 @@ namespace ControlApp.API.Data
                 EnsureRequiredControlTypes(context, logger);
                 EnsureRequiredStatuses(context, logger);
                 EnsureDefaultAdminUser(context, logger);
+                FixEarlyUpgradeFeeDefects(context, logger);
 
                 context.SaveChanges();
                 logger.LogInformation("Database initialization and seeding completed");
@@ -193,6 +194,67 @@ namespace ControlApp.API.Data
                 });
                 logger.LogInformation("Created default admin user");
             }
+        }
+
+        private static void FixEarlyUpgradeFeeDefects(AppDbContext context, ILogger logger)
+        {
+            var targetText = "Early upgrade Fee";
+            
+            // Find controls whose sub-descriptions contain the target text
+            var controlsWithTarget = context.Controls
+                .Where(c => c.SubDescriptions != null && c.SubDescriptions.Contains(targetText))
+                .ToList();
+
+            if (!controlsWithTarget.Any()) return;
+
+            logger.LogInformation("Data Correction: Found {Count} controls mentioning '{TargetText}'", controlsWithTarget.Count, targetText);
+
+            foreach (var control in controlsWithTarget)
+            {
+                try
+                {
+                    // Parse SubDescriptions JSON to find the correct index
+                    var subDescs = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<System.Text.Json.JsonElement>>(control.SubDescriptions!);
+                    if (subDescs == null) continue;
+
+                    int targetIndex = -1;
+                    for (int i = 0; i < subDescs.Count; i++)
+                    {
+                        if (subDescs[i].TryGetProperty("description", out var descProp) && 
+                            descProp.GetString()?.Contains(targetText, StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            targetIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (targetIndex != -1)
+                    {
+                        // Map defects that mention the target text but haven't been assigned an index yet
+                        var defectsToUpdate = context.Defects
+                            .Where(d => d.ControlId == control.ControlId && 
+                                        d.SubDescriptionIndex == null && 
+                                        (d.Title.Contains(targetText) || (d.Description != null && d.Description.Contains(targetText))))
+                            .ToList();
+
+                        if (defectsToUpdate.Any())
+                        {
+                            foreach (var defect in defectsToUpdate)
+                            {
+                                defect.SubDescriptionIndex = targetIndex;
+                            }
+                            logger.LogInformation("Data Correction: Mapped {Count} defects for Control ID {ControlId} to '{TargetText}' (index {Index})", 
+                                defectsToUpdate.Count, control.ControlId, targetText, targetIndex);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Data Correction: Failed to parse sub-descriptions for Control ID {ControlId}", control.ControlId);
+                }
+            }
+            
+            context.SaveChanges();
         }
     }
 }

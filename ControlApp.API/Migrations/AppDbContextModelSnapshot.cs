@@ -127,6 +127,9 @@ namespace ControlApp.API.Migrations
                     b.Property<int?>("EmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Progress")
                         .HasColumnType("int");
 
@@ -189,6 +192,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("AttachmentUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("AttachmentUrls")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Category")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -199,6 +205,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Priority")
                         .IsRequired()
@@ -228,6 +237,9 @@ namespace ControlApp.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("SubDescriptionIndex")
+                        .HasColumnType("int");
+
                     b.Property<int>("TeamId")
                         .HasColumnType("int");
 
@@ -235,9 +247,6 @@ namespace ControlApp.API.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<int?>("SubDescriptionIndex")
-                        .HasColumnType("int");
 
                     b.HasKey("DefectId");
 
@@ -270,6 +279,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("EmployeeName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("TeamId")
                         .HasColumnType("int");
@@ -413,6 +425,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
 
@@ -465,6 +480,9 @@ namespace ControlApp.API.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int?>("ProjectManagerId")
@@ -523,6 +541,9 @@ namespace ControlApp.API.Migrations
                     b.Property<string>("ExpectedResult")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -531,15 +552,15 @@ namespace ControlApp.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("SubDescriptionIndex")
+                        .HasColumnType("int");
+
                     b.Property<int>("TeamId")
                         .HasColumnType("int");
 
                     b.Property<string>("TestCaseTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("SubDescriptionIndex")
-                        .HasColumnType("int");
 
                     b.Property<string>("TestSteps")
                         .HasColumnType("nvarchar(max)");

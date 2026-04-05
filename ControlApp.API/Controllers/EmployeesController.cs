@@ -61,8 +61,8 @@ namespace ControlApp.API.Controllers
 
         // POST: api/employees/register
         [HttpPost("register")]
-        // Allow both Admin and Project Manager to register employees
-        [Authorize(Roles = "Admin,Project Manager")]
+        // Allow strictly Admin and SuperAdmin to register employees
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<EmployeeDto>> RegisterEmployee([FromBody] RegisterEmployeeWithUserDto registerDto)
         {
             try
@@ -95,8 +95,8 @@ namespace ControlApp.API.Controllers
 
         // POST: api/employees
         [HttpPost]
-        // Only Admin and Project Manager can create employees (non-registered flow)
-        [Authorize(Roles = "Admin,Project Manager")]
+        // Only Admin and SuperAdmin can create employees (non-registered flow)
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee([FromBody] CreateEmployeeWithControlDto createDto)
         {
             try
@@ -123,8 +123,8 @@ namespace ControlApp.API.Controllers
 
         // PUT: api/employees/{id}
         [HttpPut("{id:int}")]
-        // Admin, Software Architecture, and Team Lead can update employees
-        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
+        // Admin and SuperAdmin can update employees
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<EmployeeDto>> UpdateEmployee(int id, [FromBody] CreateEmployeeDto updateEmployeeDto)
         {
             var employee = await _employeeService.UpdateEmployeeAsync(id, updateEmployeeDto);
@@ -136,8 +136,8 @@ namespace ControlApp.API.Controllers
 
         // DELETE: api/employees/{id}
         [HttpDelete("{id:int}")]
-        // Admin, Software Architecture, and Team Lead can delete employees
-        [Authorize(Roles = "Admin,Software Architecture,Team Lead")]
+        // Admin and SuperAdmin can delete employees
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             try

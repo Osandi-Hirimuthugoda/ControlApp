@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ControlApp.API.Models
 {
-    public class Defect
+    public class Defect : ISoftDelete
     {
         [Key]
         public int DefectId { get; set; }
@@ -55,6 +55,9 @@ namespace ControlApp.API.Models
         // Store image as base64 string or file path
         public string? AttachmentUrl { get; set; }
 
+        // Store multiple images as JSON array
+        public string? AttachmentUrls { get; set; }
+
         [StringLength(50)]
         public string? Category { get; set; } // Functional, Environmental, Requirement Gaps
 
@@ -62,5 +65,7 @@ namespace ControlApp.API.Models
 
         [ForeignKey("TeamId")]
         public Team Team { get; set; } = null!;
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

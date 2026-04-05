@@ -121,7 +121,11 @@ namespace ControlApp.API.Controllers
                 logger.LogInformation("Creating control with TypeId: {TypeId}, EmployeeId: {EmployeeId}, Description: {Description}", 
                     createControlDto.TypeId, createControlDto.EmployeeId, createControlDto.Description);
 
-                var control = await _controlService.CreateControlAsync(createControlDto);
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var employees = await _context.Employees.ToListAsync();
+                var performer = employees.FirstOrDefault(e => e.UserId == userId);
+
+                var control = await _controlService.CreateControlAsync(createControlDto, performer?.Id);
                 
                 logger.LogInformation("Control created successfully with ID: {ControlId}", control.ControlId);
                 return CreatedAtAction(nameof(GetControlById), new { id = control.ControlId }, control);
@@ -171,7 +175,12 @@ namespace ControlApp.API.Controllers
                 }
 
                 var oldControl = await _controlService.GetControlByIdAsync(id);
-                var control = await _controlService.UpdateControlAsync(id, updateControlDto);
+                
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var employees = await _context.Employees.ToListAsync();
+                var performer = employees.FirstOrDefault(e => e.UserId == userId);
+                
+                var control = await _controlService.UpdateControlAsync(id, updateControlDto, performer?.Id);
                 if (control == null)
                     return NotFound($"Control with ID {id} not found.");
 
@@ -207,6 +216,15 @@ namespace ControlApp.API.Controllers
             {
                 return StatusCode(500, new { message = $"Error updating control: {ex.Message}" });
             }
+        }
+
+        // GET: api/controls/{id}/activity
+        [HttpGet("{id}/activity")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<ActivityLogDto>>> GetActivityLogs(int id)
+        {
+            var logs = await _controlService.GetActivityLogsAsync(id);
+            return Ok(logs);
         }
 
         // POST: api/controls/{id}/activity  — log a sub-description status change

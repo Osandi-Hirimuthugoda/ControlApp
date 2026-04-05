@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ControlApp.API;
+using ControlApp.API.Models;
 
 namespace ControlApp.API.Repositories
 {
@@ -59,7 +60,16 @@ namespace ControlApp.API.Repositories
             if (entity == null)
                 return false;
 
-            _dbSet.Remove(entity);
+            if (entity is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.IsDeleted = true;
+                _context.Entry(entity).State = EntityState.Modified;
+            }
+            else
+            {
+                _dbSet.Remove(entity);
+            }
+            
             await _context.SaveChangesAsync();
             return true;
         }

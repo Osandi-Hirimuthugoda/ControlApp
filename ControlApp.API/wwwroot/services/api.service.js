@@ -207,6 +207,71 @@ app.service('ApiService', function ($http, $q, $rootScope) {
         });
     };
 
+    self._formatControlSingle = function (c) {
+        // Ensure releaseDate is properly set from either releaseDate or release
+        // Always convert to Date object using new Date()
+        if (c.releaseDate) {
+            c.releaseDate = new Date(c.releaseDate);
+            c.releaseDateInput = new Date(c.releaseDate);
+        } else if (c.release && c.release.releaseDate) {
+            // If releaseDate is not set but release object has releaseDate, use it
+            c.releaseDate = new Date(c.release.releaseDate);
+            c.releaseDateInput = new Date(c.release.releaseDate);
+        } else {
+            c.releaseDate = null;
+            c.releaseDateInput = null;
+        }
+
+        // Set formatted date string for ng-model binding (YYYY-MM-DD format)
+        if (c.releaseDate) {
+            var d = new Date(c.releaseDate);
+            if (!isNaN(d.getTime())) {
+                var year = d.getFullYear();
+                var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                var day = ('0' + d.getDate()).slice(-2);
+                c.releaseDateInputFormatted = year + '-' + month + '-' + day;
+            } else {
+                c.releaseDateInputFormatted = '';
+            }
+        } else {
+            c.releaseDateInputFormatted = '';
+        }
+
+        if (c.editing === undefined) {
+            c.editing = false;
+        }
+
+        if (c.typeId && self.data.controlTypes && self.data.controlTypes.length > 0) {
+            var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
+            if (t) c.typeName = t.typeName;
+        }
+
+        if (c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses && self.data.statuses.length > 0) {
+            var s = self.data.statuses.find(x => x.id == c.statusId);
+            if (s) c.statusName = s.statusName;
+        }
+
+        if (c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases && self.data.releases.length > 0) {
+            var r = self.data.releases.find(x => x.releaseId == c.releaseId);
+            if (r) {
+                c.releaseName = r.releaseName;
+                // If releaseDate is not set but we found a release, use its date
+                if (!c.releaseDate && r.releaseDate) {
+                    c.releaseDate = new Date(r.releaseDate);
+                    c.releaseDateInput = new Date(r.releaseDate);
+                    // Update formatted date
+                    var rd = new Date(c.releaseDate);
+                    if (!isNaN(rd.getTime())) {
+                        var ryear = rd.getFullYear();
+                        var rmonth = ('0' + (rd.getMonth() + 1)).slice(-2);
+                        var rday = ('0' + rd.getDate()).slice(-2);
+                        c.releaseDateInputFormatted = ryear + '-' + rmonth + '-' + rday;
+                    }
+                }
+            }
+        }
+    };
+
     self.loadAllControls = function (teamId) {
         var url = apiBaseUrl + '/controls';
 
@@ -236,72 +301,13 @@ app.service('ApiService', function ($http, $q, $rootScope) {
                 });
                 console.log('Controls team distribution:', teamDistribution);
             } else {
-                console.warn('⚠ No controls returned from API' + (teamId ? ' for teamId: ' + teamId : ' for user teams'));
+                console.warn('No controls returned from API' + (teamId ? ' for teamId: ' + teamId : ' for user teams'));
             }
 
             self.data.allControls = controls;
 
             self.data.allControls.forEach(function (c) {
-                // Ensure releaseDate is properly set from either releaseDate or release
-                // Always convert to Date object using new Date()
-                if (c.releaseDate) {
-                    c.releaseDate = new Date(c.releaseDate);
-                    c.releaseDateInput = new Date(c.releaseDate);
-                } else if (c.release && c.release.releaseDate) {
-                    // If releaseDate is not set but release object has releaseDate, use it
-                    c.releaseDate = new Date(c.release.releaseDate);
-                    c.releaseDateInput = new Date(c.release.releaseDate);
-                } else {
-                    c.releaseDate = null;
-                    c.releaseDateInput = null;
-                }
-
-                // Set formatted date string for ng-model binding (YYYY-MM-DD format)
-                if (c.releaseDate) {
-                    var d = new Date(c.releaseDate);
-                    if (!isNaN(d.getTime())) {
-                        var year = d.getFullYear();
-                        var month = ('0' + (d.getMonth() + 1)).slice(-2);
-                        var day = ('0' + d.getDate()).slice(-2);
-                        c.releaseDateInputFormatted = year + '-' + month + '-' + day;
-                    } else {
-                        c.releaseDateInputFormatted = '';
-                    }
-                } else {
-                    c.releaseDateInputFormatted = '';
-                }
-
-                c.editing = false;
-
-                if (c.typeId && self.data.controlTypes.length > 0) {
-                    var t = self.data.controlTypes.find(x => x.controlTypeId == c.typeId);
-                    if (t) c.typeName = t.typeName;
-                }
-
-                if (c.statusId && (!c.statusName || c.statusName === '') && self.data.statuses.length > 0) {
-                    var s = self.data.statuses.find(x => x.id == c.statusId);
-                    if (s) c.statusName = s.statusName;
-                }
-
-                if (c.releaseId && (!c.releaseName || c.releaseName === '') && self.data.releases.length > 0) {
-                    var r = self.data.releases.find(x => x.releaseId == c.releaseId);
-                    if (r) {
-                        c.releaseName = r.releaseName;
-                        // If releaseDate is not set but we found a release, use its date
-                        if (!c.releaseDate && r.releaseDate) {
-                            c.releaseDate = new Date(r.releaseDate);
-                            c.releaseDateInput = new Date(r.releaseDate);
-                            // Update formatted date
-                            var d = new Date(c.releaseDate);
-                            if (!isNaN(d.getTime())) {
-                                var year = d.getFullYear();
-                                var month = ('0' + (d.getMonth() + 1)).slice(-2);
-                                var day = ('0' + d.getDate()).slice(-2);
-                                c.releaseDateInputFormatted = year + '-' + month + '-' + day;
-                            }
-                        }
-                    }
-                }
+                self._formatControlSingle(c);
             });
             console.log('Controls loaded:', self.data.allControls.length);
             return self.data.allControls;
@@ -373,7 +379,24 @@ app.service('ApiService', function ($http, $q, $rootScope) {
         console.log('Updating control:', controlId, payload);
 
         return $http.put(apiBaseUrl + '/controls/' + controlId, payload).then(function (r) {
-            // Always reload with the same teamId that was used to load initially
+            var updatedControl = r.data;
+            if (updatedControl && updatedControl.controlId) {
+                var index = self.data.allControls.findIndex(c => c.controlId == controlId);
+                if (index > -1) {
+                    // Update in place to preserve UI state (e.g., editing, expanded flags)
+                    var oldControl = self.data.allControls[index];
+                    Object.assign(oldControl, updatedControl);
+                    self._formatControlSingle(oldControl);
+                    
+                    self.data.lastUpdated = Date.now();
+                    $rootScope.$broadcast('controlsUpdated');
+                    $rootScope.$broadcast('dashboardUpdated');
+                    
+                    return oldControl;
+                }
+            }
+            
+            // Fallback: Reload all controls for current team if in-place update fails
             var currentTeamId = null;
             try {
                 var stored = localStorage.getItem('user');
@@ -385,6 +408,8 @@ app.service('ApiService', function ($http, $q, $rootScope) {
 
             return self.loadAllControls(currentTeamId).then(function (allControls) {
                 var updatedItem = allControls.find(c => c.controlId == controlId);
+                $rootScope.$broadcast('controlsUpdated');
+                $rootScope.$broadcast('dashboardUpdated');
                 return updatedItem;
             });
         }).catch(function (error) {
@@ -416,36 +441,13 @@ app.service('ApiService', function ($http, $q, $rootScope) {
         return $http.delete(apiBaseUrl + '/controls/' + controlId);
     };
 
-    //  Helper, Release Processing Logic
-    self._processReleases = function () {
+    // Helper, Release Processing Logic
+    self._processReleases = function() {
         var today = new Date();
-        var currentYear = today.getFullYear();
-        //var defaultReleases = '';
+        today.setHours(0, 0, 0, 0);
 
-        var defaultReleases = [
-            { releaseId: 999991, releaseName: "Release 26.01", releaseDate: new Date(currentYear, 0, 26) },
-            { releaseId: 999992, releaseName: "Release 25.12", releaseDate: new Date(currentYear, 11, 25) },
-            { releaseId: 999993, releaseName: "Release 24.12", releaseDate: new Date(currentYear, 11, 24) }
-        ];
+        self.data.upcomingReleases = angular.copy(self.data.releases || []);
 
-        if (defaultReleases[0].releaseDate < today) defaultReleases[0].releaseDate = new Date(currentYear + 1, 0, 26);
-        if (defaultReleases[1].releaseDate < today) defaultReleases[1].releaseDate = new Date(currentYear + 1, 11, 25);
-        if (defaultReleases[2].releaseDate < today) defaultReleases[2].releaseDate = new Date(currentYear + 1, 11, 24);
-
-        self.data.upcomingReleases = angular.copy(self.data.releases);
-
-        defaultReleases.forEach(function (dr) {
-            var drDate = new Date(dr.releaseDate);
-            drDate.setHours(0, 0, 0, 0);
-            var exists = self.data.upcomingReleases.some(function (r) {
-                var rDate = new Date(r.releaseDate);
-                rDate.setHours(0, 0, 0, 0);
-                return rDate.getTime() === drDate.getTime();
-            });
-            if (!exists) {
-                self.data.upcomingReleases.push(dr);
-            }
-        });
 
         if (self.data.controlTypes && self.data.controlTypes.length > 0) {
             self.data.controlTypes.forEach(function (controlType) {
@@ -667,12 +669,33 @@ app.service('ApiService', function ($http, $q, $rootScope) {
         if (teamId !== null && teamId !== undefined) {
             url += '?teamId=' + teamId;
         }
+
+        // Support for multi-screenshot array mapping
+        if (defectData.attachmentUrls && Array.isArray(defectData.attachmentUrls)) {
+            if (defectData.attachmentUrls.length > 0) defectData.attachmentUrl = defectData.attachmentUrls[0];
+            if (defectData.attachmentUrls.length > 1) defectData.attachmentUrl2 = defectData.attachmentUrls[1];
+            if (defectData.attachmentUrls.length > 2) defectData.attachmentUrl3 = defectData.attachmentUrls[2];
+            if (defectData.attachmentUrls.length > 3) defectData.attachmentUrl4 = defectData.attachmentUrls[3];
+            if (defectData.attachmentUrls.length > 4) defectData.attachmentUrl5 = defectData.attachmentUrls[4];
+            delete defectData.attachmentUrls; // Don't send the array as the backend expects discrete fields
+        }
+
         return $http.post(url, defectData).then(function (r) {
             return r.data;
         });
     };
 
     self.updateDefect = function (id, defectData) {
+        // Support for multi-screenshot array mapping in updates
+        if (defectData.attachmentUrls && Array.isArray(defectData.attachmentUrls)) {
+            defectData.attachmentUrl = defectData.attachmentUrls.length > 0 ? defectData.attachmentUrls[0] : null;
+            defectData.attachmentUrl2 = defectData.attachmentUrls.length > 1 ? defectData.attachmentUrls[1] : null;
+            defectData.attachmentUrl3 = defectData.attachmentUrls.length > 2 ? defectData.attachmentUrls[2] : null;
+            defectData.attachmentUrl4 = defectData.attachmentUrls.length > 3 ? defectData.attachmentUrls[3] : null;
+            defectData.attachmentUrl5 = defectData.attachmentUrls.length > 4 ? defectData.attachmentUrls[4] : null;
+            delete defectData.attachmentUrls;
+        }
+
         return $http.put(apiBaseUrl + '/defects/' + id, defectData).then(function (r) {
             return r.data;
         });

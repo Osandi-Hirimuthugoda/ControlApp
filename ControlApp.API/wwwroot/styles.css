@@ -1785,4 +1785,94 @@ qa-progress-view .qa-main-description:hover {
     transform: translateY(-1px);
 }
 
+/* Dashboard Redesign - Status Indicators & Layout */
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+.status-dot.analyze { background: #3b82f6; }
+.status-dot.development { background: #6366f1; }
+.status-dot.qa { background: #8b5cf6; }
+.status-dot.ready-qa { background: #f59e0b; animation: pulse-warn 2s infinite; }
+.status-dot.completed { background: #10b981; }
+.status-dot.on-hold { background: #ef4444; }
+
+.objective-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 18px;
+    transition: all 0.3s ease;
+}
+.objective-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.role-badge {
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+}
+
+@keyframes pulse-warn {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
 /* ============================================================
+
+/* Control Focus Animation */
+.highlight-pulse {
+    animation: highlightPulse 5s ease-out;
+    position: relative;
+    z-index: 5;
+}
+
+@keyframes highlightPulse {
+    0% {
+        background-color: rgba(255, 242, 0, 0.4);
+        box-shadow: 0 0 0 2px #10b981, 0 0 20px rgba(16, 185, 129, 0.4);
+        transform: scale(1.01);
+    }
+    15% {
+        background-color: rgba(255, 242, 0, 0.2);
+        box-shadow: 0 0 0 2px #10b981, 0 0 15px rgba(16, 185, 129, 0.3);
+        transform: scale(1.005);
+    }
+    100% {
+        background-color: transparent;
+        box-shadow: none;
+        transform: scale(1);
+    }
+}
+
+/* QA Owner Requirement Pulse Animations */
+.pulse-red {
+    animation: pulse-red-animation 2s infinite;
+}
+
+@keyframes pulse-red-animation {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.pulse-red-soft {
+    animation: pulse-red-soft-animation 2s infinite;
+}
+
+@keyframes pulse-red-soft-animation {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; color: #ef4444; }
+    100% { transform: scale(1); opacity: 1; }
+}
+

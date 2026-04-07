@@ -137,9 +137,9 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location, $
             canAddControl:         isPrivileged || isDev || isQA || isInternDev || isInternQA,
             canEditControl:        isPrivileged,
             canDeleteControl:      isPrivileged,
-            canAddEmployee:        self.isAdmin() || self.isProjectManager(),
-            canEditEmployee:       isPrivileged,
-            canDeleteEmployee:     isPrivileged,
+            canAddEmployee:        self.isAdmin() || self.isSuperAdmin(),
+            canEditEmployee:       self.isAdmin() || self.isSuperAdmin(),
+            canDeleteEmployee:     self.isAdmin() || self.isSuperAdmin(),
             canMarkProgress:       isPrivileged || isDev || isInternDev,
             canAddComment:         isPrivileged,
             canEditSubDescription: isPrivileged || isDev || isQA || isInternDev || isInternQA

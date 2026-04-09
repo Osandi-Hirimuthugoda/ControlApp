@@ -15,7 +15,12 @@ app.component('testCasesGrid', {
                             <i class="fas fa-table text-white fs-5"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title text-white fw-bold mb-0">Test Cases - {{$ctrl.control.description}}</h5>
+                            <h5 class="modal-title text-white fw-bold mb-0">
+                                Test Cases - {{$ctrl.control.description}}
+                                <span ng-if="$ctrl.getSubDescriptionName()" class="ms-2 opacity-75 fs-6 fw-normal">
+                                    <i class="fas fa-chevron-right me-2 small"></i>{{$ctrl.getSubDescriptionName()}}
+                                </span>
+                            </h5>
                             <p class="text-white-50 mb-0 small">Excel-style editable test case management</p>
                         </div>
                     </div>
@@ -31,8 +36,10 @@ app.component('testCasesGrid', {
                 <div class="modal-body p-0" style="background: #f8fafc; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
                     <!-- Toolbar -->
                     <div class="bg-white border-bottom p-2 d-flex justify-content-between align-items-center" style="flex-shrink: 0;">
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-secondary btn-sm px-3" ng-click="$ctrl.close()"><i class="fas fa-arrow-left me-1"></i>Back</button>          <button class="btn btn-primary btn-sm" ng-click="$ctrl.addNewRow()" ng-if="$ctrl.isQA()">
+                        <div class="d-flex gap-2 align-items-center">
+                            <button class="btn btn-secondary btn-sm px-3" ng-click="$ctrl.close()"><i class="fas fa-arrow-left me-1"></i>Back</button>
+                            <div class="vr mx-1"></div>
+                            <button class="btn btn-primary btn-sm" ng-click="$ctrl.addNewRow()" ng-if="$ctrl.isQA()">
                                 <i class="fas fa-plus me-1"></i>Add Test Case
                             </button>
                             <button class="btn btn-danger btn-sm" ng-click="$ctrl.openStandaloneDefectModal()" ng-if="$ctrl.isQA()">
@@ -44,7 +51,12 @@ app.component('testCasesGrid', {
                             <button class="btn btn-outline-secondary btn-sm" ng-click="$ctrl.loadTestCases()">
                                 <i class="fas fa-sync me-1"></i>Refresh
                             </button>
-                            <span class="badge bg-info text-dark align-self-center px-3 py-2" ng-if="!$ctrl.isQA()">
+                            <div class="ms-2 d-flex align-items-center" ng-if="$ctrl.getSubDescriptionName()">
+                                <span class="badge border border-primary text-primary bg-primary-subtle px-3 py-2 rounded-3">
+                                    <i class="fas fa-bullseye me-2"></i>Target Sub-objective: <strong>{{$ctrl.getSubDescriptionName()}}</strong>
+                                </span>
+                            </div>
+                            <span class="badge bg-info text-dark align-self-center px-3 py-2 ms-2" ng-if="!$ctrl.isQA()">
                                 <i class="fas fa-eye me-1"></i>View Only
                             </span>
                         </div>
@@ -69,7 +81,7 @@ app.component('testCasesGrid', {
                                     <th style="width: 220px; color: #1f2937; font-weight: 600; border: 1px solid #dee2e6; background: #f8f9fa;">Actual Result</th>
                                     <th style="width: 120px; color: #1f2937; font-weight: 600; border: 1px solid #dee2e6; background: #f8f9fa;">Tested By</th>
                                     <th style="width: 110px; color: #1f2937; font-weight: 600; border: 1px solid #dee2e6; background: #f8f9fa;">Tested Date</th>
-                                    <th style="width: 100px; color: #1f2937; font-weight: 600; border: 1px solid #dee2e6; background: #f8f9fa; position: sticky; right: 0; z-index: 21; box-shadow: -2px 0 5px rgba(0,0,0,0.1);">Actions</th>
+                                    <th style="width: 80px; color: #1f2937; font-weight: 600; border: 1px solid #dee2e6; background: #f8f9fa; position: sticky; right: 0; z-index: 21; box-shadow: -2px 0 5px rgba(0,0,0,0.1);">Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,7 +89,7 @@ app.component('testCasesGrid', {
                                 <tr ng-if="$ctrl.testCases.length === 0">
                                     <td colspan="12" class="text-center py-5">
                                         <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">No test cases yet. Click "Add Test Case" to create one.</p>
+                                        <p class="text-muted">No test cases yet. Click \"Add Test Case\" to create one.</p>
                                     </td>
                                 </tr>
 
@@ -150,7 +162,7 @@ app.component('testCasesGrid', {
                                                 ng-change="$ctrl.autoSaveRow(tc)">
                                             <option value="Functional">Functional</option>
                                             <option value="Regression">Regression</option>
-                                            <option value="Bug Verification">Bug Verification</option>
+                                            <option value="Defect Verification">Defect Verification</option>
                                             <option value="Validation">Validation</option>
                                             <option value="Environment Issues">Environment Issues</option>
                                             <option value="Technical Issues / Coding">Technical Issues / Coding</option>
@@ -204,12 +216,11 @@ app.component('testCasesGrid', {
                                         <span class="small">{{tc.testedDate ? $ctrl.formatDate(tc.testedDate) : '-'}}</span>
                                     </td>
                                     <td class="text-center" style="border: 1px solid #dee2e6; position: sticky; right: 0; background: inherit; z-index: 5; box-shadow: -2px 0 5px rgba(0,0,0,0.1);">
-                                        <button ng-if="$ctrl.isQA()" class="btn btn-sm btn-outline-danger" 
-                                                ng-click="$ctrl.deleteRow(tc, $index)" 
-                                                title="Delete">
+                                        <button ng-if="$ctrl.isQA()" class="btn btn-sm btn-light text-danger border-0"
+                                                ng-click="$ctrl.deleteRow(tc, $index)"
+                                                title="Delete Test Case">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                        <span ng-if="!$ctrl.isQA()" class="text-muted small">—</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -272,41 +283,53 @@ app.component('testCasesGrid', {
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Severity</label>
                                     <select class="form-select" ng-model="$ctrl.defectData.severity">
-                                        <option value="Low">Low</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="High">High</option>
-                                        <option value="Critical">Critical</option>
+                                        <option value=\"Low\">Low</option>
+                                        <option value=\"Medium\">Medium</option>
+                                        <option value=\"High\">High</option>
+                                        <option value=\"Critical\">Critical</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Priority</label>
                                     <select class="form-select" ng-model="$ctrl.defectData.priority">
-                                        <option value="Low">Low</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="High">High</option>
-                                        <option value="Critical">Critical</option>
+                                        <option value=\"Low\">Low</option>
+                                        <option value=\"Medium\">Medium</option>
+                                        <option value=\"High\">High</option>
+                                        <option value=\"Critical\">Critical</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Assign To</label>
                                     <select class="form-select" ng-model="$ctrl.defectData.assignedToEmployeeId">
-                                        <option value="">Unassigned</option>
-                                        <option ng-repeat="emp in $ctrl.getDevelopers()" value="{{emp.id}}">{{emp.employeeName}}</option>
+                                        <option value=\"\">Unassigned</option>
+                                        <option ng-repeat=\"emp in $ctrl.getDevelopers()\" value=\"{{emp.id}}\">{{emp.employeeName}}</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label fw-bold">Attachment (Screenshot/Image)</label>
-                                    <input type="file" class="form-control" accept="image/*" onchange="angular.element(this).scope().$ctrl.onImageSelect(this.files[0])">
-                                    <small class="text-muted">Upload a screenshot to help explain the defect</small>
-                                </div>
-                                <div class="col-12" ng-if="$ctrl.defectData.imagePreview">
-                                    <div class="card">
-                                        <div class="card-body p-2">
-                                            <img ng-src="{{$ctrl.defectData.imagePreview}}" class="img-fluid" style="max-height: 200px;" alt="Preview">
-                                            <button type="button" class="btn btn-sm btn-danger mt-2" ng-click="$ctrl.removeImage()">
-                                                <i class="fas fa-times me-1"></i>Remove Image
+                                    <label class="form-label fw-bold">Attachments (Max 5 Screenshots)</label>
+                                    <div class="input-group">
+                                        <input type="file" id="defectImageInput" class="form-control" accept="image/*" 
+                                               onchange="angular.element(this).scope().$ctrl.onImageSelect(this.files[0])"
+                                               ng-disabled="$ctrl.defectData.attachmentUrls.length >= 5">
+                                        <label class="input-group-text bg-light text-primary" for="defectImageInput">
+                                            <i class="fas fa-image"></i>
+                                        </label>
+                                    </div>
+                                    <div class="mt-2 d-flex flex-wrap gap-2">
+                                        <div ng-repeat="img in $ctrl.defectData.attachmentUrls track by $index" class="position-relative" style="width: 100px; height: 100px;">
+                                            <img ng-src="{{img}}" class="img-thumbnail w-100 h-100 object-fit-cover shadow-sm" style="border-radius: 8px;">
+                                            <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 translate-middle-y translate-middle-x" 
+                                                    style="width: 20px; height: 20px; padding: 0; font-size: 10px;"
+                                                    ng-click="$ctrl.removeImage($index)">
+                                                <i class="fas fa-times"></i>
                                             </button>
                                         </div>
+                                        <div ng-if="$ctrl.defectData.attachmentUrls.length === 0" class="w-100 py-3 text-center border rounded dashed" style="border: 2px dashed #e2e8f0; background: #f8fafc;">
+                                            <p class="text-muted mb-0 small"><i class="fas fa-upload me-2"></i>Upload screenshots to explain the defect</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 small" ng-class="$ctrl.defectData.attachmentUrls.length >= 5 ? 'text-danger fw-bold' : 'text-muted'">
+                                        {{$ctrl.defectData.attachmentUrls.length}} / 5 images uploaded
                                     </div>
                                 </div>
                             </div>
@@ -396,11 +419,26 @@ app.component('testCasesGrid', {
                                 <p class="text-muted mb-0" style="white-space: pre-line;">{{$ctrl.viewingDefect.resolutionNotes}}</p>
                             </div>
                             
-                            <div class="col-12" ng-if="$ctrl.viewingDefect.attachmentUrl">
+                            <div class="col-12" ng-if="$ctrl.viewingDefect.attachmentUrls && $ctrl.viewingDefect.attachmentUrls.length > 0">
+                                <label class="small fw-bold text-secondary">Attachments ({{$ctrl.viewingDefect.attachmentUrls.length}}):</label>
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    <div ng-repeat="url in $ctrl.viewingDefect.attachmentUrls track by $index" class="position-relative">
+                                        <img ng-src="{{url}}" 
+                                             class="img-thumbnail border shadow-sm" 
+                                             style="width: 140px; height: 100px; object-fit: cover; cursor: pointer; transition: transform 0.2s;" 
+                                             alt="Defect Screenshot"
+                                             ng-click="$ctrl.viewImage(url)"
+                                             onmouseover="this.style.transform='scale(1.05)'"
+                                             onmouseout="this.style.transform='scale(1)'">
+                                    </div>
+                                </div>
+                                <div class="mt-2 small text-muted"><i class="fas fa-info-circle me-1"></i>Click on an image to open in full size</div>
+                            </div>
+                            <div class="col-12" ng-if="!$ctrl.viewingDefect.attachmentUrls && $ctrl.viewingDefect.attachmentUrl">
                                 <label class="small fw-bold text-secondary">Attachment:</label>
                                 <div class="mt-2">
                                     <img ng-src="{{$ctrl.viewingDefect.attachmentUrl}}" 
-                                         class="img-fluid rounded border" 
+                                         class="img-fluid rounded border shadow-sm" 
                                          style="max-height: 300px; cursor: pointer;" 
                                          alt="Defect Screenshot"
                                          ng-click="$ctrl.viewImage($ctrl.viewingDefect.attachmentUrl)">
@@ -416,7 +454,7 @@ app.component('testCasesGrid', {
         </div>
     </div>
     `,
-    controller: function (ApiService, NotificationService, AuthService, $scope, $timeout) {
+    controller: function (ApiService, NotificationService, AuthService, $scope, $timeout, $rootScope) {
         var ctrl = this;
 
         ctrl.testCases = [];
@@ -429,6 +467,21 @@ app.component('testCasesGrid', {
         ctrl.showViewDefectModal = false;
         ctrl.viewingDefect = null;
         ctrl.loadingDefect = false;
+        
+        ctrl.getSubDescriptionName = function () {
+            if (ctrl.subDescriptionIndex === null || ctrl.subDescriptionIndex === undefined) return null;
+            if (!ctrl.control || !ctrl.control.subDescriptions) return null;
+            try {
+                var subs = JSON.parse(ctrl.control.subDescriptions);
+                if (Array.isArray(subs) && subs[ctrl.subDescriptionIndex]) {
+                    return subs[ctrl.subDescriptionIndex].description;
+                }
+            } catch (e) {
+                console.warn('Error parsing subDescriptions in test-cases-grid:', e);
+                return null;
+            }
+            return null;
+        };
 
         ctrl.isQA = function () {
             return AuthService.isQAEngineer() || AuthService.isAdmin() || AuthService.isSoftwareArchitecture();
@@ -455,7 +508,7 @@ app.component('testCasesGrid', {
         };
 
         ctrl.getDevelopers = function () {
-            var devRoles = ['developer', 'intern developer', 'intern dev'];
+            var devRoles = ['developer', 'intern developer', 'intern dev', 'team lead', 'software architecture', 'software architect'];
             return (ctrl.employees || []).filter(function (emp) {
                 return emp.role && devRoles.indexOf(emp.role.toLowerCase().trim()) !== -1;
             });
@@ -474,7 +527,12 @@ app.component('testCasesGrid', {
                 var filtered = testCases;
                 if (ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined) {
                     filtered = testCases.filter(function (tc) {
-                        return tc.subDescriptionIndex === ctrl.subDescriptionIndex;
+                        return tc.subDescriptionIndex === ctrl.subDescriptionIndex || tc.subDescriptionIndex === String(ctrl.subDescriptionIndex);
+                    });
+                } else {
+                    // Show only general test cases
+                    filtered = testCases.filter(function (tc) {
+                        return tc.subDescriptionIndex === null || tc.subDescriptionIndex === undefined || tc.subDescriptionIndex === -1;
                     });
                 }
                 ctrl.testCases = filtered.map(function (tc) {
@@ -531,12 +589,12 @@ app.component('testCasesGrid', {
                 var textBefore = tc.testSteps ? tc.testSteps.substring(0, cursorPos) : '';
                 var textAfter = tc.testSteps ? tc.testSteps.substring(cursorPos) : '';
 
-                // If field is empty or only whitespace, start with "1. "
+                // If field is empty or only whitespace, start with \"1. \"
                 if (!tc.testSteps || tc.testSteps.trim() === '') {
                     tc.testSteps = '1. ';
                     $scope.$apply();
                     setTimeout(function () {
-                        textarea.setSelectionRange(3, 3); // Position after "1. "
+                        textarea.setSelectionRange(3, 3); // Position after \"1. \"
                     }, 0);
                     ctrl.markAsModified(tc);
                     return;
@@ -622,6 +680,7 @@ app.component('testCasesGrid', {
                     tc._isSaving = false;
                     tc._savedOk = true;
                     tc._original = angular.copy(saved);
+                    $rootScope.$broadcast('testCasesUpdated');
                     $timeout(function () { tc._savedOk = false; }, 2000);
                 }).catch(function (error) {
                     console.error('[AutoSave] CREATE error:', error.status, error.data);
@@ -650,6 +709,7 @@ app.component('testCasesGrid', {
                     tc._isSaving = false;
                     tc._savedOk = true;
                     tc._original = angular.copy(tc);
+                    $rootScope.$broadcast('testCasesUpdated');
                     $timeout(function () { tc._savedOk = false; }, 2000);
                 }).catch(function (error) {
                     console.error('[AutoSave] UPDATE error:', error.status, error.data);
@@ -674,6 +734,7 @@ app.component('testCasesGrid', {
             ApiService.deleteTestCase(tc.testCaseId).then(function () {
                 NotificationService.show('Test case deleted successfully', 'success');
                 ctrl.testCases.splice(index, 1);
+                $rootScope.$broadcast('testCasesUpdated');
             }).catch(function (error) {
                 console.error('Error deleting test case:', error);
                 NotificationService.show('Error deleting test case', 'error');
@@ -704,7 +765,7 @@ app.component('testCasesGrid', {
 
                     var createDto = {
                         controlId: ctrl.control.controlId,
-                    subDescriptionIndex: tc.subDescriptionIndex !== undefined ? tc.subDescriptionIndex : null,
+                        subDescriptionIndex: tc.subDescriptionIndex !== undefined ? tc.subDescriptionIndex : null,
                         testCaseTitle: tc.testCaseTitle,
                         testSteps: tc.testSteps,
                         expectedResult: tc.expectedResult,
@@ -731,6 +792,7 @@ app.component('testCasesGrid', {
 
             Promise.all(promises).then(function () {
                 NotificationService.show('All changes saved successfully', 'success');
+                $rootScope.$broadcast('testCasesUpdated');
                 ctrl.loadTestCases(); // Reload to get fresh data
             }).catch(function (error) {
                 console.error('Error saving test cases:', error);
@@ -755,6 +817,22 @@ app.component('testCasesGrid', {
 
         ctrl.hasPendingSaves = function () {
             return ctrl.testCases.some(function (tc) { return tc._isSaving || tc._savePending; });
+        };
+
+        // Open the qa-defects modal for this test case's sub-description objective
+        ctrl.openObjectiveDefects = function (tc) {
+            // Determine the sub-description index: from the test case itself, or from the component binding
+            var subIndex = (tc.subDescriptionIndex !== null && tc.subDescriptionIndex !== undefined)
+                ? parseInt(tc.subDescriptionIndex)
+                : (ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined
+                    ? ctrl.subDescriptionIndex
+                    : null);
+
+            // Broadcast to control-board to open the defects modal for this objective
+            $rootScope.$broadcast('openDefectsForObjective', {
+                control: ctrl.control,
+                subDescriptionIndex: subIndex
+            });
         };
 
         $scope.$on('$destroy', function () {
@@ -882,7 +960,7 @@ app.component('testCasesGrid', {
                 priority: testCase.priority || 'Medium',
                 assignedToEmployeeId: ctrl.control.employeeId ? ctrl.control.employeeId.toString() : '',
                 attachmentUrl: null,
-                imagePreview: null
+                attachmentUrls: []
             };
         };
 
@@ -899,7 +977,7 @@ app.component('testCasesGrid', {
                 priority: 'Medium',
                 assignedToEmployeeId: ctrl.control.employeeId ? ctrl.control.employeeId.toString() : '',
                 attachmentUrl: null,
-                imagePreview: null
+                attachmentUrls: []
             };
         };
 
@@ -954,16 +1032,27 @@ app.component('testCasesGrid', {
             var reader = new FileReader();
             reader.onload = function (e) {
                 $scope.$apply(function () {
-                    ctrl.defectData.attachmentUrl = e.target.result;
-                    ctrl.defectData.imagePreview = e.target.result;
+                    if (ctrl.defectData.attachmentUrls.length < 5) {
+                        ctrl.defectData.attachmentUrls.push(e.target.result);
+                        // Also set backward compatibility single URL for older components if needed
+                        ctrl.defectData.attachmentUrl = ctrl.defectData.attachmentUrls[0];
+                    }
+                    
+                    // Clear the file input so same file can be selected again if needed
+                    var input = document.getElementById('defectImageInput');
+                    if (input) input.value = '';
                 });
             };
             reader.readAsDataURL(file);
         };
 
-        ctrl.removeImage = function () {
-            ctrl.defectData.attachmentUrl = null;
-            ctrl.defectData.imagePreview = null;
+        ctrl.removeImage = function (index) {
+            if (index !== undefined) {
+                ctrl.defectData.attachmentUrls.splice(index, 1);
+            } else {
+                ctrl.defectData.attachmentUrls = [];
+            }
+            ctrl.defectData.attachmentUrl = ctrl.defectData.attachmentUrls.length > 0 ? ctrl.defectData.attachmentUrls[0] : null;
         };
 
         ctrl.submitDefect = function () {
@@ -983,7 +1072,7 @@ app.component('testCasesGrid', {
                 if (testCase._isNew) {
                     var createDto = {
                         controlId: ctrl.control.controlId,
-                    subDescriptionIndex: tc.subDescriptionIndex !== undefined ? tc.subDescriptionIndex : null,
+                        subDescriptionIndex: testCase.subDescriptionIndex !== undefined ? testCase.subDescriptionIndex : null,
                         testCaseTitle: testCase.testCaseTitle,
                         testSteps: testCase.testSteps,
                         expectedResult: testCase.expectedResult,
@@ -1011,17 +1100,20 @@ app.component('testCasesGrid', {
                 if (testCase && testCase._isNew && savedTestCase && savedTestCase.testCaseId) {
                     testCase.testCaseId = savedTestCase.testCaseId;
                     testCase._isNew = false;
+                    testCase._isModified = false;
                 }
 
                 // Create defect
                 var defectPayload = {
                     controlId: ctrl.control.controlId,
+                    subDescriptionIndex: (testCase && testCase.subDescriptionIndex !== undefined) ? testCase.subDescriptionIndex : ((ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined) ? ctrl.subDescriptionIndex : null),
                     title: ctrl.defectData.title,
                     description: ctrl.defectData.description,
                     severity: ctrl.defectData.severity,
                     priority: ctrl.defectData.priority,
                     assignedToEmployeeId: ctrl.defectData.assignedToEmployeeId ? parseInt(ctrl.defectData.assignedToEmployeeId) : null,
-                    attachmentUrl: ctrl.defectData.attachmentUrl || null
+                    attachmentUrls: ctrl.defectData.attachmentUrls || [],
+                    attachmentUrl: ctrl.defectData.attachmentUrls.length > 0 ? ctrl.defectData.attachmentUrls[0] : null
                 };
 
                 var teamId = AuthService.getTeamId();
@@ -1035,6 +1127,7 @@ app.component('testCasesGrid', {
                             testCase.defectId = defect.defectId;
                             var devName = defect.assignedToName || (ctrl.control.employeeName || 'assigned developer');
                             Swal.fire({ icon: 'success', title: 'Defect Added', text: 'Defect successfully added to ' + devName, timer: 2500, showConfirmButton: false });
+                            $rootScope.$broadcast('testCasesUpdated');
                             ctrl.closeDefectModal();
                         });
                     } else {
@@ -1052,84 +1145,5 @@ app.component('testCasesGrid', {
             });
         };
 
-        ctrl.createDefectFromTest = function (testCase) {
-            if (!testCase.actualResult || !testCase.actualResult.trim()) {
-                NotificationService.show('Please enter actual result before creating defect', 'error');
-                return;
-            }
-
-            // First save the test case if it's new or modified
-            var savePromise;
-            if (testCase._isNew || testCase._isModified) {
-                ctrl.isSaving = true;
-                var teamId = AuthService.getTeamId();
-
-                if (testCase._isNew) {
-                    var createDto = {
-                        controlId: ctrl.control.controlId,
-                    subDescriptionIndex: tc.subDescriptionIndex !== undefined ? tc.subDescriptionIndex : null,
-                        testCaseTitle: testCase.testCaseTitle,
-                        testSteps: testCase.testSteps,
-                        expectedResult: testCase.expectedResult,
-                        priority: testCase.priority,
-                        testType: testCase.testType
-                    };
-                    savePromise = ApiService.addTestCase(createDto, teamId);
-                } else {
-                    var updateDto = {
-                        testCaseTitle: testCase.testCaseTitle,
-                        testSteps: testCase.testSteps,
-                        expectedResult: testCase.expectedResult,
-                        priority: testCase.priority,
-                        testType: testCase.testType,
-                        status: testCase.status,
-                        actualResult: testCase.actualResult
-                    };
-                    savePromise = ApiService.updateTestCase(testCase.testCaseId, updateDto);
-                }
-            } else {
-                savePromise = Promise.resolve(testCase);
-            }
-
-            savePromise.then(function (savedTestCase) {
-                // Update test case ID if it was new
-                if (testCase._isNew && savedTestCase.testCaseId) {
-                    testCase.testCaseId = savedTestCase.testCaseId;
-                    testCase._isNew = false;
-                }
-
-                // Create defect
-                var defectData = {
-                    controlId: ctrl.control.controlId,
-                    title: 'Test Failed: ' + testCase.testCaseTitle,
-                    description: 'Test Case: ' + testCase.testCaseTitle + '\n\n' +
-                        'Expected Result:\n' + (testCase.expectedResult || 'N/A') + '\n\n' +
-                        'Actual Result:\n' + testCase.actualResult + '\n\n' +
-                        'Test Steps:\n' + (testCase.testSteps || 'N/A'),
-                    severity: testCase.priority === 'High' ? 'High' : testCase.priority === 'Low' ? 'Low' : 'Medium',
-                    priority: testCase.priority || 'Medium',
-                    assignedToEmployeeId: ctrl.control.employeeId ? parseInt(ctrl.control.employeeId) : null
-                };
-
-                var teamId = AuthService.getTeamId();
-                return ApiService.addDefect(defectData, teamId).then(function (defect) {
-                    // Link defect to test case
-                    var linkDto = {
-                        defectId: defect.defectId
-                    };
-                    return ApiService.updateTestCase(testCase.testCaseId, linkDto).then(function () {
-                        testCase.defectId = defect.defectId;
-                        NotificationService.show('Defect created and linked to test case', 'success');
-                    });
-                });
-            }).catch(function (error) {
-                console.error('Error creating defect:', error);
-                NotificationService.show('Error creating defect: ' + (error.data?.message || 'Unknown error'), 'error');
-            }).finally(function () {
-                ctrl.isSaving = false;
-                $scope.$apply();
-            });
-        };
     }
 });
-

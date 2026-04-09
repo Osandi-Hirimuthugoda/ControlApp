@@ -90,7 +90,7 @@ app.component('qaDefects', {
                                             <select class="form-select" ng-model="$ctrl.newTestCase.testType">
                                                 <option value="Functional" selected>Functional</option>
                                                 <option value="Regression">Regression</option>
-                                                <option value="Bug Verification">Bug Verification</option>
+                                                <option value="Defect Verification">Defect Verification</option>
                                                 <option value="Validation">Validation</option>
                                             </select>
                                         </div>
@@ -279,18 +279,30 @@ app.component('qaDefects', {
                                         </select>
                                     </div>
                                     <div class="col-md-12">
-                                        <label class="form-label small fw-bold text-secondary">Attachment (Screenshot/Image)</label>
-                                        <input type="file" class="form-control" accept="image/*" onchange="angular.element(this).scope().$ctrl.onImageSelect(this.files[0])">
-                                        <small class="text-muted">Upload a screenshot or image to help explain the defect</small>
-                                    </div>
-                                    <div class="col-md-12" ng-if="$ctrl.newDefect.imagePreview">
-                                        <div class="card">
-                                            <div class="card-body p-2">
-                                                <img ng-src="{{$ctrl.newDefect.imagePreview}}" class="img-fluid" style="max-height: 200px;" alt="Preview">
-                                                <button type="button" class="btn btn-sm btn-danger mt-2" ng-click="$ctrl.removeImage()">
-                                                    <i class="fas fa-times me-1"></i>Remove Image
+                                        <label class="form-label small fw-bold text-secondary">Attachments (Max 5 Screenshots)</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="file" id="qaDefectImageInput" class="form-control" accept="image/*" 
+                                                   onchange="angular.element(this).scope().$ctrl.onImageSelect(this.files[0])"
+                                                   ng-disabled="$ctrl.newDefect.attachments.length >= 5">
+                                            <label class="input-group-text bg-light text-primary" for="qaDefectImageInput">
+                                                <i class="fas fa-image"></i>
+                                            </label>
+                                        </div>
+                                        <div class="mt-2 d-flex flex-wrap gap-2">
+                                            <div ng-repeat="img in $ctrl.newDefect.attachments track by $index" class="position-relative" style="width: 100px; height: 100px;">
+                                                <img ng-src="{{img}}" class="img-thumbnail w-100 h-100 object-fit-cover shadow-sm" style="border-radius: 8px;">
+                                                <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 translate-middle-y translate-middle-x" 
+                                                        style="width: 20px; height: 20px; padding: 0; font-size: 10px;"
+                                                        ng-click="$ctrl.removeImage($index)">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
+                                            <div ng-if="$ctrl.newDefect.attachments.length === 0" class="w-100 py-3 text-center border rounded dashed" style="border: 2px dashed #e2e8f0; background: #f8fafc;">
+                                                <p class="text-muted mb-0 small"><i class="fas fa-upload me-2"></i>Upload screenshots to explain the defect</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 small" ng-class="$ctrl.newDefect.attachments.length >= 5 ? 'text-danger fw-bold' : 'text-muted'" style="font-size: 0.75rem;">
+                                            {{$ctrl.newDefect.attachments.length}} / 5 images uploaded
                                         </div>
                                     </div>
                                     <div class="col-12">
@@ -399,7 +411,7 @@ app.component('qaDefects', {
                                                             <option value="">None</option>
                                                             <option value="Functional">Functional</option>
                                                             <option value="Regression">Regression</option>
-                                                            <option value="Bug Verification">Bug Verification</option>
+                                                            <option value="Defect Verification">Defect Verification</option>
                                                             <option value="Validation">Validation</option>
                                                             <option value="Environment Issues">Environment Issues</option>
                                                             <option value="Technical Issues / Coding">Technical Issues / Coding</option>
@@ -423,6 +435,7 @@ app.component('qaDefects', {
                                                             <option value="Deferred">Deferred</option>
                                                             <option value="Duplicate">Duplicate</option>
                                                             <option value="Not a Defect">Not a Defect</option>
+                                                            <option value="Closed">Closed</option>
                                                         </select>
                                                         <small ng-if="$ctrl.isDeveloper()" class="text-muted" style="font-size:0.7rem;">
                                                             <i class="fas fa-bell me-1"></i>QA will be notified on change
@@ -441,10 +454,34 @@ app.component('qaDefects', {
                                                             <i class="fas fa-user me-1"></i>{{defect.reportedByName || 'QA Engineer'}}
                                                         </div>
                                                     </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label small mb-1">Comment / Resolution Notes <span class="text-muted">(optional)</span></label>
-                                                        <textarea class="form-control form-control-sm" ng-model="defect.resolutionNotes" rows="3" placeholder="Add your comments or resolution notes here..."></textarea>
-                                                    </div>
+                                                     <div class="col-12">
+                                                         <label class="form-label small mb-1">Comment / Resolution Notes <span class="text-muted">(optional)</span></label>
+                                                         <textarea class="form-control form-control-sm" ng-model="defect.resolutionNotes" rows="3" placeholder="Add your comments or resolution notes here..."></textarea>
+                                                     </div>
+                                                     <!-- Edit Attachments -->
+                                                     <div class="col-12 mt-2" ng-if="!$ctrl.isDeveloper()">
+                                                         <label class="form-label small mb-1 fw-bold">Attachments (Max 5)</label>
+                                                         <div class="d-flex flex-wrap gap-2">
+                                                             <div ng-repeat="slot in [1,2,3,4,5]" class="position-relative" style="width: 50px; height: 50px;">
+                                                                 <div ng-if="!$ctrl.getDefectImages(defect)[slot-1]" 
+                                                                      class="border rounded d-flex align-items-center justify-content-center bg-light cursor-pointer h-100 w-100"
+                                                                      onclick="this.nextElementSibling.click()"
+                                                                      title="Upload Screenshot {{slot}}">
+                                                                     <i class="fas fa-camera text-muted small"></i>
+                                                                 </div>
+                                                                 <input type="file" class="d-none" onchange="angular.element(this).scope().$ctrl.onEditImageSelect(this.files[0], angular.element(this).scope().defect, slot-1)" accept="image/*">
+                                                                 
+                                                                 <div ng-if="$ctrl.getDefectImages(defect)[slot-1]" class="position-relative h-100 w-100">
+                                                                     <img ng-src="{{$ctrl.getDefectImages(defect)[slot-1]}}" class="rounded w-100 h-100" style="object-fit: cover; border: 1px solid #dee2e6;">
+                                                                     <button type="button" class="btn btn-danger btn-xs rounded-circle position-absolute top-0 end-0 translate-middle p-0" 
+                                                                             style="width:14px; height:14px; font-size:8px; line-height:1;"
+                                                                             ng-click="$ctrl.removeEditImage(defect, slot-1)">
+                                                                         <i class="fas fa-times"></i>
+                                                                     </button>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     </div>
                                                     <div class="col-12">
                                                         <button type="submit" class="btn btn-sm btn-primary">
                                                             <i class="fas fa-save me-1"></i>Save Changes
@@ -467,6 +504,22 @@ app.component('qaDefects', {
                                             <div ng-if="defect.assignedToName">
                                                 <span class="text-secondary">Assigned:</span>
                                                 <span class="fw-bold ms-1">{{defect.assignedToName}}</span>
+                                            </div>
+                                            <!-- Developer current status & progress on the control -->
+                                            <div ng-if="defect.assignedToName && $ctrl.control" class="w-100 mt-1 p-2 rounded-3" style="background:#f0f9ff; border:1px solid #bae6fd;">
+                                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                                    <span class="text-secondary small"><i class="fas fa-code me-1 text-blue"></i>Developer on Control:</span>
+                                                    <span class="badge rounded-pill fw-bold" style="background:#dbeafe; color:#1d4ed8; font-size:0.72rem;">
+                                                        <i class="fas fa-signal me-1"></i>{{$ctrl.control.statusName || 'No Status'}}
+                                                    </span>
+                                                    <div class="d-flex align-items-center gap-2 flex-grow-1" style="min-width:140px;">
+                                                        <div class="progress flex-grow-1 rounded-pill" style="height:6px; background:#e0f2fe;">
+                                                            <div class="progress-bar rounded-pill" style="background:linear-gradient(90deg,#3b82f6,#6366f1);"
+                                                                 ng-style="{'width': ($ctrl.control.progress || 0) + '%'}"></div>
+                                                        </div>
+                                                        <span class="fw-bold text-primary" style="font-size:0.75rem; white-space:nowrap;">{{$ctrl.control.progress || 0}}%</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div ng-if="defect.reportedByName">
                                                 <span class="text-secondary">Reported by:</span>
@@ -536,9 +589,18 @@ app.component('qaDefects', {
                                             <small class="text-secondary fw-bold">Resolution:</small>
                                             <p class="small mb-0 mt-1">{{defect.resolutionNotes}}</p>
                                         </div>
-                                        <div ng-if="!defect._editing && defect.attachmentUrl" class="mt-2">
-                                            <small class="text-secondary fw-bold d-block mb-1">Attachment:</small>
-                                            <img ng-src="{{defect.attachmentUrl}}" class="img-fluid rounded" style="max-height: 300px; cursor: pointer;" alt="Defect Screenshot" ng-click="$ctrl.viewImage(defect.attachmentUrl)">
+                                        <div ng-if="!defect._editing && $ctrl.getDefectImages(defect).length > 0" class="mt-3 p-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                            <small class="text-secondary fw-bold d-block mb-2">
+                                                <i class="fas fa-paperclip me-1"></i>Attachments ({{$ctrl.getDefectImages(defect).length}}):
+                                            </small>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <div ng-repeat="img in $ctrl.getDefectImages(defect) track by $index" 
+                                                     class="rounded shadow-sm overflow-hidden" 
+                                                     style="height:80px; width:120px; cursor:zoom-in; border:1px solid #cbd5e1; background:#fff;"
+                                                     ng-click="$ctrl.viewImage(img)">
+                                                    <img ng-src="{{img}}" class="w-100 h-100 object-fit-cover" alt="Defect Screenshot {{$index+1}}">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -625,8 +687,7 @@ app.component('qaDefects', {
             priority: 'Medium',
             category: '',
             assignedToEmployeeId: null,
-            attachmentUrl: null,
-            imagePreview: null
+            attachments: []
         };
 
         ctrl.newTestCase = {
@@ -641,9 +702,24 @@ app.component('qaDefects', {
         ctrl.loadingLogs = false;
 
         ctrl.$onInit = function () {
+            if (!ctrl.activeTab) ctrl.activeTab = 'defects';
             ctrl.loadDefects();
             ctrl.loadTestCases();
             ctrl.loadEmployees();
+            if (ctrl.activeTab === 'activity') {
+                ctrl.loadActivityLogs();
+            }
+        };
+
+        ctrl.$onChanges = function (changes) {
+            if ((changes.control && !changes.control.isFirstChange()) || 
+                (changes.subDescriptionIndex && !changes.subDescriptionIndex.isFirstChange())) {
+                ctrl.loadDefects();
+                ctrl.loadTestCases();
+                if (ctrl.activeTab === 'activity') {
+                    ctrl.loadActivityLogs();
+                }
+            }
         };
 
         ctrl.isDeveloper = function () {
@@ -689,10 +765,19 @@ app.component('qaDefects', {
 
         ctrl.loadTestCases = function () {
             if (!ctrl.control || !ctrl.control.controlId) return;
-
             ApiService.getTestCasesByControl(ctrl.control.controlId).then(function (testCases) {
-                ctrl.testCases = testCases;
-                console.log('Loaded test cases for control:', ctrl.control.controlId, testCases.length);
+                // Filter by sub-description index if specified
+                if (ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined) {
+                    ctrl.testCases = testCases.filter(function (tc) {
+                        return tc.subDescriptionIndex === ctrl.subDescriptionIndex || tc.subDescriptionIndex === String(ctrl.subDescriptionIndex);
+                    });
+                } else {
+                    // Show only general test cases (those without a sub-description index)
+                    ctrl.testCases = testCases.filter(function (tc) {
+                        return tc.subDescriptionIndex === null || tc.subDescriptionIndex === undefined || tc.subDescriptionIndex === -1;
+                    });
+                }
+                console.log('Loaded test cases for control:', ctrl.control.controlId, ctrl.testCases.length);
             }).catch(function (error) {
                 console.error('Error loading test cases:', error);
                 NotificationService.show('Error loading test cases', 'error');
@@ -706,10 +791,13 @@ app.component('qaDefects', {
                 // Filter by sub-description if opened from sub-description button
                 if (ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined) {
                     ctrl.defects = defects.filter(function (d) {
-                        return d.subDescriptionIndex === ctrl.subDescriptionIndex;
+                        return d.subDescriptionIndex === ctrl.subDescriptionIndex || d.subDescriptionIndex === String(ctrl.subDescriptionIndex);
                     });
                 } else {
-                    ctrl.defects = defects;
+                    // Show only general defects
+                    ctrl.defects = defects.filter(function (d) {
+                        return d.subDescriptionIndex === null || d.subDescriptionIndex === undefined || d.subDescriptionIndex === -1;
+                    });
                 }
                 ctrl.loadActivityLogs();
             }).catch(function (error) {
@@ -726,7 +814,7 @@ app.component('qaDefects', {
         };
 
         ctrl.getDevelopers = function () {
-            var devRoles = ['developer', 'intern developer', 'intern dev'];
+            var devRoles = ['developer', 'intern developer', 'intern dev', 'team lead', 'software architecture', 'software architect'];
             return (ctrl.employees || []).filter(function (emp) {
                 return emp.role && devRoles.indexOf(emp.role.toLowerCase().trim()) !== -1;
             });
@@ -740,6 +828,11 @@ app.component('qaDefects', {
 
             ctrl.isSubmitting = true;
 
+            var finalAttachmentUrl = null;
+            if (ctrl.newDefect.attachments && ctrl.newDefect.attachments.length > 0) {
+                finalAttachmentUrl = JSON.stringify(ctrl.newDefect.attachments);
+            }
+
             var defectData = {
                 controlId: ctrl.control.controlId,
                 subDescriptionIndex: ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined ? ctrl.subDescriptionIndex : null,
@@ -749,7 +842,8 @@ app.component('qaDefects', {
                 priority: ctrl.newDefect.priority,
                 category: ctrl.newDefect.category,
                 assignedToEmployeeId: ctrl.newDefect.assignedToEmployeeId ? parseInt(ctrl.newDefect.assignedToEmployeeId) : null,
-                attachmentUrl: ctrl.newDefect.attachmentUrl || null
+                attachmentUrls: ctrl.newDefect.attachments || [],
+                attachmentUrl: ctrl.newDefect.attachments.length > 0 ? ctrl.newDefect.attachments[0] : null
             };
 
             var teamId = AuthService.getTeamId();
@@ -766,10 +860,11 @@ app.component('qaDefects', {
                     priority: 'Medium',
                     category: '',
                     assignedToEmployeeId: null,
-                    attachmentUrl: null,
-                    imagePreview: null
+                    attachments: []
                 };
                 ctrl.loadDefects(); // Reload to get updated data
+                // Broadcast event to notify other components (e.g. Developer Progress, Control Board)
+                $rootScope.$broadcast('defectsUpdated');
             }).catch(function (error) {
                 console.error('Error adding defect:', error);
                 NotificationService.show('Error reporting defect: ' + (error.data?.message || 'Unknown error'), 'error');
@@ -787,13 +882,17 @@ app.component('qaDefects', {
                 priority: defect.priority,
                 category: defect.category,
                 assignedToEmployeeId: defect.assignedToEmployeeId ? parseInt(defect.assignedToEmployeeId) : null,
-                resolutionNotes: defect.resolutionNotes
+                resolutionNotes: defect.resolutionNotes,
+                subDescriptionIndex: defect.subDescriptionIndex,
+                attachmentUrls: $ctrl.getDefectImages(defect)
             };
 
             ApiService.updateDefect(defect.defectId, updateData).then(function (updated) {
                 NotificationService.show('Defect updated successfully', 'success');
                 defect._editing = false;
                 ctrl.loadDefects(); // Reload to get updated data
+                // Broadcast event to notify other components
+                $rootScope.$broadcast('defectsUpdated');
             }).catch(function (error) {
                 console.error('Error updating defect:', error);
                 NotificationService.show('Error updating defect: ' + (error.data?.message || 'Unknown error'), 'error');
@@ -806,6 +905,8 @@ app.component('qaDefects', {
             ApiService.deleteDefect(defectId).then(function () {
                 NotificationService.show('Defect deleted successfully', 'success');
                 ctrl.defects = ctrl.defects.filter(function (d) { return d.defectId !== defectId; });
+                // Broadcast event to notify other components
+                $rootScope.$broadcast('defectsUpdated');
             }).catch(function (error) {
                 console.error('Error deleting defect:', error);
                 NotificationService.show('Error deleting defect: ' + (error.data?.message || 'Unknown error'), 'error');
@@ -918,7 +1019,42 @@ app.component('qaDefects', {
             } else {
                 defect._originalStatus = defect.status;
                 defect._editing = true;
+                // Initialize attachmentUrls if not already an array for easier editing
+                if (!defect.attachmentUrls) {
+                    defect.attachmentUrls = ctrl.getDefectImages(defect);
+                }
             }
+        };
+
+        ctrl.onEditImageSelect = function (file, defect, slotIndex) {
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                NotificationService.show('Image size should be less than 5MB', 'warning');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $scope.$apply(function () {
+                    if (!defect.attachmentUrls) defect.attachmentUrls = ctrl.getDefectImages(defect);
+                    // Ensure the list is long enough
+                    while (defect.attachmentUrls.length <= slotIndex) {
+                        defect.attachmentUrls.push(null);
+                    }
+                    defect.attachmentUrls[slotIndex] = e.target.result;
+                    // Map back to properties for getDefectImages to reflect change immediately if needed, 
+                    // though getDefectImages checks attachmentUrls first now.
+                    var propSuffix = slotIndex === 0 ? '' : (slotIndex + 1);
+                    defect['attachmentUrl' + propSuffix] = e.target.result;
+                });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        ctrl.removeEditImage = function (defect, slotIndex) {
+            if (!defect.attachmentUrls) defect.attachmentUrls = ctrl.getDefectImages(defect);
+            defect.attachmentUrls[slotIndex] = null;
+            var propSuffix = slotIndex === 0 ? '' : (slotIndex + 1);
+            defect['attachmentUrl' + propSuffix] = null;
         };
 
         ctrl.canAddDefect = function () {
@@ -1042,6 +1178,7 @@ app.component('qaDefects', {
 
             var testCaseData = {
                 controlId: ctrl.control.controlId,
+                subDescriptionIndex: ctrl.subDescriptionIndex !== null && ctrl.subDescriptionIndex !== undefined ? ctrl.subDescriptionIndex : null,
                 testCaseTitle: ctrl.newTestCase.testCaseTitle,
                 testSteps: ctrl.newTestCase.testSteps,
                 expectedResult: ctrl.newTestCase.expectedResult,
@@ -1121,6 +1258,7 @@ app.component('qaDefects', {
                 // Then create a defect
                 var defectData = {
                     controlId: ctrl.control.controlId,
+                    subDescriptionIndex: testCase.subDescriptionIndex !== undefined ? testCase.subDescriptionIndex : null,
                     title: 'Test Failed: ' + testCase.testCaseTitle,
                     description: 'Expected: ' + (testCase.expectedResult || 'N/A') + '\n\nActual: ' + testCase._actualResultInput,
                     severity: 'High',
@@ -1177,6 +1315,15 @@ app.component('qaDefects', {
         ctrl.onImageSelect = function (file) {
             if (!file) return;
 
+            if (!ctrl.newDefect.attachments) {
+                ctrl.newDefect.attachments = [];
+            }
+
+            if (ctrl.newDefect.attachments.length >= 5) {
+                NotificationService.show('You can only upload up to 5 images per defect.', 'error');
+                return;
+            }
+
             // Check file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 NotificationService.show('Image size should be less than 5MB', 'error');
@@ -1192,22 +1339,42 @@ app.component('qaDefects', {
             var reader = new FileReader();
             reader.onload = function (e) {
                 $scope.$apply(function () {
-                    ctrl.newDefect.attachmentUrl = e.target.result;
-                    ctrl.newDefect.imagePreview = e.target.result;
+                    ctrl.newDefect.attachments.push(e.target.result);
                 });
             };
             reader.readAsDataURL(file);
         };
 
-        ctrl.removeImage = function () {
-            ctrl.newDefect.attachmentUrl = null;
-            ctrl.newDefect.imagePreview = null;
+        ctrl.removeImage = function (index) {
+            if (ctrl.newDefect.attachments) {
+                ctrl.newDefect.attachments.splice(index, 1);
+            }
         };
 
         ctrl.viewImage = function (imageUrl) {
             // Open image in new window/tab
             var win = window.open();
             win.document.write('<img src="' + imageUrl + '" style="max-width:100%; height:auto;">');
+        };
+
+        ctrl.getDefectImages = function (defect) {
+            if (!defect) return [];
+            
+            var images = [];
+            if (defect.attachmentUrl) images.push(defect.attachmentUrl);
+            if (defect.attachmentUrl2) images.push(defect.attachmentUrl2);
+            if (defect.attachmentUrl3) images.push(defect.attachmentUrl3);
+            if (defect.attachmentUrl4) images.push(defect.attachmentUrl4);
+            if (defect.attachmentUrl5) images.push(defect.attachmentUrl5);
+            
+            if (images.length > 0) return images;
+
+            // Fallback for array-based attachmentUrls if it exists
+            if (defect.attachmentUrls && Array.isArray(defect.attachmentUrls) && defect.attachmentUrls.length > 0) {
+                return defect.attachmentUrls;
+            }
+
+            return [];
         };
 
         ctrl.loadActivityLogs = function () {
@@ -1396,28 +1563,38 @@ app.component('qaDefects', {
             // Switch to defects tab
             ctrl.activeTab = 'defects';
 
-            // Clear previous highlights
-            ctrl.defects.forEach(function (d) {
-                d._highlighted = false;
-            });
+            var attempts = 0;
+            var maxAttempts = 10; // Try for up to 5 seconds (10 * 500ms)
 
-            // Find and highlight the defect
-            var defect = ctrl.defects.find(function (d) {
-                return d.defectId === defectId;
-            });
+            function tryHighlight() {
+                // Clear previous highlights
+                ctrl.defects.forEach(function (d) {
+                    d._highlighted = false;
+                });
 
-            if (defect) {
-                // Add highlight class
-                defect._highlighted = true;
+                // Find and highlight the defect
+                var defect = ctrl.defects.find(function (d) {
+                    return d.defectId === defectId;
+                });
 
-                // Scroll to defect (if needed)
-                setTimeout(function () {
-                    var element = document.getElementById('defect-' + defectId);
-                    if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 300);
+                if (defect) {
+                    // Add highlight class
+                    defect._highlighted = true;
+
+                    // Scroll to defect (if needed)
+                    setTimeout(function () {
+                        var element = document.getElementById('defect-' + defectId);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 300);
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(tryHighlight, 500);
+                }
             }
+
+            tryHighlight();
         });
 
         // Cleanup

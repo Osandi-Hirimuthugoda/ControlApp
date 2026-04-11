@@ -86,40 +86,40 @@ app.component('dashboard', {
 
         <!-- Quick Insights Row -->
         <div class="row g-3 mb-5">
-            <!-- Total Controls -->
+            <!-- Total Sub-Objectives -->
             <div class="col-xl col-md-4 col-sm-6">
                 <div class="metric-card rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg,#6366f1 0%,#4f46e5 100%); color:white; position:relative; overflow:hidden;">
                     <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.2);">
-                            <i class="fas fa-list-check fs-5"></i>
+                            <i class="fas fa-layer-group fs-5"></i>
                         </div>
-                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Controls</span>
+                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Objectives</span>
                     </div>
-                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.store.allControls.length || 0}}</h2>
-                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Total Initiatives</p>
+                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.subObjectiveStats.total}}</h2>
+                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Total Sub-Objectives</p>
                     <div class="progress rounded-pill" style="height:4px;background:rgba(255,255,255,0.2);">
                         <div class="progress-bar rounded-pill" style="width:100%;background:rgba(255,255,255,0.7);"></div>
                     </div>
-                    <small class="opacity-60 mt-1 d-block">{{$ctrl.getCompletedCount()}} completed</small>
+                    <small class="opacity-60 mt-1 d-block">{{$ctrl.subObjectiveStats.completed}} verified ready</small>
                 </div>
             </div>
-            <!-- Avg Progress -->
+            <!-- Project Readiness -->
             <div class="col-xl col-md-4 col-sm-6">
                 <div class="metric-card rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg,#10b981 0%,#059669 100%); color:white; position:relative; overflow:hidden;">
                     <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.2);">
-                            <i class="fas fa-gauge-high fs-5"></i>
+                            <i class="fas fa-flag-checkered fs-5"></i>
                         </div>
-                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Velocity</span>
+                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Readiness</span>
                     </div>
-                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.averageProgress}}<span style="font-size:1rem;">%</span></h2>
-                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Avg Progress</p>
+                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.projectReadiness}}<span style="font-size:1rem;">%</span></h2>
+                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Project Readiness</p>
                     <div class="progress rounded-pill" style="height:4px;background:rgba(255,255,255,0.2);">
-                        <div class="progress-bar rounded-pill" ng-style="{'width': $ctrl.averageProgress + '%'}" style="background:rgba(255,255,255,0.7);"></div>
+                        <div class="progress-bar rounded-pill" ng-style="{'width': $ctrl.projectReadiness + '%'}" style="background:rgba(255,255,255,0.7);"></div>
                     </div>
-                    <small class="opacity-60 mt-1 d-block">across all controls</small>
+                    <small class="opacity-60 mt-1 d-block">Overall objective completion</small>
                 </div>
             </div>
             <!-- Active Defects -->
@@ -133,99 +133,189 @@ app.component('dashboard', {
                         <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Defects</span>
                     </div>
                     <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.activeDefectsCount}}</h2>
-                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Active Defects</p>
+                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Blockers & Issues</p>
                     <div class="progress rounded-pill" style="height:4px;background:rgba(255,255,255,0.2);">
                         <div class="progress-bar rounded-pill" ng-style="{'width': ($ctrl.allDefects.length > 0 ? ($ctrl.activeDefectsCount/$ctrl.allDefects.length*100) : 0) + '%'}" style="background:rgba(255,255,255,0.7);"></div>
                     </div>
-                    <small class="opacity-60 mt-1 d-block">{{$ctrl.getReOpenCount()}} re-opened</small>
+                    <small class="opacity-60 mt-1 d-block">Fixing in progress</small>
                 </div>
             </div>
-            <!-- Test Pass Rate -->
+            <!-- Verification Pipeline (NEW for QA focus) -->
             <div class="col-xl col-md-4 col-sm-6">
-                <div class="metric-card rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); color:white; position:relative; overflow:hidden;">
+                <div class="metric-card rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%); color:white; position:relative; overflow:hidden;">
                     <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.2);">
-                            <i class="fas fa-check-circle fs-5"></i>
+                            <i class="fas fa-flask fs-5"></i>
                         </div>
-                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">QA</span>
+                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Verification</span>
                     </div>
-                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.getPassRate()}}<span style="font-size:1rem;">%</span></h2>
-                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Test Pass Rate</p>
+                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.subObjectiveStats.readyQA}}</h2>
+                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Ready for QA</p>
                     <div class="progress rounded-pill" style="height:4px;background:rgba(255,255,255,0.2);">
-                        <div class="progress-bar rounded-pill" ng-style="{'width': $ctrl.getPassRate() + '%'}" style="background:rgba(255,255,255,0.7);"></div>
+                        <div class="progress-bar rounded-pill" ng-style="{'width': ($ctrl.subObjectiveStats.total > 0 ? ($ctrl.subObjectiveStats.readyQA/$ctrl.subObjectiveStats.total*100) : 0) + '%'}" style="background:rgba(255,255,255,0.7);"></div>
                     </div>
-                    <small class="opacity-60 mt-1 d-block">{{$ctrl.allTestCases.length || 0}} total test cases</small>
+                    <small class="opacity-60 mt-1 d-block">Pending verification</small>
                 </div>
             </div>
-            <!-- Team Size -->
+            <!-- Workload Insight -->
             <div class="col-xl col-md-4 col-sm-6">
                 <div class="metric-card rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg,#f59e0b 0%,#d97706 100%); color:white; position:relative; overflow:hidden;">
                     <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:rgba(255,255,255,0.2);">
-                            <i class="fas fa-users fs-5"></i>
+                            <i class="fas fa-bolt fs-5"></i>
                         </div>
-                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Team</span>
+                        <span class="badge rounded-pill px-2 py-1" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">Team Heat</span>
                     </div>
-                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.store.employees.length || 0}}</h2>
-                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Team Members</p>
+                    <h2 class="fw-bold mb-0" style="font-size:2rem;">{{$ctrl.store.allControls.length}}</h2>
+                    <p class="mb-2 small fw-bold text-uppercase text-white" style="letter-spacing:0.05em;">Active Initiatives</p>
                     <div class="progress rounded-pill" style="height:4px;background:rgba(255,255,255,0.2);">
                         <div class="progress-bar rounded-pill" style="width:100%;background:rgba(255,255,255,0.7);"></div>
                     </div>
-                    <small class="opacity-60 mt-1 d-block">{{$ctrl.currentTeamName || 'All Teams'}}</small>
+                    <small class="opacity-60 mt-1 d-block">{{$ctrl.currentTeamName || 'All Ops'}}</small>
                 </div>
             </div>
         </div>
 
-        <!-- Main Analytics & Defects List -->
+        <!-- Main Dashboard Content -->
         <div class="row g-4 mb-5">
-            <!-- Left Column: Primary Charts -->
+            <!-- Left Column: Role-Adaptive Hero Card -->
             <div class="col-lg-8">
-                <div class="row g-4">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-signal me-2 text-indigo"></i>Status Landscape</h5>
+                <div class="card border-0 shadow-sm objective-card h-100 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;background:#eef2ff;color:#6366f1;">
+                                <i class="fas fa-id-card-clip fs-5"></i>
                             </div>
-                            <div class="card-body p-4">
-                                <div style="height: 300px;">
-                                    <canvas id="statusDistributionChart"></canvas>
-                                </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">Personalized Command View</h5>
+                                <span class="role-badge" ng-class="{'bg-indigo text-white': $ctrl.isPM(), 'bg-purple text-white': $ctrl.isQA(), 'bg-success text-white': $ctrl.isDev()}">
+                                    {{$ctrl.currentUser.role || 'Contributor'}}
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                            <div class="card-header bg-gradient-indigo-soft border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                                <h6 class="fw-bold text-dark mb-0">
-                                    <i class="fas fa-bug me-2 text-danger"></i>Active Defects Pool
-                                    <span class="badge bg-danger text-white ms-2">{{$ctrl.getFilteredDefects().length}}</span>
-                                </h6>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-sm" ng-class="$ctrl.defectFilter === 'All' ? 'btn-danger' : 'btn-outline-danger'" ng-click="$ctrl.defectFilter = 'All'">All</button>
-                                    <button class="btn btn-sm" ng-class="$ctrl.defectFilter === 'Open' ? 'btn-danger' : 'btn-outline-danger'" ng-click="$ctrl.defectFilter = 'Open'">Open</button>
-                                    <button class="btn btn-sm" ng-class="$ctrl.defectFilter === 'Assigned' ? 'btn-danger' : 'btn-outline-danger'" ng-click="$ctrl.defectFilter = 'Assigned'">My Defects</button>
+                    <div class="card-body p-4 pt-0">
+                        <!-- PROJECT MANAGER VIEW: Executive Overview -->
+                        <div ng-if="$ctrl.isPM()">
+                            <p class="text-secondary small mb-3">Enterprise-grade project overview and team velocity insights.</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-4 border bg-indigo-soft d-flex align-items-center justify-content-between h-100 shadow-sm border-indigo-subtle">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-indigo text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 42px; height: 42px;">
+                                                <i class="fas fa-bullseye fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="small fw-bold text-dark">Overall Progress</div>
+                                                <div class="x-small text-muted">Across {{$ctrl.store.allControls.length}} Initiatives</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <h3 class="fw-bold mb-0 text-indigo">{{$ctrl.averageProgress}}%</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-4 border bg-success-subtle d-flex align-items-center justify-content-between h-100 shadow-sm">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 42px; height: 42px;">
+                                                <i class="fas fa-users-gear fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="small fw-bold text-dark">Active Resources</div>
+                                                <div class="x-small text-muted">Allocated to Controls</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <h3 class="fw-bold mb-0 text-success">{{$ctrl.employeesWorkload.length}}</h3>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body p-4">
-                                <div class="row g-3">
-                                    <div ng-repeat="defect in $ctrl.getFilteredDefects() | orderBy:'-reportedDate' | limitTo:6 track by defect.defectId" class="col-md-6">
-                                        <div class="card border-0 bg-light shadow-none border-start border-4 h-100" 
-                                             style="border-radius: 12px; border-color: {{$ctrl.getDefectSeverityColor(defect.severity)}} !important;">
-                                            <div class="card-body p-3">
-                                                <div class="d-flex justify-content-between mb-2">
-                                                    <span class="x-small fw-bold px-2 py-1 rounded" style="background: white; color: {{$ctrl.getDefectSeverityColor(defect.severity)}}">{{defect.severity}}</span>
-                                                    <span class="x-small text-muted">{{$ctrl.formatDefectDate(defect.reportedDate)}}</span>
+
+                            <div class="row g-4">
+                                <!-- Global Status Compact -->
+                                <div class="col-md-7">
+                                    <h6 class="fw-bold text-muted extra-small text-uppercase mb-2"><i class="fas fa-chart-pie me-1"></i>Distribution Flow</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="flex-grow-1 p-2 rounded-3 border bg-light text-center shadow-sm" ng-repeat="(status, count) in {Analyze: $ctrl.subObjectiveStats.analyze, Development: $ctrl.subObjectiveStats.dev, QA: $ctrl.subObjectiveStats.qa, 'Ready for QA': $ctrl.subObjectiveStats.readyQA, Completed: $ctrl.subObjectiveStats.completed}">
+                                            <div class="h5 fw-bold text-dark mb-0">{{count}}</div>
+                                            <div class="extra-small text-muted flex-nowrap"><span class="status-dot" style="width:6px;height:6px;" ng-class="status.toLowerCase().replace(' ', '-')"></span>{{status}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Top Resources -->
+                                <div class="col-md-5">
+                                    <div ng-if="$ctrl.employeesWorkload.length > 0">
+                                        <h6 class="fw-bold text-muted extra-small text-uppercase mb-2"><i class="fas fa-fire me-1 text-warning"></i>Top Workloads</h6>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div ng-repeat="emp in $ctrl.employeesWorkload | limitTo:3" class="d-flex align-items-center bg-light p-2 rounded-3 border shadow-sm">
+                                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-2 x-small fw-bold shadow-sm"
+                                                    style="width:28px; height:28px; background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                                                    {{emp.employeeName.substring(0,2).toUpperCase()}}
                                                 </div>
-                                                <h6 class="fw-bold mb-1 text-truncate">{{defect.title}}</h6>
-                                                <p class="x-small text-muted mb-0">{{defect.description | limitTo:50}}...</p>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="x-small fw-bold text-dark text-truncate" style="max-width: 120px;">{{emp.employeeName}}</span>
+                                                        <span class="badge" ng-class="emp.avgProgress > 80 ? 'bg-success' : 'bg-secondary'" style="font-size:0.55rem;">{{emp.avgProgress}}%</span>
+                                                    </div>
+                                                    <div class="progress rounded-pill bg-white" style="height:4px;">
+                                                        <div class="progress-bar" style="background: linear-gradient(90deg, #6366f1, #10b981);" ng-style="{'width': emp.avgProgress + '%'}"></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div ng-if="$ctrl.getFilteredDefects().length === 0" class="col-12 text-center py-4">
-                                        <i class="fas fa-check-circle fa-3x text-success opacity-20 mb-2"></i>
-                                        <p class="text-muted">No defects found in this category</p>
+                                    <div ng-if="$ctrl.employeesWorkload.length === 0" class="text-center p-3">
+                                        <span class="text-muted x-small">No active resources</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LEAD VIEW: Global Status -->
+                        <div ng-if="$ctrl.isLead() && !$ctrl.isPM()">
+                            <p class="text-secondary small mb-4">Overall distribution of sub-objectives across the current team scope.</p>
+                            <div class="row g-3">
+                                <div class="col-md-4" ng-repeat="(status, count) in {Analyze: $ctrl.subObjectiveStats.analyze, Development: $ctrl.subObjectiveStats.dev, QA: $ctrl.subObjectiveStats.qa, 'Ready for QA': $ctrl.subObjectiveStats.readyQA, Completed: $ctrl.subObjectiveStats.completed}">
+                                    <div class="p-3 rounded-4 border bg-light d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <span class="status-dot me-2" ng-class="status.toLowerCase().replace(' ', '-')"></span>
+                                            <span class="small fw-bold text-muted">{{status}}</span>
+                                        </div>
+                                        <span class="fw-bold h5 mb-0">{{count}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DEVELOPER VIEW: My Tasks -->
+                        <div ng-if="$ctrl.isDev()">
+                            <p class="text-secondary small mb-3">Your assigned sub-objectives that require attention.</p>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <tbody style="font-size: 0.85rem;">
+                                        <tr ng-repeat="sub in $ctrl.mySubObjectives | limitTo:5">
+                                            <td style="width: 40px;"><span class="status-dot" ng-class="sub.status.toLowerCase().replace(' ', '-')"></span></td>
+                                            <td class="fw-bold">{{sub.text}}</td>
+                                            <td class="text-muted small">{{sub.controlName}}</td>
+                                            <td class="text-end"><span class="badge bg-light text-dark border">{{sub.status}}</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- QA VIEW: Verification Pipeline -->
+                        <div ng-if="$ctrl.isQA()">
+                            <p class="text-secondary small mb-3">Sub-objectives ready for your verification.</p>
+                            <div class="row g-2">
+                                <div class="col-md-6" ng-repeat="sub in $ctrl.readyForQASubObjectives | limitTo:6">
+                                    <div class="p-3 rounded-3 border-start border-4 bg-light" style="border-start-color: #f59e0b !important;">
+                                        <div class="fw-bold small mb-1">{{sub.text}}</div>
+                                        <div class="text-muted extra-small"><i class="fas fa-layer-group me-1"></i>{{sub.controlName}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -234,305 +324,150 @@ app.component('dashboard', {
                 </div>
             </div>
 
-            <!-- Right Column: Secondary Analytics & Release Hub -->
+            <!-- Right Column: Brief Release Hub (Maintained & Optimized) -->
             <div class="col-lg-4">
-                <div class="row g-4">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                            <div class="card-header bg-white border-0 py-4 px-4">
-                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-biohazard me-2 text-danger"></i>Severity Delta</h5>
-                            </div>
-                            <div class="card-body p-4">
-                                <div style="height: 250px;">
-                                    <canvas id="defectSeverityChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-                                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-rocket me-2 text-purple"></i>Release Hub</h5>
-                                <button class="btn btn-sm btn-outline-indigo rounded-circle" ng-click="$ctrl.refreshRoadmap()"><i class="fas fa-sync-alt"></i></button>
-                            </div>
-                            <div class="card-body p-4 pt-0">
-                                <div class="d-flex justify-content-between align-items-center mb-4 bg-light rounded-pill p-2">
-                                    <button class="btn btn-sm btn-link text-indigo" ng-click="$ctrl.changeYear(-1)"><i class="fas fa-chevron-left"></i></button>
-                                    <span class="fw-bold text-indigo">{{$ctrl.currentYear}}</span>
-                                    <button class="btn btn-sm btn-link text-indigo" ng-click="$ctrl.changeYear(1)"><i class="fas fa-chevron-right"></i></button>
-                                </div>
-                                
-                                <div class="table-responsive">
-                                    <table class="table table-borderless mb-0">
-                                        <tbody>
-                                            <tr ng-repeat="row in [0, 1, 2]">
-                                                <td ng-repeat="col in [0, 1, 2, 3]" class="p-1" style="width: 25%;">
-                                                    <div class="month-card rounded-3 p-2 text-center shadow-sm border" 
-                                                         ng-class="$ctrl.getMonthCardClass(row * 4 + col)"
-                                                         ng-style="$ctrl.getMonthCardStyle(row * 4 + col)"
-                                                         ng-click="$ctrl.showMonthReleases(row * 4 + col)"
-                                                         ng-mouseenter="$ctrl.hoveredMonth = row * 4 + col"
-                                                         ng-mouseleave="$ctrl.hoveredMonth = null"
-                                                         style="transition: all 0.2s ease; min-height: 60px;">
-                                                        <div class="fw-bold x-small text-uppercase mb-1" 
-                                                             ng-class="$ctrl.getMonthTextClass(row * 4 + col)">
-                                                            {{$ctrl.getMonthName(row * 4 + col)}}
-                                                        </div>
-                                                        <div class="release-count">
-                                                            <span class="badge rounded-pill px-2 py-1 x-small"
-                                                                  ng-class="$ctrl.getMonthBadgeClass(row * 4 + col)">
-                                                                {{$ctrl.getMonthReleaseCount(row * 4 + col)}} 
-                                                                <i class="fas fa-rocket ms-1 x-small"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <button class="btn btn-indigo w-100 rounded-pill mt-3 fw-bold shadow-sm x-small" ng-click="$ctrl.goToCurrentMonth()">
-                                    Return to Today
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Test Cases & Defects Charts Row -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <div class="card-header bg-white border-0 py-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-clipboard-check me-2 text-primary"></i>Test Case Status</h5>
-                    </div>
-                    <div class="card-body p-4 d-flex align-items-center justify-content-center">
-                        <div style="height: 280px; width: 100%;">
-                            <canvas id="testCaseStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <div class="card-header bg-white border-0 py-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-bug me-2 text-danger"></i>Defects by Status</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <div style="height: 280px;">
-                            <canvas id="defectStatusBarChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Team Load & Progress Analytics -->
-        <div class="row g-4 pb-5">
-            <div class="col-md-7">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <div class="card-header bg-white border-0 py-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-bars-progress me-2 text-blue"></i>Objective Progression</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <div style="height: 350px;">
-                            <canvas id="progressByDescriptionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-5">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
                     <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-user-gear me-2 text-success"></i>Team Force</h5>
+                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-rocket me-2 text-purple"></i>Release Hub</h5>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-xs btn-outline-indigo px-1 py-0" ng-click="$ctrl.changeYear(-1)"><i class="fas fa-chevron-left x-small"></i></button>
+                            <span class="fw-bold x-small">{{$ctrl.currentYear}}</span>
+                            <button class="btn btn-xs btn-outline-indigo px-1 py-0" ng-click="$ctrl.changeYear(1)"><i class="fas fa-chevron-right x-small"></i></button>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
-                        <div ng-repeat="emp in $ctrl.employeesWorkload | limitTo:6 track by emp.employeeId" class="mb-4 d-flex align-items-center">
-                            <div class="avatar-glass me-3 rounded-circle shadow-sm d-flex align-items-center justify-content-center text-white fw-bold" 
-                                 style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.8rem;">
-                                {{emp.employeeName.charAt(0)}}
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="fw-bold text-dark x-small">{{emp.employeeName}}</span>
-                                    <span class="x-small text-indigo fw-bold">{{emp.avgProgress}}%</span>
-                                </div>
-                                <div class="progress rounded-pill shadow-inner" style="height: 6px; background: #eef2ff;">
-                                    <div class="progress-bar rounded-pill" ng-style="{'width': emp.avgProgress + '%'}" 
-                                         style="background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);"></div>
-                                </div>
-                            </div>
+                    <div class="card-body p-3 pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-borderless mb-0">
+                                <tbody>
+                                    <tr ng-repeat="row in [0, 1, 2]">
+                                        <td ng-repeat="col in [0, 1, 2, 3]" class="p-1">
+                                            <div class="month-card rounded-3 p-1 text-center border" 
+                                                 ng-class="$ctrl.getMonthCardClass(row * 4 + col)"
+                                                 ng-click="$ctrl.showMonthReleases(row * 4 + col)"
+                                                 style="cursor: pointer; min-height: 45px;">
+                                                <div class="extra-small text-uppercase mb-0 fw-bold" style="font-size: 0.6rem;">{{$ctrl.getMonthName(row * 4 + col).substring(0,3)}}</div>
+                                                <div class="fw-bold small">{{$ctrl.getMonthReleaseCount(row * 4 + col)}}</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        
-        <!-- Controls by Release Date -->
-        <div class="row g-4 mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-calendar-check me-2 text-indigo"></i>Controls by Release</h5>
-                        <span class="badge rounded-pill" style="background:#eef2ff;color:#4f46e5;font-size:0.72rem;">{{$ctrl.releaseGroups.length}} releases</span>
+        <!-- THE OBJECTIVE HUB: Overall Idea -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+            <div class="card-header border-0 bg-white py-4 px-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="fas fa-map-location-dot me-2 text-success"></i>Operational Objective Hub</h5>
+                        <p class="text-muted extra-small mb-0">Full project status breakdown across every control and sub-objective</p>
                     </div>
-                    <div class="card-body p-3">
-                        <div class="row g-4">
-                            <!-- Left: Release date selector + controls list -->
-                            <div class="col-md-5">
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold text-secondary text-uppercase mb-1">Filter by Release Date</label>
-                                    <select class="form-select form-select-sm border-0 shadow-sm" ng-model="$ctrl.selectedReleaseGroup" ng-change="$ctrl.onReleaseGroupChange()">
-                                        <option value="">-- All Releases --</option>
-                                        <option ng-repeat="rg in $ctrl.releaseGroups track by rg.dateKey" value="{{rg.dateKey}}">
-                                            {{rg.label}} ({{rg.controls.length}} controls)
-                                        </option>
-                                    </select>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Search Filter for Objective Hub -->
+                        <div class="search-box-glass shadow-sm rounded-pill p-1 bg-light border d-flex align-items-center px-3" style="width: 250px;">
+                            <i class="fas fa-search text-muted me-2 small"></i>
+                            <input type="text" class="form-control border-0 shadow-none bg-transparent extra-small" placeholder="Filter controls..." ng-model="$ctrl.hubSearch">
+                        </div>
+                        <div class="d-flex align-items-center gap-3 ms-2">
+                            <span class="status-dot analyze"></span><span class="extra-small text-muted">Analyze</span>
+                            <span class="status-dot development"></span><span class="extra-small text-muted">Dev</span>
+                            <span class="status-dot qa"></span><span class="extra-small text-muted">QA</span>
+                            <span class="status-dot ready-qa"></span><span class="extra-small text-muted">Ready QA</span>
+                            <span class="status-dot completed"></span><span class="extra-small text-muted">Done</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <div class="row g-3">
+                    <div class="col-xl-3 col-lg-4 col-md-6" ng-repeat="control in $ctrl.store.allControls | filter:$ctrl.hubSearch | limitTo:48">
+                        <div class="p-3 rounded-4 border h-100 d-flex flex-column hover-shadow-lg" 
+                             style="background: #ffffff; cursor: pointer; transition: all 0.2s ease;"
+                             ng-click="$ctrl.goToControl(control.controlId)">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold text-dark mb-0 text-truncate" style="font-size:0.85rem;" title="{{control.description}}">{{control.description}}</h6>
+                            </div>
+                            <div class="text-muted extra-small mb-3"><i class="fas fa-id-badge me-1"></i>Owner: {{$ctrl.getEmployeeName(control.employeeId)}}</div>
+                            <div class="mt-auto">
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <!-- Parsing subDescriptions in template - showing pellets for each sub-objective -->
+                                    <span ng-repeat="sub in $ctrl.parseSub(control.subDescriptions) track by $index" 
+                                          class="status-dot" 
+                                          ng-class="sub.status.toLowerCase().replace(' ', '-')"
+                                          title="{{sub.description}} - {{sub.status}}"></span>
+                                    <span ng-if="!control.subDescriptions || control.subDescriptions === '[]'" class="extra-small text-muted italic">No objectives</span>
                                 </div>
-                                <!-- Selected release stats card -->
-                                <div ng-if="$ctrl.activeReleaseGroup" class="rounded-4 p-3 mb-3" ng-style="{'background': $ctrl.activeReleaseGroup.bg}">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="text-white fw-bold" style="font-size:1.4rem;">{{$ctrl.activeReleaseGroup.controls.length}}</div>
-                                        <span class="badge rounded-pill text-white" style="background:rgba(255,255,255,0.2);font-size:0.72rem;">
-                                            <i class="fas fa-calendar me-1"></i>{{$ctrl.activeReleaseGroup.label}}
-                                        </span>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="progress rounded-pill flex-grow-1 me-2" style="height:4px; background:#eee;">
+                                        <div class="progress-bar bg-success" ng-style="{'width': control.progress + '%'}"></div>
                                     </div>
-                                    <div class="progress rounded-pill mb-1" style="height:5px;background:rgba(255,255,255,0.25);">
-                                        <div class="progress-bar rounded-pill" ng-style="{'width': $ctrl.activeReleaseGroup.avgProgress + '%'}" style="background:rgba(255,255,255,0.8);"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <small class="text-white opacity-75" style="font-size:0.68rem;">Avg Progress</small>
-                                        <small class="text-white fw-bold" style="font-size:0.68rem;">{{$ctrl.activeReleaseGroup.avgProgress}}%</small>
-                                    </div>
-                                </div>
-                                <!-- Controls list -->
-                                <div class="rounded-3 border" style="max-height:220px;overflow-y:auto;background:#f8fafc;">
-                                    <div ng-if="$ctrl.getAllReleaseControls().length === 0" class="text-center py-4 text-muted small">
-                                        <i class="fas fa-calendar-times opacity-25 mb-1"></i>
-                                        <p class="mb-0">No release dates set on controls yet</p>
-                                    </div>
-                                    <div ng-repeat="c in ($ctrl.activeReleaseGroup ? $ctrl.activeReleaseGroup.controls : $ctrl.getAllReleaseControls()) track by c.controlId"
-                                         class="d-flex align-items-center gap-2 px-3 py-2 border-bottom" style="border-color:#f1f5f9 !important;font-size:0.78rem;">
-                                        <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center text-white fw-bold"
-                                             style="width:28px;height:28px;font-size:0.6rem;background:linear-gradient(135deg,#6366f1,#4f46e5);">
-                                            {{c.progress || 0}}%
-                                        </div>
-                                        <span class="text-dark flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{c.description}}">{{c.description}}</span>
-                                        <span class="badge rounded-pill flex-shrink-0" style="font-size:0.6rem;background:#eef2ff;color:#4f46e5;">{{c.statusName || 'No Status'}}</span>
-                                    </div>
+                                    <span class="extra-small fw-bold">{{control.progress}}%</span>
                                 </div>
                             </div>
-                            <!-- Right: Pie chart — always rendered so canvas exists -->
-                            <div class="col-md-7">
-                                <div class="card border-0 shadow-sm rounded-3 h-100">
-                                    <div class="card-header border-0 py-2 px-3" style="background:#1e3a5f;">
-                                        <span class="fw-bold text-white small">
-                                            <i class="fas fa-chart-pie me-2"></i>
-                                            {{$ctrl.activeReleaseGroup ? $ctrl.activeReleaseGroup.label : 'All Releases'}} — Status Distribution
-                                        </span>
-                                    </div>
-                                    <div class="card-body p-3 d-flex align-items-center justify-content-center">
-                                        <div style="height:260px;width:100%;">
-                                            <canvas id="releaseStatusPieChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-sm btn-light border rounded-pill px-4" ng-click="$ctrl.backToControls()">
+                        View All Controls in Ops Room <i class="fas fa-chevron-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Defects Pool (Role-Based) -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="fas fa-bug me-2 text-danger"></i>
+                    <span ng-if="$ctrl.defectFilter === 'Assigned'">Your Assigned Tasks</span>
+                    <span ng-if="$ctrl.defectFilter === 'QA'">Pending QA Verification</span>
+                    <span ng-if="$ctrl.defectFilter !== 'Assigned' && $ctrl.defectFilter !== 'QA'">Incident Pool</span>
+                </h5>
+                <div class="btn-group btn-group-sm bg-light rounded-pill p-1">
+                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'All' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'All'">All</button>
+                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'Assigned' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'Assigned'">My Work</button>
+                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-if="$ctrl.isQA()" ng-class="$ctrl.defectFilter === 'QA' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'QA'">QA Verification</button>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div ng-repeat="defect in $ctrl.getFilteredDefects() | limitTo:6" class="col-md-4">
+                        <div class="card border-0 bg-white shadow-sm h-100 p-3 objective-card hover-shadow-lg" 
+                             style="cursor: pointer; transition: all 0.3s ease; border-left: 4px solid {{$ctrl.getDefectSeverityColor(defect.severity)}} !important;"
+                             ng-click="$ctrl.goToControl(defect.controlId)">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="badge rounded-pill extra-small fw-bold" style="background: {{$ctrl.getDefectSeverityColor(defect.severity)}}15; color: {{$ctrl.getDefectSeverityColor(defect.severity)}}">
+                                    <i class="fas fa-triangle-exclamation me-1"></i>{{defect.severity}}
+                                </span>
+                                <span class="badge rounded-pill bg-light text-dark extra-small">{{defect.status}}</span>
                             </div>
+                            <h6 class="fw-bold mb-1 text-dark" style="font-size:0.95rem;">{{defect.title}}</h6>
+                            <p class="text-muted extra-small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">{{defect.description}}</p>
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width:24px;height:24px;">
+                                        <i class="fas fa-layer-group text-indigo" style="font-size:0.7rem;"></i>
+                                    </div>
+                                    <span class="extra-small text-muted fw-bold">{{defect.controlName}}</span>
+                                </div>
+                                <span class="text-indigo extra-small fw-bold"><i class="fas fa-chevron-right"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="$ctrl.getFilteredDefects().length === 0" class="col-12 text-center py-5">
+                        <div class="p-4 rounded-4 d-inline-block">
+                            <i class="fas fa-check-circle fa-2x text-success opacity-50 mb-3"></i>
+                            <p class="text-muted mb-0 small">Great work! You have no pending items here.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Controls by Status & Test Cases by Type Row -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-layer-group me-2 text-indigo"></i>Controls by Status</h5>
-                        <span class="badge rounded-pill" style="background:#eef2ff;color:#4f46e5;font-size:0.72rem;">{{$ctrl.store.allControls.length}} total</span>
-                    </div>
-                    <div class="card-body p-3">
-                        <div style="height: 220px;">
-                            <canvas id="controlsByStatusChart"></canvas>
-                        </div>
-
-                        <!-- Developer Metrics -->
-                        <div class="mt-3">
-                            <div class="fw-bold text-secondary mb-2" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;">
-                                <i class="fas fa-user-gear me-1"></i>Developer Breakdown
-                            </div>
-                            <div ng-repeat="dev in $ctrl.developerMetrics track by $index" class="mb-2 p-2 rounded-3" style="background:#f8fafc;">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                             style="width:28px;height:28px;background:linear-gradient(135deg,#6366f1,#4f46e5);font-size:0.72rem;">
-                                            {{dev.name.charAt(0).toUpperCase()}}
-                                        </div>
-                                        <span class="fw-semibold text-dark" style="font-size:0.82rem;">{{dev.name}}</span>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="text-muted" style="font-size:0.72rem;">{{dev.controls}} controls</span>
-                                        <span class="fw-bold" style="font-size:0.78rem;color:#6366f1;">{{dev.avgProgress}}%</span>
-                                    </div>
-                                </div>
-                                <!-- Progress bar -->
-                                <div class="progress rounded-pill mb-1" style="height:5px;background:#e2e8f0;">
-                                    <div class="progress-bar rounded-pill" ng-style="{'width': dev.avgProgress + '%'}"
-                                         style="background:linear-gradient(90deg,#6366f1,#10b981);"></div>
-                                </div>
-                                <!-- Status pills -->
-                                <div class="d-flex flex-wrap gap-1">
-                                    <span ng-repeat="st in dev.statuses track by $index"
-                                          class="badge rounded-pill"
-                                          ng-style="{'background': st.color + '22', 'color': st.color, 'border': '1px solid ' + st.color + '44'}"
-                                          style="font-size:0.65rem;padding:2px 7px;">
-                                        {{st.name}} ({{st.count}})
-                                    </span>
-                                </div>
-                            </div>
-                            <div ng-if="!$ctrl.developerMetrics || $ctrl.developerMetrics.length === 0" class="text-center text-muted small py-2">
-                                No developer data
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                    <div class="card-header bg-white border-0 py-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-flask me-2 text-purple"></i>Test Cases by Type</h5>
-                    </div>
-                    <div class="card-body p-3">
-                        <div style="height: 180px; width: 100%;">
-                            <canvas id="testCasesByTypeChart"></canvas>
-                        </div>
-                        <!-- Per-type metric mini cards -->
-                        <div class="row g-2 mt-2">
-                            <div ng-repeat="tm in $ctrl.tcTypeMetrics" class="col-6">
-                                <div class="rounded-3 p-2 d-flex align-items-center gap-2 hover-shadow-lg"
-                                     style="background: {{tm.bg}}; cursor: pointer; transition: all 0.2s ease;"
-                                     ng-click="$ctrl.showTcTypeBreakdown(tm.type)">
-                                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                                         style="width:36px;height:36px;background:rgba(255,255,255,0.25);">
-                                        <i class="fas {{tm.icon}} text-white" style="font-size:0.9rem;"></i>
-                                    </div>
-                                    <div class="flex-grow-1 overflow-hidden">
-                                        <div class="fw-bold text-white" style="font-size:1.1rem;line-height:1;">{{tm.count}}</div>
-                                        <div class="text-white opacity-75" style="font-size:0.65rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{tm.type}}</div>
-                                        <div class="progress rounded-pill mt-1" style="height:3px;background:rgba(255,255,255,0.25);">
-                                            <div class="progress-bar rounded-pill" ng-style="{'width': tm.pct + '%'}" style="background:rgba(255,255,255,0.8);"></div>
-                                        </div>
-                                    </div>
-                                    <div class="text-white fw-bold flex-shrink-0" style="font-size:0.75rem;">{{tm.pct}}%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
         <!-- TC Type Breakdown Modal -->
         <div ng-if="$ctrl.selectedTcType" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;" ng-click="$ctrl.closeTcBreakdown($event)">
@@ -588,7 +523,7 @@ app.component('dashboard', {
                                 <div ng-repeat="release in $ctrl.selectedMonthReleases" 
                                      class="list-group-item border rounded-3 mb-3 p-4 shadow-sm hover-shadow-lg"
                                      style="transition: all 0.3s ease; cursor: pointer;"
-                                     ng-click="$ctrl.showReleaseDetails(release)">
+                                     ng-click="$ctrl.toggleReleaseExpansion(release)">
                                     <div class="d-flex align-items-start">
                                         <div class="release-icon bg-indigo text-white rounded-3 p-3 me-3 shadow-sm" 
                                              style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
@@ -598,7 +533,7 @@ app.component('dashboard', {
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 class="fw-bold text-dark mb-0">
                                                     {{release.releaseName}}
-                                                    <i class="fas fa-chevron-right ms-2 text-muted small"></i>
+                                                    <i class="fas ms-2 text-muted small" ng-class="release._expanded ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                                                 </h6>
                                                 <span class="badge bg-success rounded-pill px-3 py-2">
                                                     <i class="fas fa-calendar-check me-1"></i>
@@ -611,17 +546,80 @@ app.component('dashboard', {
                                             </p>
                                             <div class="d-flex gap-3 mt-3">
                                                 <small class="text-muted">
-                                                    <i class="fas fa-code-branch me-1 text-primary"></i>
-                                                    Version: <span class="fw-bold text-dark">{{release.version || 'N/A'}}</span>
-                                                </small>
-                                                <small class="text-muted">
                                                     <i class="fas fa-tasks me-1 text-info"></i>
-                                                    Controls: <span class="fw-bold text-dark">{{$ctrl.getReleaseControlCount(release.releaseId)}}</span>
+                                                    Controls: <span class="fw-bold text-dark">{{release._count}}</span>
                                                 </small>
                                                 <small class="text-muted">
                                                     <i class="fas fa-clock me-1 text-warning"></i>
-                                                    Status: <span class="badge bg-warning-subtle text-warning">Scheduled</span>
+                                                    Status: <span class="badge rounded-pill shadow-sm" 
+                                                                  ng-class="$ctrl.getReleaseStatusInfo(release).class" 
+                                                                  ng-style="$ctrl.getReleaseStatusInfo(release).style"
+                                                                  style="padding: 5px 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.65rem;">
+                                                                {{$ctrl.getReleaseStatusInfo(release).text}}
+                                                            </span>
                                                 </small>
+                                            </div>
+
+                                            <!-- Inline Expansion: Controls list -->
+                                            <div ng-if="release._expanded" class="mt-4 pt-4 border-top" style="cursor: default;" ng-click="$event.stopPropagation()">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h6 class="fw-bold text-muted small text-uppercase mb-0">Associated Controls</h6>
+                                                    <span class="badge bg-indigo-subtle text-indigo rounded-pill px-3">{{release._controls.length}} items</span>
+                                                </div>
+
+                                                <div class="list-group list-group-flush border rounded-3 overflow-hidden shadow-sm bg-white" style="max-height: 300px; overflow-y: auto;">
+                                                    <div ng-repeat="control in release._controls" class="list-group-item p-0">
+                                                        <div class="px-3 py-3 d-flex align-items-center hover-bg-light" 
+                                                             style="cursor: pointer; font-size: 0.85rem;" 
+                                                             ng-click="control._expanded = !control._expanded">
+                                                            <div class="rounded-circle me-2 flex-shrink-0" style="width: 8px; height: 8px;"
+                                                                 ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}"></div>
+                                                            <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{control.controlName || control.description}}</span>
+                                                            <span class="badge ms-2 rounded-pill x-small" 
+                                                                  ng-style="{'background-color': $ctrl.getStatusColor(control.statusName) + '18', 'color': $ctrl.getStatusColor(control.statusName)}">
+                                                                {{control.statusName}}
+                                                            </span>
+                                                            <i class="fas ms-auto text-muted x-small" ng-class="control._expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                                        </div>
+                                                        
+                                                        <div ng-if="control._expanded" class="px-3 pb-3 bg-light-subtle">
+                                                            <div class="mt-2 text-muted extra-small text-uppercase fw-bold mb-2">Objectives</div>
+                                                            <div ng-repeat="sub in control._subDescriptionsArray" class="mb-2 ps-2 border-start border-2 border-indigo">
+                                                                <div class="d-flex justify-content-between align-items-center mb-1 x-small">
+                                                                    <span class="text-dark fw-bold text-truncate" style="max-width: 70%;">{{sub.title || sub.description}}</span>
+                                                                    <div class="d-flex align-items-center gap-2">
+                                                                        <span class="text-muted extra-small">{{$ctrl.getEmployeeName(sub.employeeId)}}</span>
+                                                                        <span class="fw-bold text-indigo">{{sub.progress || 0}}%</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="progress rounded-pill" style="height: 3px; background: #e2e8f0;">
+                                                                    <div class="progress-bar rounded-pill bg-indigo" ng-style="{'width': (sub.progress || 0) + '%'}"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div ng-if="release._controls.length === 0" class="p-4 text-center text-muted small">
+                                                        No associated controls found.
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                                    <div class="flex-grow-1 me-4">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="text-muted extra-small fw-bold text-uppercase">Overall Progress</span>
+                                                            <span class="text-indigo fw-bold extra-small">{{release._averageProgress}}%</span>
+                                                        </div>
+                                                        <div class="progress rounded-pill shadow-sm" style="height: 8px; background: #e2e8f0;">
+                                                            <div class="progress-bar rounded-pill bg-indigo" 
+                                                                 style="transition: width 0.8s ease;"
+                                                                 ng-style="{'width': release._averageProgress + '%'}"></div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-indigo btn-sm rounded-3 px-4 fw-bold shadow-sm"
+                                                            ng-click="$ctrl.showReleaseDetails(release)">
+                                                        <i class="fas fa-external-link-alt me-2"></i>Full Dashboard
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -647,7 +645,7 @@ app.component('dashboard', {
         </div>
 
         <!-- Release Details Modal -->
-        <div class="modal fade" id="releaseDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="releaseDetailsModal" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content border-0 shadow-lg rounded-4">
                     <div class="modal-header border-0 bg-gradient-indigo text-white rounded-top-4 py-4">
@@ -663,118 +661,445 @@ app.component('dashboard', {
                         </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
-                        <div class="row g-4">
-                            <!-- Left Side: Status Progress Bars -->
-                            <div class="col-md-5">
-                                <div class="card border-0 shadow-sm rounded-4 h-100">
-                                    <div class="card-header bg-white border-0 py-3">
-                                        <h6 class="fw-bold text-dark mb-0">
-                                            <i class="fas fa-chart-bar me-2 text-indigo"></i>
-                                            Status Progress Overview
+                    <div class="modal-body p-4" style="background: #f8fafc;">
+                        <div class="row g-4 align-items-stretch">
+
+                            <!-- LEFT: Status Progress Overview -->
+                            <div class="col-md-5 d-flex flex-column">
+                                <div class="card border-0 shadow-sm rounded-4 flex-grow-1" style="min-height: 0;">
+                                    <div class="card-header border-0 py-3 px-4" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 1rem 1rem 0 0;">
+                                        <h6 class="fw-bold text-white mb-0">
+                                            <i class="fas fa-stream me-2 opacity-75"></i>
+                                            Lifecycle Progress
                                         </h6>
                                     </div>
-                                    <div class="card-body p-4">
-                                        <div ng-if="$ctrl.releaseStatusProgress.length > 0">
-                                            <div ng-repeat="statusItem in $ctrl.releaseStatusProgress" class="mb-4">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="status-dot rounded-circle me-2" 
-                                                             ng-style="{'background-color': statusItem.color}"
-                                                             style="width: 12px; height: 12px;"></div>
-                                                        <span class="fw-bold text-dark small">{{statusItem.statusName}}</span>
+                                    <div class="card-body p-0 d-flex flex-column" style="background: #fff; border-radius: 0 0 1rem 1rem;">
+                                        <!-- Objectives List -->
+                                        <div class="flex-grow-1 overflow-auto p-4" style="max-height: 380px;">
+                                            <div ng-if="$ctrl.releaseStatusProgress.length > 0">
+                                                <div ng-repeat="item in $ctrl.releaseStatusProgress"
+                                                     class="mb-4 pb-4"
+                                                     ng-class="!$last ? 'border-bottom' : ''"
+                                                     style="border-color: #f1f5f9 !important; transition: all 0.3s ease;">
+
+                                                    <!-- Header Row -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2" 
+                                                         style="cursor: pointer;" 
+                                                         ng-click="item._expanded = !item._expanded">
+                                                        <div style="max-width: 72%;">
+                                                            <div class="fw-bold text-dark lh-sm" style="font-size: 0.82rem;">{{item.title}}</div>
+                                                            <div class="text-muted d-flex align-items-center mt-1" style="font-size: 0.7rem;">
+                                                                <i class="fas fa-layer-group me-1" style="color: #6366f1;"></i>
+                                                                <span class="text-truncate">{{item.controlName}}</span>
+                                                            </div>
+                                                            <div class="text-muted d-flex align-items-center mt-1" style="font-size: 0.7rem;">
+                                                                <i class="fas fa-code me-1 text-success"></i>
+                                                                <span>DEV: {{item.assigneeName}}</span>
+                                                            </div>
+                                                            <div class="text-muted d-flex align-items-center mt-1" style="font-size: 0.7rem;">
+                                                                <i class="fas fa-vial me-1 text-purple"></i>
+                                                                <span>QA: {{item.qaAssigneeName || 'Unassigned'}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge rounded-pill px-2 py-1"
+                                                                  style="font-size: 0.65rem; white-space: nowrap;"
+                                                                  ng-style="{'background-color': item.color, 'color': 'white'}">
+                                                                {{item.currentStatus}}
+                                                            </span>
+                                                            <i class="fas" style="font-size: 0.75rem; color: #6366f1;"
+                                                               ng-class="item._expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                                        </div>
                                                     </div>
-                                                    <div class="text-end">
-                                                        <span class="badge rounded-pill px-2 py-1 small"
-                                                              ng-style="{'background-color': statusItem.color}">
-                                                            {{statusItem.count}} controls
-                                                        </span>
+
+                                                    <!-- Lifecycle Pipeline -->
+                                                    <div class="position-relative d-flex align-items-center mt-3 mb-1" style="height: 36px; padding: 0 8px;">
+                                                        <div class="position-absolute" style="height: 2px; background: #e2e8f0; top: 9px; left: 8px; right: 8px; z-index: 0;"></div>
+                                                        <div ng-repeat="stage in item.stages" class="flex-grow-1 text-center position-relative" style="z-index: 1;">
+                                                            <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                                                                 style="width: 20px; height: 20px; transition: all 0.3s ease;"
+                                                                 ng-style="{'background-color': (stage.progress > 0 ? stage.color : '#e2e8f0'), 'transform': (stage.isActive ? 'scale(1.35)' : 'scale(1)'), 'box-shadow': (stage.isActive ? '0 0 0 3px ' + stage.color + '33' : 'none')}">
+                                                                <i class="fas fa-check" ng-if="stage.progress === 100" style="font-size: 0.45rem; color: white;"></i>
+                                                                <div ng-if="stage.isActive && stage.progress < 100" style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div>
+                                                            </div>
+                                                            <div class="mt-2 text-center fw-bold" style="font-size: 0.52rem; letter-spacing: 0.04em;"
+                                                                 ng-style="{'color': (stage.progress > 0 ? '#475569' : '#cbd5e1')}">
+                                                                {{stage.name === 'Analyze' ? 'ANL' : (stage.name === 'Development' ? 'DEV' : (stage.name === 'Dev Testing' ? 'TST' : stage.name))}}
+                                                            </div>
+                                                            <div class="mt-1 text-center text-truncate px-1" style="font-size: 0.42rem; font-weight: 500; color: #64748b;" ng-if="stage.isActive">
+                                                                <i class="fas fa-user-circle me-1 opacity-50"></i>{{stage.assignee}}
+                                                            </div>
+                                                            <div class="text-center fw-bold" style="font-size: 0.45rem;"
+                                                                 ng-style="{'color': (stage.progress > 0 ? '#64748b' : '#cbd5e1')}">
+                                                                {{stage.progress}}%
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="progress rounded-pill shadow-sm" style="height: 12px; background: #f1f5f9;">
-                                                    <div class="progress-bar rounded-pill" 
-                                                         ng-style="{'width': statusItem.avgProgress + '%', 'background-color': statusItem.color}"
-                                                         style="transition: width 0.6s ease;">
+
+                                                    <!-- Overall -->
+                                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                                        <span class="text-muted" style="font-size: 0.7rem;">Overall Intensity</span>
+                                                        <span class="fw-bold" style="font-size: 0.72rem;" ng-style="{'color': item.color}">{{item.totalProgress}}% Completed</span>
                                                     </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between mt-1">
-                                                    <small class="text-muted">Average Progress</small>
-                                                    <small class="fw-bold" ng-style="{'color': statusItem.color}">
-                                                        {{statusItem.avgProgress}}%
-                                                    </small>
+
+                                                    <!-- Inline Expansion: Sub-Objectives / WBS Breakdown -->
+                                                    <div ng-if="item._expanded" class="mt-3 p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                                        <div class="fw-bold text-muted mb-2" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                                            <i class="fas fa-sitemap me-1"></i>Detailed Breakdown
+                                                        </div>
+                                                        <div ng-if="item._subDescriptionsArray.length > 0">
+                                                            <div ng-repeat="sub in item._subDescriptionsArray" class="mb-2 pb-2 border-bottom" ng-class="{'border-0': $last}" style="border-color: #f1f5f9 !important;">
+                                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                    <span class="text-dark fw-bold text-truncate" style="font-size: 0.75rem; max-width: 60%;">{{sub.title || sub.description}}</span>
+                                                                    <span class="fw-bold" style="font-size: 0.7rem;" ng-style="{'color': $ctrl.getStatusColor(sub.status)}">{{sub.progress || 0}}%</span>
+                                                                </div>
+                                                                <div class="progress rounded-pill" style="height: 3px; background: #e2e8f0;">
+                                                                    <div class="progress-bar rounded-pill" ng-style="{'width': (sub.progress || 0) + '%', 'background-color': $ctrl.getStatusColor(sub.status)}"></div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between mt-1" style="font-size: 0.6rem;">
+                                                                    <span class="text-muted"><i class="fas fa-user me-1"></i>{{$ctrl.getEmployeeName(sub.employeeId)}}</span>
+                                                                    <span class="badge rounded-pill" style="font-size: 0.55rem;" ng-style="{'background-color': $ctrl.getStatusColor(sub.status) + '15', 'color': $ctrl.getStatusColor(sub.status)}">{{sub.status}}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div ng-if="!item._subDescriptionsArray || item._subDescriptionsArray.length === 0" class="text-center py-2">
+                                                            <span class="text-muted x-small">No additional sub-objective data available.</span>
+                                                        </div>
+                                                        <div class="mt-2 pt-2 border-top text-center">
+                                                            <button class="btn btn-link btn-sm p-0 text-indigo fw-bold" 
+                                                                    style="font-size: 0.65rem; text-decoration: none;"
+                                                                    ng-click="$ctrl.goToControl(item.controlId)">
+                                                                <i class="fas fa-external-link-alt me-1"></i>View in Control Board
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div ng-if="$ctrl.releaseStatusProgress.length === 0" class="text-center py-5">
-                                            <i class="fas fa-chart-bar text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                                            <p class="text-muted mt-3">No status data available</p>
-                                        </div>
-                                        <div class="mt-4 pt-3 border-top">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span class="text-muted small">Total Controls:</span>
-                                                <span class="fw-bold text-dark">{{$ctrl.releaseControls.length}}</span>
+                                            <div ng-if="$ctrl.releaseStatusProgress.length === 0" class="text-center py-5">
+                                                <i class="fas fa-chart-line text-muted" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                                                <p class="text-muted mt-3 small">No lifecycle data available</p>
                                             </div>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="text-muted small">Overall Progress:</span>
-                                                <span class="fw-bold text-success">{{$ctrl.releaseAverageProgress}}%</span>
+                                        </div>
+
+                                        <!-- Stats Footer -->
+                                        <div class="border-top p-3" style="background: #f8fafc; border-radius: 0 0 1rem 1rem;">
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-4">
+                                                    <div class="text-center p-2 bg-white border rounded-3 shadow-sm">
+                                                        <div class="fw-bold text-dark" style="font-size: 1.1rem;">{{$ctrl.releaseControls.length}}</div>
+                                                        <div class="text-muted" style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em;">Controls</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="text-center p-2 bg-white border rounded-3 shadow-sm">
+                                                        <div class="fw-bold text-indigo" style="font-size: 1.1rem;">{{$ctrl.releaseStatusProgress.length}}</div>
+                                                        <div class="text-muted" style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em;">Objectives</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="text-center p-2 bg-white border rounded-3 shadow-sm">
+                                                        <div class="fw-bold text-success" style="font-size: 1.1rem;">{{$ctrl.releaseAverageProgress}}%</div>
+                                                        <div class="text-muted" style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em;">Flow</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="progress rounded-pill" style="height: 6px;">
+                                                <div class="progress-bar" style="background: linear-gradient(90deg, #6366f1, #10b981);"
+                                                     ng-style="{'width': $ctrl.releaseAverageProgress + '%'}"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Right Side: Controls List -->
-                            <div class="col-md-7">
-                                <div class="card border-0 shadow-sm rounded-4 h-100">
-                                    <div class="card-header bg-white border-0 py-3">
-                                        <h6 class="fw-bold text-dark mb-0">
-                                            <i class="fas fa-list-check me-2 text-success"></i>
-                                            Release Controls
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                                        <div ng-if="$ctrl.releaseControls.length > 0">
-                                            <div ng-repeat="control in $ctrl.releaseControls" 
-                                                 class="border-bottom p-3 hover-bg-light"
-                                                 style="transition: all 0.2s ease;">
-                                                <div class="d-flex align-items-start">
-                                                    <div class="me-3">
-                                                        <div class="status-badge rounded-circle d-flex align-items-center justify-content-center"
-                                                             ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}"
-                                                             style="width: 40px; height: 40px;">
-                                                            <i class="fas fa-check text-white"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="fw-bold text-dark mb-1">{{control.controlName}}</h6>
-                                                        <p class="text-muted small mb-2">{{control.description}}</p>
-                                                        <div class="mb-2" ng-if="control.releaseName">
-                                                            <span class="badge bg-light text-dark border px-2 py-1 small">
-                                                                <i class="fas fa-rocket me-1 text-indigo"></i>
-                                                                {{control.releaseName}}
-                                                            </span>
-                                                        </div>
-                                                        <div class="d-flex gap-3 align-items-center">
-                                                            <span class="badge rounded-pill px-2 py-1 small"
-                                                                  ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}">
-                                                                {{control.statusName}}
-                                                            </span>
-                                                            <div class="flex-grow-1">
-                                                                <div class="progress rounded-pill" style="height: 6px;">
-                                                                    <div class="progress-bar bg-success" 
-                                                                         ng-style="{'width': control.progress + '%'}"></div>
+                            <!-- RIGHT: Analytics + Controls -->
+                            <div class="col-md-7 d-flex flex-column gap-3">
+
+                                <!-- Pie Chart + KPI -->
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                                            <div class="card-body p-3">
+                                                <div class="fw-bold text-muted mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;">
+                                                    <i class="fas fa-chart-pie me-1" style="color: #6366f1;"></i> Individual Progress
+                                                </div>
+                                                <div class="overflow-auto pe-1" style="height: 160px; overflow-x: hidden;">
+                                                    <div class="row g-2">
+                                                        <div class="col-6 col-lg-4" ng-repeat="item in $ctrl.releaseStatusProgress">
+                                                            <div class="p-2 border rounded-3 text-center d-flex flex-column align-items-center h-100 hover-shadow-lg" 
+                                                                 style="background: #f8fafc; transition: all 0.2s; cursor: pointer;"
+                                                                 ng-click="item._expanded = !item._expanded"
+                                                                 ng-style="{'border-color': item._expanded ? '#6366f1' : '#dee2e6', 'background-color': item._expanded ? '#ffffff' : '#f8fafc', 'box-shadow': item._expanded ? '0 4px 12px rgba(99,102,241,0.15)' : 'none'}">
+                                                                <div class="position-relative d-flex align-items-center justify-content-center mt-1" 
+                                                                     style="width: 54px; height: 54px; border-radius: 50%;" ng-style="{'background': item.conicGradient}">
+                                                                    <div class="position-absolute" style="width: 42px; height: 42px; background: #f8fafc; border-radius: 50%;"></div>
+                                                                    <span class="position-relative fw-bold" style="font-size: 0.65rem; color: #475569;">{{item.totalProgress}}%</span>
                                                                 </div>
+                                                                <div class="mt-2 text-dark text-truncate w-100 fw-bold" style="font-size: 0.62rem;" title="{{item.title}}">
+                                                                    {{item.title}}
+                                                                </div>
+                                                                <span class="badge rounded-pill mt-auto w-100 text-truncate" style="font-size: 0.5rem; background-color: {{item.color}}15; color: {{item.color}}; border: 1px solid {{item.color}}33;">
+                                                                    {{item.currentStatus}}
+                                                                </span>
                                                             </div>
-                                                            <span class="text-muted small fw-bold">{{control.progress}}%</span>
+                                                        </div>
+                                                        <div ng-if="$ctrl.releaseStatusProgress.length === 0" class="col-12 text-center text-muted py-5 small">
+                                                            No objectives found.
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div ng-if="$ctrl.releaseControls.length === 0" class="text-center py-5">
-                                            <i class="fas fa-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                                            <p class="text-muted mt-3">No controls assigned to this release</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card border-0 shadow-sm rounded-4 h-100 text-white"
+                                             style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                                            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-3">
+                                                <div style="font-size: 2.5rem; font-weight: 800; line-height: 1;">{{$ctrl.releaseStatusProgress.length}}</div>
+                                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8;">Work Units</div>
+                                                <div class="mt-2 pt-2 w-100 text-center" style="border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.65rem; opacity: 0.7;">
+                                                    Across {{$ctrl.releaseControls.length}} Controls
+                                                </div>
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- Controls List -->
+                                <div class="card border-0 shadow-sm rounded-4 flex-grow-1 bg-white overflow-hidden">
+                                    <div class="card-header border-0 py-2 px-4 d-flex justify-content-between align-items-center" style="background: #f8fafc;">
+                                        <span class="fw-bold text-dark" style="font-size: 0.8rem;">
+                                            <i class="fas fa-list-check me-2 text-success"></i>Release Controls
+                                        </span>
+                                        <span class="badge rounded-pill" style="background: #6366f115; color: #6366f1; font-size: 0.7rem;">{{$ctrl.releaseControls.length}} items</span>
+                                    </div>
+                                    <div class="overflow-auto" style="max-height: 265px;">
+                                        <div ng-if="$ctrl.releaseControls.length > 0">
+                                            <div ng-repeat="control in $ctrl.releaseControls"
+                                                 class="border-bottom"
+                                                 style="transition: background 0.15s;">
+                                                <!-- Control header row — click to expand -->
+                                                <div class="px-4 py-3 d-flex align-items-center hover-bg-light"
+                                                     style="cursor: pointer;"
+                                                     ng-click="control._expanded = !control._expanded">
+                                                    <div class="rounded-circle me-2 flex-shrink-0" style="width: 8px; height: 8px;"
+                                                         ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}"></div>
+                                                    <span class="fw-bold text-dark text-truncate" style="font-size: 0.82rem; max-width: 48%;">{{control.controlName || control.description}}</span>
+                                                    <span class="badge ms-2 rounded-pill" style="font-size: 0.6rem;"
+                                                          ng-style="{'background-color': $ctrl.getStatusColor(control.statusName) + '18', 'color': $ctrl.getStatusColor(control.statusName)}">
+                                                        {{control.statusName}}
+                                                    </span>
+                                                    <span class="ms-auto text-muted" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-user me-1"></i>{{$ctrl.getEmployeeName(control.employeeId)}}
+                                                    </span>
+                                                    <i class="fas ms-3" style="font-size:0.75rem; color:#6366f1;"
+                                                       ng-class="control._expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                                </div>
+                                                <!-- Inline expanded details -->
+                                                <div ng-if="control._expanded" class="px-4 pb-3" style="background:#f8fafc; border-top: 1px solid #f1f5f9;">
+                                                    <!-- Sub-objectives -->
+                                                    <div ng-if="control._subDescriptionsArray && control._subDescriptionsArray.length > 0" class="pt-3">
+                                                        <div class="text-muted fw-bold mb-2" style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em;">
+                                                            <i class="fas fa-layer-group me-1"></i>Sub-Objectives
+                                                        </div>
+                                                        <div ng-repeat="sub in control._subDescriptionsArray track by $index" class="mb-2 ps-2 border-start border-2" style="border-color:#6366f1 !important;">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span class="text-dark text-truncate fw-bold" style="font-size:0.75rem; max-width:55%;">{{sub.title || sub.description || 'Sub-Objective'}}</span>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <span class="text-muted" style="font-size:0.67rem;">{{$ctrl.getEmployeeName(sub.employeeId)}}</span>
+                                                                    <span class="fw-bold" style="font-size:0.72rem;" ng-style="{'color': $ctrl.getStatusColor(sub.status)}">{{sub.progress || 0}}%</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="progress rounded-pill" style="height:3px; background:#e2e8f0;">
+                                                                <div class="progress-bar rounded-pill"
+                                                                     ng-style="{'width': (sub.progress || 0) + '%', 'background-color': $ctrl.getStatusColor(sub.status)}"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Overall progress -->
+                                                    <div class="d-flex align-items-center gap-3 mt-3 pt-2" style="border-top:1px solid #e2e8f0;">
+                                                        <div class="flex-grow-1">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <span class="text-muted" style="font-size:0.68rem;">Overall Progress</span>
+                                                                <span class="fw-bold text-indigo" style="font-size:0.72rem;">{{control.progress || 0}}%</span>
+                                                            </div>
+                                                            <div class="progress rounded-pill" style="height:5px; background:#e2e8f0;">
+                                                                <div class="progress-bar rounded-pill" style="background:linear-gradient(90deg,#6366f1,#10b981);"
+                                                                     ng-style="{'width': (control.progress || 0) + '%'}"></div>
+                                                            </div>
+                                                        </div>
+                                                        <span class="badge rounded-pill px-3 py-1" style="font-size:0.65rem; background:#6366f115; color:#6366f1;">
+                                                            {{control.releaseName || 'No Release'}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-if="$ctrl.releaseControls.length === 0" class="text-center py-5">
+                                            <i class="fas fa-inbox text-muted" style="font-size: 2rem; opacity: 0.2;"></i>
+                                            <p class="text-muted mt-2 small">No controls in this release</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 py-3 px-4" style="background: #f8fafc; border-radius: 0 0 1rem 1rem;">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 btn-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Details Modal -->
+        <div class="modal fade" id="controlDetailsModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 bg-light rounded-top-4 py-3">
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0">
+                                <i class="fas fa-file-alt text-primary me-2"></i>Control Details
+                            </h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" ng-if="$ctrl.selectedControlDetails">
+                        <div class="row g-4">
+                            <!-- Left: Core Information Grid -->
+                            <div class="col-md-5">
+                                <div class="bg-light rounded-4 p-4 h-100 border border-light-subtle">
+                                    <div class="mb-5">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-signal text-primary me-2 x-small"></i>
+                                            <label class="text-muted extra-small fw-bold text-uppercase ls-1">Current Status</label>
+                                        </div>
+                                        <h5 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                                            {{$ctrl.selectedControlDetails.statusName || 'Analyze'}}
+                                            <span class="ms-2 badge rounded-pill px-2 py-1 x-small"
+                                                  ng-style="{'background-color': $ctrl.getStatusColor($ctrl.selectedControlDetails.statusName), 'color': 'white'}">
+                                                Active
+                                            </span>
+                                        </h5>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-align-left text-primary me-2 x-small"></i>
+                                            <label class="text-muted extra-small fw-bold text-uppercase ls-1">Control Description</label>
+                                        </div>
+                                        <div class="p-3 bg-white rounded-3 border">
+                                            <h6 class="fw-bold text-dark mb-1">{{$ctrl.selectedControlDetails.controlName}}</h6>
+                                            <p class="text-muted small mb-0 lh-base">{{$ctrl.selectedControlDetails.description || 'No extended description available'}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="fas fa-rocket text-indigo me-2 x-small"></i>
+                                                <label class="text-muted extra-small fw-bold text-uppercase ls-1">Release Cycle</label>
+                                            </div>
+                                            <p class="fw-bold text-dark mb-0 small">
+                                                {{$ctrl.selectedControlDetails.releaseName || 'Not specified'}}
+                                            </p>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="fas fa-user-tie text-success me-2 x-small"></i>
+                                                <label class="text-muted extra-small fw-bold text-uppercase ls-1">Project Lead</label>
+                                            </div>
+                                            <p class="fw-bold text-dark mb-0 small">{{$ctrl.getEmployeeName($ctrl.selectedControlDetails.employeeId)}}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-3 bg-indigo-subtle rounded-4 border border-indigo-subtle mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-indigo fw-bold extra-small text-uppercase">Overall Control Health</span>
+                                            <span class="text-indigo fw-bold">{{$ctrl.selectedControlDetails.progress}}%</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height: 10px; background: rgba(255,255,255,0.5);">
+                                            <div class="progress-bar bg-indigo" ng-style="{'width': $ctrl.selectedControlDetails.progress + '%'}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Work Breakdown Structure -->
+                            <div class="col-md-7">
+                                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
+                                    <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold text-dark mb-0 small">
+                                            <i class="fas fa-sitemap me-2 text-primary"></i>
+                                            Work Breakdown Structure (WBS)
+                                        </h6>
+                                        <span class="badge bg-white text-dark border rounded-pill small">{{$ctrl.selectedControlDetails.parsedSubDesc.length}} Objectives</span>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive" style="max-height: 450px;">
+                                            <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                                <thead class="bg-light-subtle text-muted extra-small fw-bold">
+                                                    <tr>
+                                                        <th class="ps-4 border-0 py-3">OBJECTIVE / ASSIGNEE</th>
+                                                        <th class="border-0 py-3">LIFECYCLE</th>
+                                                        <th class="text-end pe-4 border-0 py-3">PROG.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sub in $ctrl.selectedControlDetails.parsedSubDesc">
+                                                        <td class="ps-4 py-3" style="width: 30%;">
+                                                            <div class="fw-bold text-dark mb-1">{{sub.displayTitle}}</div>
+                                                            <div class="text-muted d-flex flex-column gap-1 mt-2" style="font-size: 0.65rem;">
+                                                                <span class="d-flex align-items-center"><i class="fas fa-code me-2 text-primary"></i>DEV: {{sub.assigneeName}}</span>
+                                                                <span class="d-flex align-items-center"><i class="fas fa-vial me-2 text-success"></i>QA: {{sub.qaAssigneeName}}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3 px-3" style="min-width: 350px;">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span class="x-small fw-bold text-muted text-uppercase" style="font-size: 0.6rem;">Status Progress Breakdown</span>
+                                                                <span class="badge rounded-pill" ng-style="{'background-color': $ctrl.getStatusColor(sub.status) + '22', 'color': $ctrl.getStatusColor(sub.status), 'font-size': '0.55rem'}">{{sub.status || 'Analyze'}}</span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between text-center mt-2">
+                                                                <div ng-repeat="stage in sub.stages" class="position-relative flex-grow-1 mx-1">
+                                                                    <div class="w-100 rounded-pill overflow-hidden bg-light" style="height: 6px;">
+                                                                        <div class="h-100" style="transition: width 0.3s ease;" ng-style="{'width': stage.progress + '%', 'background-color': stage.color}"></div>
+                                                                    </div>
+                                                                    <div class="mt-1 d-flex flex-column">
+                                                                        <span class="fw-bold text-truncate" style="font-size: 0.52rem; color: #475569;">{{stage.name === 'Development' ? 'DEV' : (stage.name === 'Dev Testing' ? 'TST' : stage.name)}}</span>
+                                                                        <span class="fw-bold" style="font-size: 0.55rem;" ng-style="{'color': (stage.progress > 0 ? stage.color : '#94a3b8')}">{{stage.progress}}%</span>
+                                                                        <div class="text-truncate px-1 opacity-75" style="font-size: 0.42rem; font-weight: 600; color: #64748b; margin-top: 2px;" ng-if="stage.isActive">
+                                                                            {{stage.assignee}}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-end pe-4 py-3 align-middle" style="width: 15%;">
+                                                            <div class="d-flex flex-column align-items-end">
+                                                                <span class="text-muted" style="font-size: 0.55rem; text-transform: uppercase;">Total Prog.</span>
+                                                                <span class="fw-bold fs-6" ng-style="{'color': $ctrl.getStatusColor(sub.status)}">{{sub.progress || 0}}%</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!$ctrl.selectedControlDetails.parsedSubDesc.length">
+                                                        <td colspan="3" class="text-center py-5">
+                                                            <div class="text-muted px-4">
+                                                                <i class="fas fa-tasks mb-3" style="font-size: 2rem; opacity: 0.2;"></i>
+                                                                <p class="small mb-0">No detailed objectives breakdown for this control.</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-light border-0 py-3 text-center">
+                                        <button class="btn btn-outline-indigo btn-sm rounded-pill px-4 fw-bold" 
+                                                ng-click="$ctrl.goToControlFromModal($ctrl.selectedControlDetails)">
+                                            <i class="fas fa-external-link-alt me-2"></i>Go to Control Board
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -790,7 +1115,7 @@ app.component('dashboard', {
         </div>
     </div>
     `,
-    controller: function (ApiService, $timeout, $rootScope, $scope, AuthService, NotificationService) {
+    controller: function (ApiService, $timeout, $rootScope, $scope, AuthService, NotificationService, $filter, $location) {
         var ctrl = this;
         ctrl.store = ApiService.data;
 
@@ -803,7 +1128,91 @@ app.component('dashboard', {
         ctrl.allTestCases = [];
         ctrl.loadingDefects = false;
         ctrl.defectFilter = 'All';
+        ctrl.hubSearch = '';
+
+
+        ctrl.goToControl = function (id) {
+            if (!id) return;
+            // Set URL search parameter
+            $location.search('controlId', id);
+            // Switch to controls view
+            $rootScope.currentView = 'controls';
+            $rootScope.$emit('viewChanged', 'controls');
+            
+            // Notification if needed, though checkAndFocusControl handles the highlight
+            console.log('Navigating to Control ID:', id);
+        };
+
         ctrl.currentUser = AuthService.getUser();
+        
+        // Role Helpers
+        ctrl.isPM = function() { return AuthService.isProjectManager() || AuthService.isAdmin(); };
+        ctrl.isLead = function() { return AuthService.isTeamLead() || AuthService.isSoftwareArchitecture(); };
+        ctrl.isDev = function() { return AuthService.isDeveloper(); };
+        ctrl.isQA = function() { return AuthService.isQAEngineer(); };
+        ctrl.isManagement = function() { return ctrl.isPM() || ctrl.isLead(); };
+
+        // Sub-Objective Stats
+        ctrl.subObjectiveStats = { total: 0, analyze: 0, dev: 0, qa: 0, readyQA: 0, completed: 0, onHold: 0 };
+        ctrl.mySubObjectives = [];
+        ctrl.readyForQASubObjectives = [];
+        ctrl.projectReadiness = 0;
+
+        ctrl.processAllSubDescriptions = function () {
+            if (!ctrl.store.allControls) return;
+
+            var stats = { total: 0, analyze: 0, dev: 0, qa: 0, readyQA: 0, completed: 0, onHold: 0 };
+            var mySub = [];
+            var qaSub = [];
+            
+            var userId = ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null;
+
+            ctrl.store.allControls.forEach(function (control) {
+                if (!control.subDescriptions) return;
+                
+                try {
+                    var subs = JSON.parse(control.subDescriptions);
+                    if (!Array.isArray(subs)) return;
+
+                    subs.forEach(function (sub, index) {
+                        stats.total++;
+                        
+                        var status = (sub.status || '').toLowerCase().trim();
+                        if (status === 'analyze') stats.analyze++;
+                        else if (status === 'development') stats.dev++;
+                        else if (status === 'qa') stats.qa++;
+                        else if (status === 'ready for qa') stats.readyQA++;
+                        else if (status === 'completed' || status === 'done' || status === 'pass') stats.completed++;
+                        else if (status === 'on hold') stats.onHold++;
+
+                        var subObj = {
+                            controlId: control.controlId,
+                            controlName: control.description,
+                            text: sub.description || 'Untitled Sub-Objective',
+                            ownerId: sub.employeeId,
+                            ownerName: sub.employeeName,
+                            status: sub.status,
+                            releaseDate: sub.releaseDate,
+                            index: index
+                        };
+
+                        if (userId && parseInt(sub.employeeId) === userId) {
+                            mySub.push(subObj);
+                        }
+                        if (status === 'ready for qa') {
+                            qaSub.push(subObj);
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error parsing sub-descriptions", e);
+                }
+            });
+
+            ctrl.subObjectiveStats = stats;
+            ctrl.mySubObjectives = mySub;
+            ctrl.readyForQASubObjectives = qaSub;
+            ctrl.projectReadiness = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+        };
 
         // Main Refresh Function
         ctrl.refreshDashboard = function () {
@@ -849,98 +1258,41 @@ app.component('dashboard', {
 
                 // Sort and Assign
                 workloadArray.sort((a, b) => b.controlCount - a.controlCount);
-
-                // Only assign if different to prevent digest triggers
-                if (JSON.stringify(ctrl.employeesWorkload) !== JSON.stringify(workloadArray)) {
-                    ctrl.employeesWorkload = workloadArray;
-                }
+                ctrl.employeesWorkload = workloadArray;
             }
 
-            // 4. Release Groups — controls grouped by release date
-            var releaseMap = {};
-            var releaseBgs = [
-                'linear-gradient(135deg,#6366f1,#4f46e5)',
-                'linear-gradient(135deg,#10b981,#059669)',
-                'linear-gradient(135deg,#f59e0b,#d97706)',
-                'linear-gradient(135deg,#ef4444,#dc2626)',
-                'linear-gradient(135deg,#3b82f6,#2563eb)',
-                'linear-gradient(135deg,#8b5cf6,#7c3aed)',
-                'linear-gradient(135deg,#f97316,#ea580c)',
-                'linear-gradient(135deg,#94a3b8,#64748b)'
-            ];
+            // 4. Process Sub-Descriptions
+            ctrl.processAllSubDescriptions();
 
-            var getUTCDateKey = function(dateVal) {
-                if (!dateVal) return null;
-                var ds = typeof dateVal === 'string' ? dateVal : dateVal.toISOString();
-                if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
-                var d = new Date(ds);
-                return d.getUTCFullYear() + '-' + ('0'+(d.getUTCMonth()+1)).slice(-2) + '-' + ('0'+d.getUTCDate()).slice(-2);
-            };
 
-            var formatDateKey = function(key) {
-                var parts = key.split('-');
-                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                return months[parseInt(parts[1])-1] + ' ' + parseInt(parts[2]) + ', ' + parts[0];
-            };
-
-            ctrl.store.allControls.forEach(function(c) {
-                var dateKeys = new Set();
-
-                // Main control release date
-                var mainKey = getUTCDateKey(c.releaseDate);
-                if (mainKey) dateKeys.add(mainKey);
-
-                // All sub-objective release dates
-                if (c.subDescriptions) {
-                    try {
-                        var subs = JSON.parse(c.subDescriptions);
-                        if (Array.isArray(subs)) {
-                            subs.forEach(function(sub) {
-                                var subKey = getUTCDateKey(sub.releaseDate);
-                                if (subKey) dateKeys.add(subKey);
-                            });
-                        }
-                    } catch(e) {}
-                }
-
-                // Add control to each date group it belongs to
-                dateKeys.forEach(function(key) {
-                    if (!releaseMap[key]) releaseMap[key] = [];
-                    // Avoid duplicates
-                    if (!releaseMap[key].find(function(x){ return x.controlId === c.controlId; })) {
-                        releaseMap[key].push(c);
-                    }
-                });
-            });
-
-            var bgIdx = 0;
-            ctrl.releaseGroups = Object.keys(releaseMap).sort().map(function(key) {
-                var controls = releaseMap[key];
-                var totalProg = controls.reduce(function(s,c){ return s+(c.progress||0); }, 0);
-                var statusCount = {};
-                controls.forEach(function(c) {
-                    var s = c.statusName || 'No Status';
-                    statusCount[s] = (statusCount[s]||0)+1;
-                });
-                var statuses = Object.keys(statusCount).map(function(s){ return {name:s, count:statusCount[s]}; }).sort(function(a,b){return b.count-a.count;}).slice(0,3);
-                var bg = releaseBgs[bgIdx % releaseBgs.length]; bgIdx++;
-                return {
-                    dateKey: key,
-                    label: formatDateKey(key),
-                    controls: controls,
-                    avgProgress: controls.length > 0 ? Math.round(totalProg/controls.length) : 0,
-                    statuses: statuses,
-                    bg: bg,
-                    _open: false
-                };
-            });
-
-            // 5. Re-render Charts
-            $timeout(function () {
-                ctrl.initCharts();
-                ctrl.drawReleaseStatusPie();
-            }, 100);
         };
+
+        ctrl.parseSub = function (json) {
+            if (!json) return [];
+            try {
+                return JSON.parse(json);
+            } catch (e) {
+                return [];
+            }
+        };
+
+        ctrl.getDefectSeverityColor = function (severity) {
+            var s = (severity || '').toLowerCase();
+            if (s === 'critical') return '#ef4444';
+            if (s === 'high') return '#f97316';
+            if (s === 'medium') return '#f59e0b';
+            return '#3b82f6';
+        };
+
+        ctrl.getSubStatusColor = function (status) {
+            var s = (status || '').toLowerCase();
+            if (s === 'pass' || s === 'completed' || s === 'done') return '#10b981';
+            if (s === 'fail') return '#ef4444';
+            if (s === 'block') return '#f59e0b';
+            return '#6c757d';
+        };
+
+
 
         // Watch for data changes from API service
         $scope.$watch(function () {
@@ -982,12 +1334,37 @@ app.component('dashboard', {
             ctrl.releaseStatusChart = null;
             ctrl.releaseStatusProgress = [];
             ctrl.roadmapCache = null;
-            ctrl.defectFilter = 'All';
+            ctrl.defectFilter = 'Assigned';
+            ctrl.selectedControlFilter = '';
             ctrl.developerMetrics = [];
             ctrl.releaseGroups = [];
             ctrl.selectedReleaseGroup = '';
             ctrl.activeReleaseGroup = null;
             ctrl.releaseStatusPieChart = null;
+
+            // Updated date resolver (searches control + related release + sub-objectives)
+            ctrl.getControlDates = function (control) {
+                var dates = [];
+                // 1. Direct release date
+                if (control.releaseDate) dates.push(control.releaseDate);
+                // 2. Date from linked release
+                if (control.releaseId && ctrl.store.releases) {
+                    var r = ctrl.store.releases.find(function(x) { return x.releaseId === control.releaseId; });
+                    if (r && r.releaseDate) dates.push(r.releaseDate);
+                }
+                // 3. Dates from test cases / sub-objectives
+                if (control.subDescriptions) {
+                    try {
+                        var subs = typeof control.subDescriptions === 'string' ? JSON.parse(control.subDescriptions) : control.subDescriptions;
+                        if (Array.isArray(subs)) {
+                            subs.forEach(function(sub) {
+                                if (sub.releaseDate) dates.push(sub.releaseDate);
+                            });
+                        }
+                    } catch(e) {}
+                }
+                return dates;
+            };
         };
 
         // Load dashboard data for current team
@@ -1027,9 +1404,24 @@ app.component('dashboard', {
             ctrl.loadQAChartData();
         });
 
+        // Listen for real-time control updates
+        var controlsListener = $rootScope.$on('controlsUpdated', function () {
+            console.log('Dashboard received controlsUpdated event, refreshing data');
+            ctrl.refreshDashboard();
+            ctrl.forceRoadmapUpdate();
+        });
+
+        var dashboardUpdatedListener = $rootScope.$on('dashboardUpdated', function () {
+            console.log('Dashboard received dashboardUpdated event');
+            ctrl.refreshDashboard();
+            ctrl.forceRoadmapUpdate();
+        });
+
         // Cleanup
         ctrl.$onDestroy = function () {
             if (teamListener) teamListener();
+            if (controlsListener) controlsListener();
+            if (dashboardUpdatedListener) dashboardUpdatedListener();
         };
 
         ctrl.getAllReleaseControls = function() {
@@ -1069,15 +1461,35 @@ app.component('dashboard', {
             var statusColors = {
                 'Analyze': '#6366f1', 'HLD': '#8b5cf6', 'LLD': '#3b82f6',
                 'Development': '#f59e0b', 'Dev Testing': '#f97316',
-                'QA': '#10b981', 'On Hold': '#94a3b8', 'Completed': '#059669',
+                'QA': '#10b981', 'Ready for QA': '#14b8a6', 'On Hold': '#94a3b8', 'Completed': '#059669',
                 'Not Started': '#d1d5db'
             };
 
             var statusMap = {};
             controls.forEach(function(c) {
-                var s = c.statusName && c.statusName.trim() ? c.statusName.trim() : 'Not Started';
-                statusMap[s] = (statusMap[s] || 0) + 1;
+                var subs = ctrl.parseSub(c.subDescriptions);
+                if (subs && subs.length > 0) {
+                    subs.forEach(function(s) {
+                        var st = s.status && s.status.trim() ? s.status.trim() : 'Not Started';
+                        var prog = parseFloat(s.progress || 0);
+                        if (prog > 0) {
+                            statusMap[st] = (statusMap[st] || 0) + prog;
+                        }
+                    });
+                } else {
+                    // Fall back to control's own status and progress if no sub-objectives exist
+                    var defaultSt = c.statusName && c.statusName.trim() ? c.statusName.trim() : 'Not Started';
+                    var ctrlProg = parseFloat(c.progress || 0);
+                    if (ctrlProg > 0) {
+                        statusMap[defaultSt] = (statusMap[defaultSt] || 0) + ctrlProg;
+                    }
+                }
             });
+
+            // If everything is 0%, just show a 100% "Not Started" placeholder
+            if (Object.keys(statusMap).length === 0) {
+                statusMap['Not Started'] = 100;
+            }
 
             var labels = Object.keys(statusMap);
             var data = labels.map(function(s) { return statusMap[s]; });
@@ -1138,7 +1550,7 @@ app.component('dashboard', {
 
         ctrl.getMonthReleaseCount = function (monthIndex) {
             var currentTeamId = AuthService.getTeamId();
-            var releasesInMonth = {};
+            var count = 0;
 
             var matchesMonth = function(dateVal) {
                 if (!dateVal) return false;
@@ -1149,27 +1561,29 @@ app.component('dashboard', {
                 return d.getUTCFullYear() === ctrl.currentYear && d.getUTCMonth() === monthIndex;
             };
 
-            // Source 1: releases linked to controls (team-filtered)
+            // Determine if user has "All Teams" selected or no team context
+            var isAllTeams = !currentTeamId || String(currentTeamId) === '0' || String(currentTeamId) === '-1' || String(currentTeamId) === 'null';
+
+            // Items set to track unique "Release Hub" entries (Formal Release IDs or Ad-Hoc Control IDs)
+            var uniqueItems = new Set();
+
             if (ctrl.store.allControls) {
                 ctrl.store.allControls.forEach(function(control) {
-                    if (control.releaseId && control.releaseDate &&
-                        parseInt(control.teamId) === parseInt(currentTeamId) &&
-                        matchesMonth(control.releaseDate)) {
-                        releasesInMonth[control.releaseId] = true;
+                    if (isAllTeams || parseInt(control.teamId) === parseInt(currentTeamId)) {
+                        var allDates = ctrl.getControlDates(control);
+                        var matches = allDates.some(function(d) { return matchesMonth(d); });
+                        
+                        if (matches) {
+                            // If it belongs to a formal release, track the release ID
+                            // Otherwise, track the control ID as a standalone entry
+                            var itemId = control.releaseId ? ('rel_' + control.releaseId) : ('ctrl_' + control.controlId);
+                            uniqueItems.add(itemId);
+                        }
                     }
                 });
             }
 
-            // Source 2: all releases in store
-            if (ctrl.store.releases) {
-                ctrl.store.releases.forEach(function(r) {
-                    if (r.releaseDate && matchesMonth(r.releaseDate)) {
-                        releasesInMonth[r.releaseId] = true;
-                    }
-                });
-            }
-
-            return Object.keys(releasesInMonth).length;
+            return uniqueItems.size;
         };
 
         // Watch for team changes and force roadmap refresh
@@ -1319,12 +1733,23 @@ app.component('dashboard', {
             var today = new Date();
             var currentMonth = today.getMonth();
             var currentYear = today.getFullYear();
-            // Past years: always accessible
-            if (ctrl.currentYear < currentYear) return true;
-            // Future years beyond next month boundary: locked
-            if (ctrl.currentYear > currentYear) return false;
-            // Current year: accessible up to and including next month
-            return monthIndex <= currentMonth + 1;
+            
+            // Allow all past years
+            if (ctrl.currentYear < currentYear) {
+                return true;
+            }
+            
+            // For current year, allow past months, current month, and next month
+            if (ctrl.currentYear === currentYear) {
+                return monthIndex <= currentMonth + 1;
+            }
+            
+            // For next year, if current month is December, only allow January
+            if (ctrl.currentYear === currentYear + 1 && currentMonth === 11) {
+                return monthIndex === 0;
+            }
+            
+            return false;
         };
 
         ctrl.getMonthCardClass = function (monthIndex) {
@@ -1408,15 +1833,8 @@ app.component('dashboard', {
             console.log('Month Name:', ctrl.monthFullNames[monthIndex]);
             console.log('Current Year:', ctrl.currentYear);
 
-            // Check if user can access this month (past, current, or next month only)
-            var today = new Date();
-            var currentMonth = today.getMonth();
-            var currentYear = today.getFullYear();
-            var targetDate = new Date(ctrl.currentYear, monthIndex, 1);
-            var nextMonthStart = new Date(currentYear, currentMonth + 1, 1);
-
             // Allow past months, current month, and next month only
-            if (targetDate > nextMonthStart) {
+            if (!ctrl._isMonthAccessible(monthIndex)) {
                 if (NotificationService) {
                     NotificationService.show('Access restricted. You can only view up to next month.', 'warning');
                 }
@@ -1438,40 +1856,59 @@ app.component('dashboard', {
                 return d.getUTCFullYear() === ctrl.currentYear && d.getUTCMonth() === monthIndex;
             };
 
-            // Source 1: from controls (team-filtered)
+            // Source 1: from controls (team-filtered) (now considering test case dates too)
+            var isAllTeams = !currentTeamId || String(currentTeamId) === '0' || String(currentTeamId) === '-1' || String(currentTeamId) === 'null';
+
             if (ctrl.store.allControls) {
                 ctrl.store.allControls.forEach(function (control) {
-                    if (control.releaseId && control.releaseName && control.releaseDate &&
-                        parseInt(control.teamId) === parseInt(currentTeamId) &&
-                        matchesMonthYear(control.releaseDate)) {
-                        if (!releasesMap[control.releaseId]) {
-                            releasesMap[control.releaseId] = {
-                                releaseId: control.releaseId,
-                                releaseName: control.releaseName,
-                                releaseDate: control.releaseDate,
-                                description: null
-                            };
+                    if (isAllTeams || parseInt(control.teamId) === parseInt(currentTeamId)) {
+                        var allDates = ctrl.getControlDates(control);
+                        var firstMatchInMonth = allDates.find(function(d) { return matchesMonthYear(d); });
+                        
+                        if (firstMatchInMonth) {
+                            var rId = control.releaseId;
+                            var mapKey = rId ? rId : ('adhoc_ctrl_' + control.controlId);
+
+                            if (!releasesMap[mapKey]) {
+                                // If it's a formal release, we might already have it from store.releases (handled below)
+                                // or we create a placeholder if it's not in store.releases but exists on controls
+                                var releaseName = control.releaseName;
+                                if (!releaseName) {
+                                    releaseName = rId ? ('Release ' + rId) : (control.description || 'Ad-Hoc Release');
+                                }
+
+                                releasesMap[mapKey] = {
+                                    releaseId: rId,
+                                    isCustom: !rId,
+                                    controlId: !rId ? control.controlId : null,
+                                    releaseName: releaseName,
+                                    releaseDate: firstMatchInMonth, 
+                                    description: !rId ? 'Scheduled Control: ' + control.description : null
+                                };
+                            }
                         }
                     }
                 });
             }
 
-            // Source 2: from store.releases directly (catches releases not yet linked to controls)
+            // Sync with formal releases from store to get proper names/dates if available
             if (ctrl.store.releases) {
                 ctrl.store.releases.forEach(function (r) {
-                    if (r.releaseDate && !releasesMap[r.releaseId] && matchesMonthYear(r.releaseDate)) {
-                        releasesMap[r.releaseId] = {
-                            releaseId: r.releaseId,
-                            releaseName: r.releaseName,
-                            releaseDate: r.releaseDate,
-                            description: r.description || null
-                        };
+                    if (releasesMap[r.releaseId]) {
+                        releasesMap[r.releaseId].releaseName = r.releaseName || releasesMap[r.releaseId].releaseName;
+                        releasesMap[r.releaseId].releaseDate = r.releaseDate || releasesMap[r.releaseId].releaseDate;
+                        releasesMap[r.releaseId].description = r.description || releasesMap[r.releaseId].description;
                     }
                 });
             }
 
-            // Convert map to array
-            ctrl.selectedMonthReleases = Object.values(releasesMap);
+            // Convert map to array and enrich with stats
+            ctrl.selectedMonthReleases = Object.values(releasesMap).map(function(r) {
+                var stats = ctrl.getReleaseStats(r);
+                r._count = stats.count;
+                r._progress = stats.progress;
+                return r;
+            });
 
             // Sort by date
             ctrl.selectedMonthReleases.sort(function (a, b) {
@@ -1495,26 +1932,105 @@ app.component('dashboard', {
             return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
         };
 
-        ctrl.getReleaseControlCount = function (releaseId) {
-            if (!ctrl.store.allControls) return 0;
-            var release = ctrl.store.releases && ctrl.store.releases.find(function(r) { return r.releaseId === releaseId; });
-            if (!release || !release.releaseDate) {
-                return ctrl.store.allControls.filter(function(c) { return c.releaseId === releaseId; }).length;
+        ctrl._calculateControlProgress = function (control) {
+            // Priority 1: Use explicitly set progress if it exists and is non-zero
+            if (control.progress && control.progress > 0) return control.progress;
+            
+            // Priority 2: Calculate from sub-descriptions (WBS)
+            var subs = [];
+            if (control.subDescriptions && typeof control.subDescriptions === 'string') {
+                try { subs = JSON.parse(control.subDescriptions); } catch (e) {}
+            } else if (Array.isArray(control.subDescriptions)) {
+                subs = control.subDescriptions;
             }
-            var ds = typeof release.releaseDate === 'string' ? release.releaseDate : release.releaseDate.toISOString();
-            if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
-            var rd = new Date(ds);
-            var releaseDay = rd.getUTCFullYear() + '-' + rd.getUTCMonth() + '-' + rd.getUTCDate();
-            return ctrl.store.allControls.filter(function(c) {
-                if (c.releaseId === releaseId) return true;
-                if (c.releaseDate) {
-                    var cds = typeof c.releaseDate === 'string' ? c.releaseDate : c.releaseDate.toISOString();
-                    if (cds.indexOf('Z') === -1 && cds.indexOf('+') === -1) cds += 'Z';
-                    var cd = new Date(cds);
-                    return cd.getUTCFullYear() + '-' + cd.getUTCMonth() + '-' + cd.getUTCDate() === releaseDay;
+            
+            if (subs && subs.length > 0) {
+                var total = subs.reduce(function(s, sub) {
+                    return s + (sub.progress || 0);
+                }, 0);
+                return Math.round(total / subs.length);
+            }
+            
+            return control.progress || 0;
+        };
+
+        ctrl.getReleaseStats = function (release) {
+            if (!ctrl.store.allControls) return { count: 0, progress: 0 };
+            
+            var releaseDay = null;
+            if (release.releaseDate) {
+                var ds = typeof release.releaseDate === 'string' ? release.releaseDate : (release.releaseDate instanceof Date ? release.releaseDate.toISOString() : String(release.releaseDate));
+                if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
+                var rd = new Date(ds);
+                releaseDay = rd.getUTCFullYear() + '-' + rd.getUTCMonth() + '-' + rd.getUTCDate();
+            }
+
+            var matchingControls = ctrl.store.allControls.filter(function (c) {
+                if (c.releaseId && c.releaseId === release.releaseId) return true;
+                var allDates = ctrl.getControlDates ? ctrl.getControlDates(c) : (c.releaseDate ? [c.releaseDate] : []);
+                if (releaseDay && allDates.length > 0) {
+                    return allDates.some(function(effDate) {
+                        var cds = typeof effDate === 'string' ? effDate : (effDate instanceof Date ? effDate.toISOString() : String(effDate));
+                        if (cds.indexOf('Z') === -1 && cds.indexOf('+') === -1) cds += 'Z';
+                        var cd = new Date(cds);
+                        var cDay = cd.getUTCFullYear() + '-' + cd.getUTCMonth() + '-' + cd.getUTCDate();
+                        return cDay === releaseDay;
+                    });
+                }
+                if (releaseDay && c.subDescriptions) {
+                    try {
+                        var subs = JSON.parse(c.subDescriptions);
+                        if (Array.isArray(subs)) {
+                            return subs.some(function(sub) {
+                                if (!sub.releaseDate) return false;
+                                var sds = typeof sub.releaseDate === 'string' ? sub.releaseDate : new Date(sub.releaseDate).toISOString();
+                                if (sds.indexOf('Z') === -1 && sds.indexOf('+') === -1) sds += 'Z';
+                                var sd = new Date(sds);
+                                var sDay = sd.getUTCFullYear() + '-' + sd.getUTCMonth() + '-' + sd.getUTCDate();
+                                return sDay === releaseDay;
+                            });
+                        }
+                    } catch(e) {}
                 }
                 return false;
-            }).length;
+            });
+
+            var avgProgress = matchingControls.length > 0
+                ? Math.round(matchingControls.reduce(function(s, c) { return s + ctrl._calculateControlProgress(c); }, 0) / matchingControls.length)
+                : 0;
+
+            return {
+                count: matchingControls.length,
+                progress: avgProgress
+            };
+        };
+
+        ctrl.getReleaseStatusInfo = function (release) {
+            var progress = release._progress !== undefined ? release._progress : 0;
+            var count = release._count !== undefined ? release._count : 0;
+            
+            if (count === 0) return { text: 'No Controls', style: { 'background-color': '#64748b', 'color': 'white' } };
+            
+            // Using explicit style objects for ng-style compatibility and maximum visibility
+            if (progress === 0) return { text: 'Scheduled', style: { 'background-color': '#f59e0b', 'color': 'white' } };
+            if (progress === 100) return { text: 'Completed', style: { 'background-color': '#10b981', 'color': 'white' } };
+            return { text: 'In Progress (' + progress + '%)', style: { 'background-color': '#6366f1', 'color': 'white' } };
+        };
+
+        ctrl.getReleaseControlCount = function (release) {
+            if (!release || !ctrl.store.allControls) return 0;
+            
+            // If it's a standalone ad-hoc control, the count is always 1
+            if (release.isCustom && release.controlId) return 1;
+
+            var releaseId = release.releaseId;
+            var count = 0;
+            ctrl.store.allControls.forEach(function (c) {
+                if (c.releaseId && c.releaseId === releaseId) {
+                    count++;
+                }
+            });
+            return count;
         };
 
         ctrl.showReleaseDetails = function (release) {
@@ -1529,17 +2045,23 @@ app.component('dashboard', {
                 var rd = new Date(ds);
                 releaseDay = rd.getUTCFullYear() + '-' + rd.getUTCMonth() + '-' + rd.getUTCDate();
             }
+            ctrl.selectedReleaseDay = releaseDay;
 
             ctrl.releaseControls = ctrl.store.allControls.filter(function (c) {
                 // Match by releaseId
                 if (c.releaseId && c.releaseId === release.releaseId) return true;
-                // Match by release date (UTC day)
-                if (releaseDay && c.releaseDate) {
-                    var cds = typeof c.releaseDate === 'string' ? c.releaseDate : c.releaseDate.toISOString();
-                    if (cds.indexOf('Z') === -1 && cds.indexOf('+') === -1) cds += 'Z';
-                    var cd = new Date(cds);
-                    var cDay = cd.getUTCFullYear() + '-' + cd.getUTCMonth() + '-' + cd.getUTCDate();
-                    if (cDay === releaseDay) return true;
+                
+                var allDates = ctrl.getControlDates ? ctrl.getControlDates(c) : (c.releaseDate ? [c.releaseDate] : []);
+                
+                // Match by release date (UTC day) — check if ANY of the control's dates match the release date
+                if (releaseDay && allDates.length > 0) {
+                    return allDates.some(function(effDate) {
+                        var cds = typeof effDate === 'string' ? effDate : (effDate instanceof Date ? effDate.toISOString() : String(effDate));
+                        if (cds.indexOf('Z') === -1 && cds.indexOf('+') === -1) cds += 'Z';
+                        var cd = new Date(cds);
+                        var cDay = cd.getUTCFullYear() + '-' + cd.getUTCMonth() + '-' + cd.getUTCDate();
+                        return cDay === releaseDay;
+                    });
                 }
                 // Also check sub-objectives for matching release date
                 if (releaseDay && c.subDescriptions) {
@@ -1559,6 +2081,29 @@ app.component('dashboard', {
                 }
                 return false;
             });
+            
+            // Process sub-descriptions for each control
+            ctrl.releaseControls.forEach(function (c) {
+                if (c.subDescriptions && typeof c.subDescriptions === 'string') {
+                    try {
+                        c._subDescriptionsArray = JSON.parse(c.subDescriptions);
+                    } catch (e) {
+                        c._subDescriptionsArray = [];
+                    }
+                } else if (Array.isArray(c.subDescriptions)) {
+                    c._subDescriptionsArray = c.subDescriptions;
+                } else {
+                    c._subDescriptionsArray = [];
+                }
+                
+                // Ensure each sub-description has a title and progress
+                if (c._subDescriptionsArray) {
+                    c._subDescriptionsArray.forEach(function(sub) {
+                       sub.title = sub.title || sub.description || 'Sub-Objective';
+                       sub.progress = (sub.progress !== undefined && sub.progress !== null) ? sub.progress : 0;
+                    });
+                }
+            });
 
             // Calculate average progress
             ctrl.releaseAverageProgress = ctrl.releaseControls.length > 0
@@ -1567,64 +2112,442 @@ app.component('dashboard', {
 
             ctrl.calculateStatusProgress();
 
-            var monthModal = bootstrap.Modal.getInstance(document.getElementById('monthReleasesModal'));
-            if (monthModal) monthModal.hide();
-
+            // Open release details modal without hiding the month releases modal
+            // This allows stacking and keeps the previous context accessible when closing this modal
             $timeout(function () {
                 var releaseModal = new bootstrap.Modal(document.getElementById('releaseDetailsModal'));
                 releaseModal.show();
-            }, 500);
+            }, 0);
+        };
+
+        ctrl.toggleReleaseExpansion = function(release) {
+            release._expanded = !release._expanded;
+            if (release._expanded && !release._detailsLoaded) {
+                // Populate data for this specific release
+                
+                var releaseDay = null;
+                if (release.releaseDate) {
+                    var ds = typeof release.releaseDate === 'string' ? release.releaseDate : release.releaseDate.toISOString();
+                    if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
+                    var rd = new Date(ds);
+                    releaseDay = rd.getUTCFullYear() + '-' + rd.getUTCMonth() + '-' + rd.getUTCDate();
+                }
+
+                release._controls = ctrl.store.allControls.filter(function (c) {
+                    if (c.releaseId && c.releaseId === release.releaseId) return true;
+                    var allDates = ctrl.getControlDates ? ctrl.getControlDates(c) : (c.releaseDate ? [c.releaseDate] : []);
+                    if (releaseDay && allDates.length > 0) {
+                        return allDates.some(function(effDate) {
+                            var cds = typeof effDate === 'string' ? effDate : (effDate instanceof Date ? effDate.toISOString() : String(effDate));
+                            if (cds.indexOf('Z') === -1 && cds.indexOf('+') === -1) cds += 'Z';
+                            var cd = new Date(cds);
+                            var cDay = cd.getUTCFullYear() + '-' + cd.getUTCMonth() + '-' + cd.getUTCDate();
+                            return cDay === releaseDay;
+                        });
+                    }
+                    if (releaseDay && c.subDescriptions) {
+                        try {
+                            var subs = JSON.parse(c.subDescriptions);
+                            if (Array.isArray(subs)) {
+                                return subs.some(function(sub) {
+                                    if (!sub.releaseDate) return false;
+                                    var sds = typeof sub.releaseDate === 'string' ? sub.releaseDate : new Date(sub.releaseDate).toISOString();
+                                    if (sds.indexOf('Z') === -1 && sds.indexOf('+') === -1) sds += 'Z';
+                                    var sd = new Date(sds);
+                                    var sDay = sd.getUTCFullYear() + '-' + sd.getUTCMonth() + '-' + sd.getUTCDate();
+                                    return sDay === releaseDay;
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                    return false;
+                });
+
+                release._controls.forEach(function (c) {
+                    if (c.subDescriptions && typeof c.subDescriptions === 'string') {
+                        try { c._subDescriptionsArray = JSON.parse(c.subDescriptions); } catch (e) { c._subDescriptionsArray = []; }
+                    } else if (Array.isArray(c.subDescriptions)) {
+                        c._subDescriptionsArray = c.subDescriptions;
+                    } else {
+                        c._subDescriptionsArray = [];
+                    }
+                    if (c._subDescriptionsArray) {
+                        c._subDescriptionsArray.forEach(function(sub) {
+                           sub.title = sub.title || sub.description || 'Sub-Objective';
+                           sub.progress = (sub.progress !== undefined && sub.progress !== null) ? sub.progress : 0;
+                        });
+                    }
+                    
+                    // Dynamic calculation for real-time accuracy in expansion
+                    c.calculatedProgress = ctrl._calculateControlProgress(c);
+                });
+
+                release._averageProgress = release._controls.length > 0
+                    ? Math.round(release._controls.reduce(function(s, c) { return s + (c.calculatedProgress || 0); }, 0) / release._controls.length)
+                    : 0;
+
+                release._detailsLoaded = true;
+            }
+        };
+
+        ctrl.openControlDetails = function(control) {
+            ctrl.selectedControlDetails = Object.assign({}, control);
+            
+            // Stages for breakdown
+            var lifecycleStages = [
+                { name: 'Analyze',     id: 1, color: '#6366f1' },
+                { name: 'HLD',         id: 2, color: '#f59e0b' },
+                { name: 'LLD',         id: 3, color: '#ec4899' },
+                { name: 'Development', id: 4, color: '#3b82f6' },
+                { name: 'Dev Testing', id: 5, color: '#8b5cf6' },
+                { name: 'QA',          id: 6, color: '#10b981' }
+            ];
+
+            // Mapping for dynamic lookup
+            if (ctrl.store.statuses && ctrl.store.statuses.length > 0) {
+                lifecycleStages.forEach(function(s) {
+                    var found = ctrl.store.statuses.find(function(dbS) {
+                        return dbS.statusName && dbS.statusName.toLowerCase().indexOf(s.name.toLowerCase()) !== -1;
+                    });
+                    if (found) s.id = found.id;
+                });
+            }
+
+            // Parse sub-descriptions if they exist
+            var subDesc = [];
+            if (typeof ctrl.selectedControlDetails.subDescriptions === 'string' && ctrl.selectedControlDetails.subDescriptions.trim().startsWith('[')) {
+                try {
+                    subDesc = JSON.parse(ctrl.selectedControlDetails.subDescriptions);
+                } catch (e) {
+                    subDesc = [];
+                }
+            } else if (Array.isArray(ctrl.selectedControlDetails.subDescriptions)) {
+                subDesc = ctrl.selectedControlDetails.subDescriptions;
+            }
+            
+            // Map details for each sub-objective
+            if (Array.isArray(subDesc)) {
+                subDesc.forEach(function(sub) {
+                    sub.displayTitle = sub.title || sub.description || 'Sub-Objective';
+                    sub.assigneeName = sub.employeeId ? ctrl.getEmployeeName(sub.employeeId) : 'Unassigned';
+                    var qaId = sub.qaEmployeeId || control.qaEmployeeId;
+                    sub.qaAssigneeName = qaId ? ctrl.getEmployeeName(qaId) : 'Unassigned';
+                    
+                    var statusId = sub.statusId ? parseInt(sub.statusId) : 1;
+                    var subStatusProgress = sub.statusProgress || {};
+                    
+                    // Build stage progress for WBS table
+                    sub.stages = lifecycleStages.map(function(s) {
+                        var progressValue = 0;
+                        if (subStatusProgress[s.id] !== undefined) {
+                            progressValue = parseInt(subStatusProgress[s.id]);
+                        } else if (statusId > s.id) {
+                            progressValue = 100;
+                        } else if (statusId === s.id) {
+                            progressValue = parseInt(sub.progress || 0);
+                        }
+                        return { name: s.name, progress: progressValue, color: s.color, isActive: statusId === s.id };
+                    });
+                });
+            }
+            
+            ctrl.selectedControlDetails.parsedSubDesc = subDesc;
+
+            $timeout(function() {
+                var modal = new bootstrap.Modal(document.getElementById('controlDetailsModal'));
+                modal.show();
+            }, 0);
+        };
+
+        ctrl.getEmployeeName = function(empId) {
+            if (!empId || !ctrl.store.employees) return 'Unassigned';
+            var emp = ctrl.store.employees.find(function(e) { return e.id === empId; });
+            return emp ? emp.employeeName : 'Unknown';
+        };
+
+        ctrl.goToControlFromModal = function(control) {
+            // Close all open modals gracefully
+            var m1 = document.getElementById('controlDetailsModal');
+            if (m1) {
+                var inst1 = bootstrap.Modal.getInstance(m1);
+                if (inst1) inst1.hide();
+            }
+            var m2 = document.getElementById('releaseDetailsModal');
+            if (m2) {
+                var inst2 = bootstrap.Modal.getInstance(m2);
+                if (inst2) inst2.hide();
+            }
+            var m3 = document.getElementById('monthReleasesModal');
+            if (m3) {
+                var inst3 = bootstrap.Modal.getInstance(m3);
+                if (inst3) inst3.hide();
+            }
+
+            // Wait for modals to hide before navigating to avoid backdrop issues
+            $timeout(function() {
+                // Set to controls view
+                ctrl.backToControls();
+            }, 400);
         };
 
         ctrl.calculateStatusProgress = function () {
-            var statusMap = {};
+            // Transform the overview into a Multi-Stage Lifecycle Breakdown per objective
+            // Stages: Analyze, HLD, LLD, Development, Dev Testing, QA
+            var lifecycleStages = [
+                { name: 'Analyze',     id: 1, color: '#6366f1' },
+                { name: 'HLD',         id: 2, color: '#f59e0b' },
+                { name: 'LLD',         id: 3, color: '#ec4899' },
+                { name: 'Development', id: 4, color: '#3b82f6' },
+                { name: 'Dev Testing', id: 5, color: '#8b5cf6' },
+                { name: 'QA',          id: 6, color: '#10b981' }
+            ];
 
-            // Group controls by status and calculate progress
-            ctrl.releaseControls.forEach(function (control) {
-                var statusName = control.statusName || 'No Status';
+            // Mapping for dynamic lookup if IDs differ from defaults
+            if (ctrl.store.statuses && ctrl.store.statuses.length > 0) {
+                lifecycleStages.forEach(function(s) {
+                    var found = ctrl.store.statuses.find(function(dbS) {
+                        return dbS.statusName && dbS.statusName.toLowerCase().indexOf(s.name.toLowerCase()) !== -1;
+                    });
+                    if (found) s.id = found.id;
+                });
+            }
 
-                if (!statusMap[statusName]) {
-                    statusMap[statusName] = {
-                        statusName: statusName,
-                        count: 0,
-                        totalProgress: 0,
-                        avgProgress: 0,
-                        color: ctrl.getStatusColor(statusName)
-                    };
-                }
-
-                statusMap[statusName].count++;
-                statusMap[statusName].totalProgress += (control.progress || 0);
-            });
-
-            // Calculate average progress for each status
             ctrl.releaseStatusProgress = [];
-            Object.keys(statusMap).forEach(function (statusName) {
-                var statusItem = statusMap[statusName];
-                statusItem.avgProgress = Math.round(statusItem.totalProgress / statusItem.count);
-                ctrl.releaseStatusProgress.push(statusItem);
+            var statusCounts = {}; // For Pie Chart
+            
+            // Map each objective into the breakdown list
+            ctrl.releaseControls.forEach(function (control) {
+                var subs = control._subDescriptionsArray || [];
+                
+                if (subs.length > 0) {
+                    subs.forEach(function(sub) {
+                        var matchesDate = true;
+                        if (ctrl.selectedReleaseDay && sub.releaseDate && !control.releaseId) {
+                            var sds = typeof sub.releaseDate === 'string' ? sub.releaseDate : new Date(sub.releaseDate).toISOString();
+                            if (sds.indexOf('Z') === -1 && sds.indexOf('+') === -1) sds += 'Z';
+                            var sd = new Date(sds);
+                            var sDay = sd.getUTCFullYear() + '-' + sd.getUTCMonth() + '-' + sd.getUTCDate();
+                            matchesDate = (sDay === ctrl.selectedReleaseDay);
+                        }
+
+                        if (matchesDate) {
+                            var statusId = sub.statusId ? parseInt(sub.statusId) : 1;
+                            var subStatusProgress = sub.statusProgress || {};
+                            var currentStatusName = sub.status || 'Analyze';
+                            
+                            // Tally status counts for pie chart
+                            statusCounts[currentStatusName] = (statusCounts[currentStatusName] || 0) + 1;
+
+                            var assigneeName = sub.employeeId ? ctrl.getEmployeeName(sub.employeeId) : 'Unassigned';
+                            // Priority 1: sub.qaEmployeeId, Priority 2: control.qaEmployeeId
+                            // Priority 3: Fallback to sub.employeeId IF the current status is actually 'QA'
+                            var rawQaId = sub.qaEmployeeId || control.qaEmployeeId;
+                            var qaAssigneeName = 'Unassigned';
+                            
+                            if (rawQaId) {
+                                qaAssigneeName = ctrl.getEmployeeName(rawQaId);
+                            } else if (currentStatusName.toLowerCase() === 'qa' && sub.employeeId) {
+                                qaAssigneeName = ctrl.getEmployeeName(sub.employeeId);
+                            }
+
+                            // Build stages for this objective
+                            var stagesList = lifecycleStages.map(function(s) {
+                                var progressValue = 0;
+                                if (subStatusProgress[s.id] !== undefined) {
+                                    progressValue = parseInt(subStatusProgress[s.id]);
+                                } else if (statusId > s.id) {
+                                    progressValue = 100;
+                                } else if (statusId === s.id) {
+                                    progressValue = parseInt(sub.progress || 0);
+                                }
+                                
+                                // For QA stage, use the detected QA assignee
+                                // For other stages, use the sub-objective owner, or fallback to parent owner if sub is currently assigned to QA
+                                var stageAssignee = assigneeName;
+                                if (s.name === 'QA') {
+                                    stageAssignee = qaAssigneeName;
+                                } else if (currentStatusName.toLowerCase() === 'qa') {
+                                    // If sub is in QA, the sub.employeeId might be the QA person. 
+                                    // So for Dev stages, use the parent control owner as the default developer.
+                                    stageAssignee = control.employeeId ? ctrl.getEmployeeName(control.employeeId) : assigneeName;
+                                }
+
+                                return { 
+                                    name: s.name, 
+                                    id: s.id, 
+                                    progress: progressValue, 
+                                    color: s.color, 
+                                    isActive: statusId === s.id,
+                                    assignee: stageAssignee
+                                };
+                            });
+
+                            var gradientParts = [];
+                            var currentAngle = 0;
+                            var sliceSize = 100 / stagesList.length;
+                            stagesList.forEach(function(stage) {
+                                var filledSize = sliceSize * (stage.progress / 100);
+                                var emptySize = sliceSize - filledSize;
+                                if (filledSize > 0) {
+                                    gradientParts.push(stage.color + ' ' + currentAngle + '% ' + (currentAngle + filledSize) + '%');
+                                }
+                                currentAngle += filledSize;
+                                if (emptySize > 0) {
+                                    gradientParts.push('#e2e8f0 ' + currentAngle + '% ' + (currentAngle + emptySize) + '%');
+                                    currentAngle += emptySize;
+                                }
+                            });
+                            var gradientStr = 'conic-gradient(' + gradientParts.join(', ') + ')';
+
+                            ctrl.releaseStatusProgress.push({
+                                title: sub.title || 'Untitled Objective',
+                                currentStatus: currentStatusName,
+                                stages: stagesList,
+                                controlName: control.controlName,
+                                controlId: control.controlId,
+                                totalProgress: sub.progress || 0,
+                                assigneeName: (currentStatusName.toLowerCase() === 'qa' && control.employeeId) ? ctrl.getEmployeeName(control.employeeId) : assigneeName,
+                                qaAssigneeName: qaAssigneeName,
+                                color: ctrl.getStatusColor(currentStatusName),
+                                conicGradient: gradientStr,
+                                _expanded: false,
+                                _subDescriptionsArray: subs
+                            });
+                        }
+                    });
+                } else {
+                    // Fallback for parent control
+                    var statusId = control.statusId ? parseInt(control.statusId) : 1;
+                    var currentStatusName = control.statusName || 'Analyze';
+                    
+                    statusCounts[currentStatusName] = (statusCounts[currentStatusName] || 0) + 1;
+
+                    var assigneeName = control.employeeId ? ctrl.getEmployeeName(control.employeeId) : 'Unassigned';
+                    var qaAssigneeName = control.qaEmployeeId ? ctrl.getEmployeeName(control.qaEmployeeId) : 'Unassigned';
+
+                    var stagesList = lifecycleStages.map(function(s) {
+                        var stageAssignee = (s.name === 'QA') ? qaAssigneeName : assigneeName;
+                        return { 
+                            name: s.name, 
+                            progress: (statusId > s.id ? 100 : (statusId === s.id ? (control.progress || 0) : 0)),
+                            color: s.color,
+                            isActive: statusId === s.id,
+                            assignee: stageAssignee
+                        };
+                    });
+
+                    var gradientParts = [];
+                    var currentAngle = 0;
+                    var sliceSize = 100 / stagesList.length;
+                    stagesList.forEach(function(stage) {
+                        var filledSize = sliceSize * (stage.progress / 100);
+                        var emptySize = sliceSize - filledSize;
+                        if (filledSize > 0) {
+                            gradientParts.push(stage.color + ' ' + currentAngle + '% ' + (currentAngle + filledSize) + '%');
+                        }
+                        currentAngle += filledSize;
+                        if (emptySize > 0) {
+                            gradientParts.push('#e2e8f0 ' + currentAngle + '% ' + (currentAngle + emptySize) + '%');
+                            currentAngle += emptySize;
+                        }
+                    });
+                    var gradientStr = 'conic-gradient(' + gradientParts.join(', ') + ')';
+
+                    ctrl.releaseStatusProgress.push({
+                        title: control.controlName || 'Untitled Control',
+                        currentStatus: currentStatusName,
+                        stages: stagesList,
+                        controlName: control.controlName,
+                        totalProgress: control.progress || 0,
+                        assigneeName: control.employeeId ? ctrl.getEmployeeName(control.employeeId) : 'Unassigned',
+                        color: ctrl.getStatusColor(currentStatusName),
+                        conicGradient: gradientStr,
+                        _expanded: false,
+                        _subDescriptionsArray: []
+                    });
+                }
             });
 
-            // Sort by count (descending)
-            ctrl.releaseStatusProgress.sort(function (a, b) {
-                return b.count - a.count;
+            // Prepare chart data
+            ctrl.releaseStatusChartData = {
+                labels: Object.keys(statusCounts),
+                data: Object.values(statusCounts),
+                colors: Object.keys(statusCounts).map(function(s) { return ctrl.getStatusColor(s); })
+            };
+
+            // Redraw pie chart
+            $timeout(function() { ctrl.drawReleaseObjectivesPieChart(); }, 300);
+        };
+
+        ctrl.drawReleaseObjectivesPieChart = function() {
+            var ctx = document.getElementById('releaseObjectivesStatusChart');
+            if (!ctx) return;
+            if (ctrl.releaseObjectivesPieChart) {
+                ctrl.releaseObjectivesPieChart.destroy();
+            }
+
+            if (!ctrl.releaseStatusChartData || !ctrl.releaseStatusChartData.labels.length) {
+                return;
+            }
+
+            ctrl.releaseObjectivesPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ctrl.releaseStatusChartData.labels,
+                    datasets: [{
+                        data: ctrl.releaseStatusChartData.data,
+                        backgroundColor: ctrl.releaseStatusChartData.colors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: { size: 10, family: "'Inter', sans-serif" },
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 10,
+                            titleFont: { family: "'Inter', sans-serif", weight: 'bold' }
+                        }
+                    }
+                }
             });
         };
 
         ctrl.getStatusColor = function (statusName) {
+            var s = (statusName || '').toLowerCase().trim();
             var colors = {
-                'To Do': '#94a3b8',
-                'In Progress': '#3b82f6',
-                'In Review': '#f59e0b',
-                'QA': '#8b5cf6',
-                'Done': '#10b981',
-                'Blocked': '#ef4444',
-                'Analyze': '#06b6d4',
-                'Design': '#ec4899',
-                'Development': '#6366f1',
-                'Testing': '#f97316'
+                'to do': '#94a3b8',
+                'in progress': '#3b82f6',
+                'in review': '#f59e0b',
+                'qa': '#8b5cf6',
+                'ready for qa': '#f97316',
+                'done': '#10b981',
+                'completed': '#10b981',
+                'pass': '#10b981',
+                'blocked': '#ef4444',
+                'fail': '#ef4444',
+                'analyze': '#6366f1',
+                'hld': '#f59e0b',
+                'lld': '#ec4899',
+                'development': '#3b82f6',
+                'dev testing': '#8b5cf6',
+                'on hold': '#6c757d',
+                'not started': '#94a3b8',
+                'pending': '#94a3b8'
             };
-            return colors[statusName] || '#6b7280';
+            return colors[s] || '#94a3b8';
         };
 
         ctrl.initCharts = function () {
@@ -1945,7 +2868,7 @@ app.component('dashboard', {
             });
             var tcTypeColors = {
                 'Functional': '#6366f1', 'Regression': '#f59e0b',
-                'Bug Verification': '#ef4444', 'Validation': '#10b981',
+                'Defect Verification': '#ef4444', 'Validation': '#10b981',
                 'Environment Issues': '#3b82f6', 'Technical Issues / Coding': '#dc2626',
                 'Missing Requirements': '#f97316', 'Design Issues': '#8b5cf6',
                 'Existing Issues / Not an Issue': '#94a3b8'
@@ -1954,7 +2877,7 @@ app.component('dashboard', {
             var tcTypeValues = tcTypeLabels.map(function(k) { return tcTypeData[k]; });
             var tcTypeBgColors = tcTypeLabels.map(function(k) { return tcTypeColors[k] || '#6366f1'; });
             var tcTypeIcons = {
-                'Functional': 'fa-cogs', 'Regression': 'fa-redo', 'Bug Verification': 'fa-bug',
+                'Functional': 'fa-cogs', 'Regression': 'fa-redo', 'Defect Verification': 'fa-bug',
                 'Validation': 'fa-check-double', 'Environment Issues': 'fa-server',
                 'Technical Issues / Coding': 'fa-code', 'Missing Requirements': 'fa-file-alt',
                 'Design Issues': 'fa-drafting-compass', 'Existing Issues / Not an Issue': 'fa-archive'
@@ -1962,7 +2885,7 @@ app.component('dashboard', {
             var tcTypeGradients = {
                 'Functional': 'linear-gradient(135deg,#6366f1,#4f46e5)',
                 'Regression': 'linear-gradient(135deg,#f59e0b,#d97706)',
-                'Bug Verification': 'linear-gradient(135deg,#ef4444,#dc2626)',
+                'Defect Verification': 'linear-gradient(135deg,#ef4444,#dc2626)',
                 'Validation': 'linear-gradient(135deg,#10b981,#059669)',
                 'Environment Issues': 'linear-gradient(135deg,#3b82f6,#2563eb)',
                 'Technical Issues / Coding': 'linear-gradient(135deg,#dc2626,#b91c1c)',
@@ -2169,26 +3092,46 @@ app.component('dashboard', {
             });
         };
 
+        ctrl.isQA = function() {
+            return AuthService.isQAEngineer();
+        };
+
+        ctrl.getUniqueDefectControls = function() {
+            var controls = new Set();
+            (ctrl.allDefects || []).forEach(function(d) {
+                if (d.controlName) controls.add(d.controlName);
+            });
+            return Array.from(controls).sort();
+        };
+
         ctrl.getMyDefects = function () {
-            if (!ctrl.currentUser || !ctrl.currentUser.employeeId) return [];
+            if (!ctrl.allDefects || !ctrl.currentUser || !ctrl.currentUser.employeeId) return [];
             return ctrl.allDefects.filter(function (d) {
-                return d.assignedToEmployeeId === ctrl.currentUser.employeeId;
+                return parseInt(d.assignedToEmployeeId) === parseInt(ctrl.currentUser.employeeId);
             });
         };
 
-        ctrl.isMyDefect = function (defect) {
-            if (!ctrl.currentUser || !ctrl.currentUser.employeeId) return false;
-            return defect.assignedToEmployeeId === ctrl.currentUser.employeeId;
-        };
-
         ctrl.getFilteredDefects = function () {
+            var defects = [];
             if (ctrl.defectFilter === 'All') {
-                return ctrl.allDefects;
+                defects = ctrl.allDefects || [];
             } else if (ctrl.defectFilter === 'Assigned') {
-                return ctrl.getMyDefects();
+                defects = ctrl.getMyDefects();
+            } else if (ctrl.defectFilter === 'QA') {
+                defects = (ctrl.allDefects || []).filter(function(d) {
+                    return d.status === 'Fixed' || d.status === 'Resolved' || d.status === 'Ready for QA';
+                });
             } else {
-                return ctrl.getDefectsByStatus(ctrl.defectFilter);
+                defects = ctrl.getDefectsByStatus(ctrl.defectFilter);
             }
+
+            // Apply Control Name secondary filter
+            if (ctrl.selectedControlFilter) {
+                defects = defects.filter(function(d) {
+                    return d.controlName === ctrl.selectedControlFilter;
+                });
+            }
+            return defects;
         };
 
         ctrl.getDefectSeverityColor = function (severity) {
@@ -2226,11 +3169,37 @@ app.component('dashboard', {
             return day + '/' + month + '/' + year;
         };
 
+        ctrl.viewDefect = function (defect) {
+            if (!defect || !defect.controlId) return;
+            
+            // Navigate to controls layout and pass controlId and subIndex as query params
+            $location.path('/controls').search({ 
+                controlId: defect.controlId, 
+                subIndex: defect.subDescriptionIndex !== null ? defect.subDescriptionIndex : undefined
+            });
+        };
+
         ctrl.viewDefectImage = function (imageUrl) {
             if (imageUrl) {
                 window.open(imageUrl, '_blank');
             }
         };
+
+        // Handle Real-time Notifications for Auto-loading
+        var defectAssignedListener = $rootScope.$on('defectAssigned', function() {
+            console.log('Real-time: Defect assigned. Auto-refreshing dashboard...');
+            ctrl.loadDashboardData();
+        });
+
+        var defectStatusListener = $rootScope.$on('defectStatusChanged', function() {
+            console.log('Real-time: Defect status changed. Auto-refreshing dashboard...');
+            ctrl.loadDashboardData();
+        });
+
+        // Clean up listeners when component is destroyed
+        this.$onDestroy = function() {
+            if (defectAssignedListener) defectAssignedListener();
+            if (defectStatusListener) defectStatusListener();
+        };
     }
 });
-

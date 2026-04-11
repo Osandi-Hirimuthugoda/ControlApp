@@ -46,8 +46,8 @@ app.component('appNavbar', {
                                         <i class="fas fa-users me-2"></i>{{team.teamName}}
                                     </a>
                                 </li>
-                                <li ng-if="$ctrl.user.isSuperAdmin && $ctrl.user.teams && $ctrl.user.teams.length > 0"><hr class="dropdown-divider"></li>
-                                <li ng-if="$ctrl.user.isSuperAdmin">
+                                <li ng-if="($ctrl.isSuperAdmin() || $ctrl.isAdmin()) && $ctrl.user.teams && $ctrl.user.teams.length > 0"><hr class="dropdown-divider"></li>
+                                <li ng-if="$ctrl.isSuperAdmin() || $ctrl.isAdmin()">
                                     <a class="dropdown-item text-primary" href="#" ng-click="$ctrl.manageTeams($event)">
                                         <i class="fas fa-cog me-2"></i>Manage Teams
                                     </a>
@@ -189,6 +189,9 @@ app.component('appNavbar', {
             ctrl.user = AuthService.getUser();
             ctrl.currentPath = $location.path();
             
+            ctrl.isAdmin = function() { return AuthService.isAdmin(); };
+            ctrl.isSuperAdmin = function() { return AuthService.isSuperAdmin(); };
+            
             // Initialize notifications
             ctrl.notifications = [];
             ctrl.unreadCount = 0;
@@ -209,6 +212,8 @@ app.component('appNavbar', {
                 ctrl.isAuthenticated = AuthService.isAuthenticated();
                 ctrl.user = AuthService.getUser();
                 ctrl.currentPath = $location.path();
+                // Reload notifications on every page change so count stays fresh
+                ctrl.loadNotifications();
             });
             
             // Listen for authentication events
@@ -248,16 +253,22 @@ app.component('appNavbar', {
             });
             
             var defectStatusListener = $rootScope.$on('defectStatusChanged', function(event, data) {
-                ctrl.addNotification('Defect "' + data.title + '" status changed to: ' + data.status, 'defect', data);
-                // Reload my defects list
+                var msg = 'Defect "' + data.title + '" status changed to: ' + data.status;
+                if (data.controlId && ApiService.data && ApiService.data.allControls) {
+                    var control = ApiService.data.allControls.find(function(c) {
+                        return c.controlId === data.controlId || c.controlId === parseInt(data.controlId);
+                    });
+                    if (control) {
+                        msg += ' | Developer: ' + (control.statusName || '-') + ' ' + (control.progress || 0) + '%';
+                    }
+                }
+                ctrl.addNotification(msg, 'defect', data);
                 ctrl.loadMyDefects();
                 $timeout(function() {
-                    if (!$rootScope.$$phase) {
-                        ctrl.$apply();
-                    }
+                    if (!$rootScope.$phase) { ctrl.$apply(); }
                 });
             });
-            
+
             var testCaseListener = $rootScope.$on('testCaseFailed', function(event, data) {
                 ctrl.addNotification('Test case failed: ' + data.title, 'testcase', data);
                 $timeout(function() {
@@ -267,6 +278,13 @@ app.component('appNavbar', {
                 });
             });
             
+            
+            var qaAssignedListener = $rootScope.$on('qaAssigned', function(event, data) {
+                ctrl.addNotification('You have been assigned as QA Engineer for: ' + data.description, 'info', data);
+                $timeout(function() {
+                    if (!$rootScope.$phase) { ctrl.$apply(); }
+                });
+            });
             ctrl.$onDestroy = function() {
                 routeListener();
                 authListener();
@@ -275,6 +293,7 @@ app.component('appNavbar', {
                 defectListener();
                 defectStatusListener();
                 testCaseListener();
+                qaAssignedListener();
             };
         };
         
@@ -564,3 +583,5 @@ app.component('appNavbar', {
         };
     }
 });
+
+

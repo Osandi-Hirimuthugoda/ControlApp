@@ -23,7 +23,7 @@ app.service('SignalRService', function(AuthService, NotificationService, $rootSc
             console.log('Notification received:', message, type);
             NotificationService.show(message, type);
             $rootScope.$apply();
-        });
+        }); 
         
         // Handle defect assigned
         self.connection.on('DefectAssigned', function(defectTitle, defectId) {

@@ -18,8 +18,9 @@ app.component('controlsSidebar', {
 
             <hr class="sidebar-divider">
 
-            <!-- Add Employee (everyone can see; access checked on click) -->
+            <!-- Add Employee (Admin Only) -->
             <button class="sidebar-btn"
+                    ng-if="$ctrl.canAddEmployee()"
                     ng-class="{'active': $ctrl.currentSection === 'newEmployee'}" 
                     ng-click="$ctrl.switchSection('newEmployee')">
                 <i class="fas fa-user-plus me-2"></i>Add Employee
@@ -39,13 +40,6 @@ app.component('controlsSidebar', {
                     ng-class="{'active': $ctrl.currentSection === 'controls'}" 
                     ng-click="$ctrl.switchSection('controls')">
                 <i class="fas fa-list-check me-2"></i>Controls Board
-            </button>
-            
-            <!-- My Test Cases (QA Engineers) -->
-            <button class="sidebar-btn" 
-                    ng-if="$ctrl.isQAEngineer()"
-                    ng-click="$ctrl.goToTestCases()">
-                <i class="fas fa-clipboard-check me-2"></i>My Test Cases
             </button>
 
             <!-- Add New Control -->
@@ -324,8 +318,8 @@ app.component('controlsSidebar', {
                 'controlTypesManagement': ['Admin', 'Software Architecture', 'Team Lead'],
                 // Sub Objectives (everyone can view)
                 'subObjectives': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer'],
-                // Add Employee (Admin & Project Manager)
-                'newEmployee': ['Admin', 'Project Manager'],
+                // Add Employee (Admin Only)
+                'newEmployee': ['Admin'],
                 // Employees List (everyone can view)
                 'employees': ['Admin', 'Software Architecture', 'Team Lead', 'Developer', 'QA Engineer', 'Intern Developer', 'Intern QA Engineer']
             };

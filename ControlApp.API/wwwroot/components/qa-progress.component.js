@@ -109,8 +109,9 @@ app.component('qaProgress', {
                                                     <th style="width: 25%;">Description</th>
                                                     <th style="width: 20%;">Employee</th>
                                                      <th style="width: 15%;">Progress</th>
+                                                     <th style="width: 12%;">Defects</th>
                                                      <th style="width: 12%;">Release Date</th>
-                                                     <th style="width: 23%;">Comments</th>
+                                                     <th style="width: 11%;">Comments</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -146,8 +147,35 @@ app.component('qaProgress', {
                                                         </div>
                                                         <span ng-if="subDesc.progress === undefined || subDesc.progress === null" class="text-muted small">-</span>
                                                     </td>
-                                                    <td>
-                                                         <span class="fw-bold" style="color: #059669; font-size: 0.9rem;" ng-if="subDesc.releaseDate">
+                                                     <td class="text-start" style="padding: 0.5rem;">
+                                                         <!-- In-line Defect List -->
+                                                         <div ng-if="$ctrl.getDefects(qaControl, $index).length > 0" class="mb-2">
+                                                             <div ng-repeat="defect in $ctrl.getDefects(qaControl, $index)" 
+                                                                  class="d-flex align-items-center mb-1 p-1 rounded" 
+                                                                  style="background: rgba(220, 38, 38, 0.05); border-left: 3px solid {{$ctrl.getSeverityColor(defect.severity)}}; cursor: pointer;"
+                                                                  ng-click="$ctrl.openDefectsModal(qaControl, $parent.$index); $event.stopPropagation()"
+                                                                  title="Click to open defects modal">
+                                                                 <div class="flex-grow-1 overflow-hidden" style="font-size: 0.75rem; white-space: nowrap; text-overflow: ellipsis;">
+                                                                     <span class="fw-bold text-danger">#{{defect.defectId}}</span> {{defect.title}}
+                                                                 </div>
+                                                                 <span class="badge {{$ctrl.getStatusBadgeClass(defect.status)}} ms-1" style="font-size: 0.6rem; padding: 2px 4px;">
+                                                                     {{defect.status}}
+                                                                 </span>
+                                                             </div>
+                                                         </div>
+                                                         
+                                                         <!-- Defects Button -->
+                                                         <button class="btn btn-xs btn-outline-danger rounded-2 px-2 py-1 position-relative w-100"
+                                                                 style="font-size:0.7rem; border-color: rgba(220, 38, 38, 0.2);"
+                                                                 ng-click="$ctrl.openDefectsModal(qaControl, $index); $event.stopPropagation()"
+                                                                 title="Manage defects for this sub-objective">
+                                                             <i class="fas fa-bug me-1"></i>
+                                                             <span ng-if="$ctrl.getDefects(qaControl, $index).length === 0">Add Defect</span>
+                                                             <span ng-if="$ctrl.getDefects(qaControl, $index).length > 0">Defects ({{$ctrl.getDefects(qaControl, $index).length}})</span>
+                                                         </button>
+                                                     </td>
+                                                     <td>
+                                                          <span class="fw-bold" style="color: #059669; font-size: 0.9rem;" ng-if="subDesc.releaseDate">
                                                              <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatDate(subDesc.releaseDate)}}
                                                          </span>
                                                          <span class="text-muted small" ng-if="!subDesc.releaseDate">-</span>
@@ -654,6 +682,7 @@ app.component('qaProgress', {
                         employeeId: subDesc.employeeId || null,
                         statusId: subDesc.statusId || null,
                         progress: subDesc.progress !== undefined && subDesc.progress !== null ? parseInt(subDesc.progress) : null,
+                        statusProgress: subDesc.statusProgress || {},
                         releaseId: subDesc.releaseId || null,
                         releaseDate: subDesc.releaseDate || null,
                         comments: subDesc.comments // Include the new QA comment
@@ -793,6 +822,7 @@ app.component('qaProgress', {
                         statusId: statusId,
                         statusName: statusName,
                         progress: progress,
+                        statusProgress: item.statusProgress || {},
                         releaseId: item.releaseId ? parseInt(item.releaseId) : null,
                         releaseDate: item.releaseDate || null,
                         comments: item.comments && Array.isArray(item.comments) ? item.comments : []
@@ -941,6 +971,7 @@ app.component('qaProgress', {
                             statusId: item.statusId || null,
                             statusName: statusName,
                             progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
+                            statusProgress: item.statusProgress || {},
                             releaseName: releaseName,
                             releaseDate: releaseDate,
                             releaseId: item.releaseId || null,
@@ -1045,6 +1076,7 @@ app.component('qaProgress', {
                         employeeId: item.employeeId ? parseInt(item.employeeId) : null,
                         statusId: item.statusId ? parseInt(item.statusId) : null,
                         progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
+                        statusProgress: item.statusProgress || {},
                         releaseId: item.releaseId ? parseInt(item.releaseId) : null,
                         releaseDate: item.releaseDate || null,
                         comments: item.comments && Array.isArray(item.comments) ? item.comments : []
@@ -1137,6 +1169,7 @@ app.component('qaProgress', {
                     employeeId: sd.employeeId || null,
                     statusId: sd.statusId || null,
                     progress: sd.progress !== undefined && sd.progress !== null ? parseInt(sd.progress) : null,
+                    statusProgress: sd.statusProgress || {},
                     releaseId: sd.releaseId || null,
                     releaseDate: sd.releaseDate || null,
                     comments: sd.comments && Array.isArray(sd.comments) ? sd.comments : []
@@ -1243,15 +1276,119 @@ app.component('qaProgress', {
             }
         };
 
-        ctrl.formatDateForInput = function (date) {
-            if (!date) return '';
-            var d = new Date(date);
-            if (isNaN(d.getTime())) return '';
-            var year = d.getFullYear();
-            var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var day = ('0' + d.getDate()).slice(-2);
-            return year + '-' + month + '-' + day;
+        // --- Defect Statistics Logic for In-line Display ---
+        ctrl.defectCache = {}; // Cache: controlId -> { subIndex -> [defects] }
+        ctrl._loadingDefectStats = {};
+
+        ctrl.fetchDefectStats = function (control) {
+            if (!control || !control.controlId) return;
+            if (ctrl.defectCache[control.controlId] || ctrl._loadingDefectStats[control.controlId]) return;
+
+            ctrl._loadingDefectStats[control.controlId] = true;
+            ApiService.getDefectsByControl(control.controlId).then(function (defects) {
+                var grouped = {};
+                (defects || []).forEach(function (d) {
+                    var isClosed = d.status === 'Closed' || d.status === 'Duplicate' || d.status === 'Not a Defect' || d.status === 'Verified Fix';
+                    if (isClosed) return;
+
+                    var idx = (d.subDescriptionIndex === null || d.subDescriptionIndex === undefined) ? -1 : d.subDescriptionIndex;
+                    if (!grouped[idx]) grouped[idx] = [];
+                    grouped[idx].push(d);
+                });
+                ctrl.defectCache[control.controlId] = grouped;
+            }).finally(function() {
+                ctrl._loadingDefectStats[control.controlId] = false;
+            });
         };
+
+        ctrl.testCaseCache = {}; // Cache: controlId -> { subIndex -> [testCases] }
+        ctrl._loadingTestCaseStats = {};
+
+        ctrl.fetchTestCaseStats = function (control) {
+            if (!control || !control.controlId) return;
+            if (ctrl.testCaseCache[control.controlId] || ctrl._loadingTestCaseStats[control.controlId]) return;
+
+            ctrl._loadingTestCaseStats[control.controlId] = true;
+            ApiService.getTestCasesByControl(control.controlId).then(function (testCases) {
+                var grouped = {};
+                (testCases || []).forEach(function (tc) {
+                    var idx = (tc.subDescriptionIndex === null || tc.subDescriptionIndex === undefined) ? -1 : tc.subDescriptionIndex;
+                    if (!grouped[idx]) grouped[idx] = [];
+                    grouped[idx].push(tc);
+                });
+                ctrl.testCaseCache[control.controlId] = grouped;
+            }).finally(function () {
+                ctrl._loadingTestCaseStats[control.controlId] = false;
+            });
+        };
+
+        ctrl.getDefects = function (control, subIndex) {
+            if (!control || !control.controlId) return [];
+            var cIdx = (subIndex === null || subIndex === undefined) ? -1 : subIndex;
+            if (!ctrl.defectCache[control.controlId]) {
+                ctrl.fetchDefectStats(control);
+                return [];
+            }
+            return ctrl.defectCache[control.controlId][cIdx] || [];
+        };
+
+        ctrl.getDefectCount = function (control, subIndex) {
+            return ctrl.getDefects(control, subIndex).length;
+        };
+
+        ctrl.getTestCaseStats = function (control, subIndex) {
+            if (!control || !control._testCases) return { total: 0, passed: 0, failed: 0 };
+            var filtered = control._testCases.filter(function (tc) {
+                return (subIndex === null || subIndex === undefined) ? 
+                    (tc.subDescriptionIndex === null || tc.subDescriptionIndex === undefined) : 
+                    (tc.subDescriptionIndex == subIndex);
+            });
+            var passed = filtered.filter(function (tc) { return tc.status === 'Pass'; }).length;
+            var failed = filtered.filter(function (tc) { return tc.status === 'Fail'; }).length;
+            return { total: filtered.length, passed: passed, failed: failed };
+        };
+
+        // UI Helpers for Defects
+        ctrl.getSeverityColor = function (severity) {
+            switch (severity) {
+                case 'Critical': return '#dc2626';
+                case 'High':     return '#ea580c';
+                case 'Medium':   return '#f59e0b';
+                case 'Low':      return '#10b981';
+                default:         return '#6b7280';
+            }
+        };
+
+        ctrl.getStatusBadgeClass = function (status) {
+            switch (status) {
+                case 'New':         return 'bg-blue-100 text-blue-800 border-blue-200';
+                case 'In Progress': return 'bg-amber-100 text-amber-800 border-amber-200';
+                case 'Fixed':       return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                case 'Ready for QA':return 'bg-purple-100 text-purple-800 border-purple-200';
+                case 'Reopened':    return 'bg-rose-100 text-rose-800 border-rose-200';
+                default:            return 'bg-gray-100 text-gray-800 border-gray-200';
+            }
+        };
+
+        // Listen for defect updates
+        var defectsUpdateListener = $rootScope.$on('defectsUpdated', function () {
+            ctrl.defectCache = {};
+            if (ctrl.store && ctrl.store.allControls) {
+                ctrl.store.allControls.forEach(function(c) {
+                    ctrl.fetchDefectStats(c);
+                });
+            }
+        });
+
+        // Listen for test case updates
+        var testCasesUpdateListener = $rootScope.$on('testCasesUpdated', function () {
+            ctrl.testCaseCache = {};
+            if (ctrl.store && ctrl.store.allControls) {
+                ctrl.store.allControls.forEach(function(c) {
+                    ctrl.fetchTestCaseStats(c);
+                });
+            }
+        });
 
         // Loading state
         ctrl.isLoading = true;
@@ -1277,6 +1414,15 @@ app.component('qaProgress', {
                     });
                 }
                 ctrl.ensureSubDescriptionsInitialized();
+                
+                // Initialize defect and test case loading
+                if (ctrl.store && ctrl.store.allControls) {
+                    ctrl.store.allControls.forEach(function(c) {
+                        ctrl.fetchDefectStats(c);
+                        ctrl.fetchTestCaseStats(c);
+                    });
+                }
+
                 ctrl.isLoading = false;
                 $timeout(function () {
                     if (!$scope.$$phase && !$rootScope.$$phase) {

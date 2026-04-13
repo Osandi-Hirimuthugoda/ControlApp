@@ -102,13 +102,14 @@ app.component('developerProgress', {
                                         </div>
                                         <table class="subdesc-table" style="box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);">
                                             <thead>
-                                                <tr>
-                                                    <th style="width: 30%;">Description</th>
-                                                    <th style="width: 25%;">Employee</th>
-                                                     <th style="width: 20%;">Progress</th>
+                                                 <tr>
+                                                     <th style="width: 25%;">Description</th>
+                                                     <th style="width: 15%;">Employee</th>
+                                                     <th style="width: 18%;">Progress</th>
+                                                     <th style="width: 12%;">Defects</th>
                                                      <th style="width: 15%;">Release Date</th>
-                                                     <th style="width: 20%;">Comments</th>
-                                                </tr>
+                                                     <th style="width: 15%;">Comments</th>
+                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr ng-repeat="subDesc in devControl._subDescriptionsArray track by $index">
@@ -144,6 +145,33 @@ app.component('developerProgress', {
                                                         </div>
                                                         <span ng-if="subDesc.progress === undefined || subDesc.progress === null" class="text-muted small">-</span>
                                                     </td>
+                                                     <td class="text-start" style="padding: 0.5rem;">
+                                                         <!-- In-line Defect List -->
+                                                         <div ng-if="$ctrl.getDefects(devControl, $index).length > 0" class="mb-2">
+                                                             <div ng-repeat="defect in $ctrl.getDefects(devControl, $index)" 
+                                                                  class="d-flex align-items-center mb-1 p-1 rounded" 
+                                                                  style="background: rgba(220, 38, 38, 0.05); border-left: 3px solid {{$ctrl.getSeverityColor(defect.severity)}}; cursor: pointer;"
+                                                                  ng-click="$ctrl.openDefectsModal(devControl, $parent.$index); $event.stopPropagation()"
+                                                                  title="Click to open defects modal">
+                                                                 <div class="flex-grow-1 overflow-hidden" style="font-size: 0.75rem; white-space: nowrap; text-overflow: ellipsis;">
+                                                                     <span class="fw-bold text-danger">#{{defect.defectId}}</span> {{defect.title}}
+                                                                 </div>
+                                                                 <span class="badge {{$ctrl.getStatusBadgeClass(defect.status)}} ms-1" style="font-size: 0.6rem; padding: 2px 4px;">
+                                                                     {{defect.status}}
+                                                                 </span>
+                                                             </div>
+                                                         </div>
+                                                         
+                                                         <!-- Add/View Button -->
+                                                         <button class="btn btn-xs btn-outline-danger rounded-2 px-2 py-1 position-relative w-100"
+                                                                 style="font-size:0.7rem; border-color: rgba(220, 38, 38, 0.2);"
+                                                                 ng-click="$ctrl.openDefectsModal(devControl, $index); $event.stopPropagation()"
+                                                                 title="Manage defects for this sub-objective">
+                                                             <i class="fas fa-bug me-1"></i>
+                                                             <span ng-if="$ctrl.getDefects(devControl, $index).length === 0">Add Defect</span>
+                                                             <span ng-if="$ctrl.getDefects(devControl, $index).length > 0">Manage ({{$ctrl.getDefects(devControl, $index).length}})</span>
+                                                         </button>
+                                                     </td>
                                                      <td>
                                                          <span class="fw-bold" style="color: #059669; font-size: 0.9rem;" ng-if="subDesc.releaseDate">
                                                              <i class="fas fa-calendar-alt me-1"></i>{{$ctrl.formatDate(subDesc.releaseDate)}}
@@ -453,7 +481,15 @@ app.component('developerProgress', {
                     </tbody>
                 </table>
             </div>
+            </div>
         </div>
+        
+        <!-- Modal backdrop and component -->
+        <div ng-if="$ctrl.showDefectsModal" class="modal-backdrop fade show" style="z-index: 1050;"></div>
+        <qa-defects ng-if="$ctrl.showDefectsModal" 
+                    control="$ctrl.currentControl" 
+                    sub-description-index="$ctrl.currentSubIndex"
+                    on-close="$ctrl.closeDefectsModal()"></qa-defects>
     </div>
     `,
     controller: function (ApiService, NotificationService, AuthService, $rootScope, $scope, $timeout, $location) {
@@ -542,7 +578,7 @@ app.component('developerProgress', {
                 }
 
                 // Show ALL controls assigned to developers (not just Development/Dev Testing status)
-                if (role === 'developer' || role === 'developers' || role === 'intern developer') {
+                if (role === 'developer' || role === 'developers' || role === 'intern developer' || role === 'team lead' || role === 'lead developer') {
                     // Only initialize _subDescriptionsArray if not already initialized or if subDescriptions changed
                     // This prevents infinite digest loops by avoiding modifications during digest cycle
                     if (!control._subDescriptionsArray || control._lastSubDescriptionsValue !== control.subDescriptions) {
@@ -598,12 +634,16 @@ app.component('developerProgress', {
                         // No auto-advance - progress stays at 100% when reached
                         // User must manually change status if needed
 
+                        var statusProgress = subDesc.statusProgress || {};
+                        statusProgress[newStatusId] = newProgress;
+
                         return {
                             description: subDesc.description || '',
                             employeeId: subDesc.employeeId || null,
                             statusId: newStatusId,
                             statusName: newStatusName,
                             progress: newProgress, // Update sub-description progress to match main progress
+                            statusProgress: statusProgress,
                             comments: subDesc.comments && Array.isArray(subDesc.comments) ? subDesc.comments : []
                         };
                     } else {
@@ -1152,6 +1192,7 @@ app.component('developerProgress', {
                             statusId: item.statusId || null,
                             statusName: statusName,
                             progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
+                            statusProgress: item.statusProgress || {},
                             releaseId: item.releaseId || null,
                             releaseDate: item.releaseDate || null,
                             comments: comments // Preserve all past comments with proper formatting
@@ -1266,6 +1307,7 @@ app.component('developerProgress', {
                     employeeId: sd.employeeId || null,
                     statusId: sd.statusId || null,
                     progress: sd.progress !== undefined && sd.progress !== null ? parseInt(sd.progress) : null,
+                    statusProgress: sd.statusProgress || {},
                     releaseId: sd.releaseId || null,
                     releaseDate: sd.releaseDate || null,
                     comments: sd.comments && Array.isArray(sd.comments) ? sd.comments : []
@@ -1443,6 +1485,114 @@ app.component('developerProgress', {
             });
         });
 
+        // --- Defect Statistics & Data Logic ---
+        ctrl.defectCache = {}; // Cache for defect data: controlId -> { subIndex -> [defects] }
+        ctrl._loadingDefectStats = {}; // Map to track loading state by controlId
+
+        ctrl.fetchDefectStats = function (control) {
+            if (!control || !control.controlId) return;
+            if (ctrl.defectCache[control.controlId] || ctrl._loadingDefectStats[control.controlId]) return;
+
+            ctrl._loadingDefectStats[control.controlId] = true;
+            ApiService.getDefectsByControl(control.controlId).then(function (defects) {
+                var grouped = {};
+                defects.forEach(function (d) {
+                    // Filter to only active defects if needed, or keep all and filter in UI
+                    // User said "show bugs", usually implies active ones
+                    var isClosed = d.status === 'Closed' || d.status === 'Duplicate' || d.status === 'Not a Defect' || d.status === 'Verified Fix';
+                    if (isClosed) return;
+
+                    var idx = (d.subDescriptionIndex === null || d.subDescriptionIndex === undefined) ? -1 : d.subDescriptionIndex;
+                    if (!grouped[idx]) grouped[idx] = [];
+                    grouped[idx].push(d);
+                });
+                ctrl.defectCache[control.controlId] = grouped;
+            }).finally(function() {
+                ctrl._loadingDefectStats[control.controlId] = false;
+            });
+        };
+
+        ctrl.getDefectCount = function (control, subIndex) {
+            var defects = ctrl.getDefects(control, subIndex);
+            return defects ? defects.length : 0;
+        };
+
+        ctrl.getDefects = function (control, subIndex) {
+            if (!control || !control.controlId) return [];
+            
+            var cIdx = (subIndex === null || subIndex === undefined) ? -1 : subIndex;
+            
+            if (!ctrl.defectCache[control.controlId]) {
+                ctrl.fetchDefectStats(control);
+                return [];
+            }
+            
+            return ctrl.defectCache[control.controlId][cIdx] || [];
+        };
+
+        // Listen for defect updates to refresh stats
+        var defectsUpdateListener = $rootScope.$on('defectsUpdated', function () {
+            ctrl.defectCache = {}; // Clear cache to force refresh
+            // Refresh counts for visible controls
+            var visibleControls = ctrl.getDeveloperControls();
+            visibleControls.forEach(function(c) {
+                ctrl.fetchDefectStats(c);
+            });
+        });
+
+        // --- UI Helpers for Defects ---
+        ctrl.getSeverityColor = function (severity) {
+            switch (severity) {
+                case 'Critical': return '#dc2626'; // Red
+                case 'High':     return '#ea580c'; // Orange-red
+                case 'Medium':   return '#f59e0b'; // Amber
+                case 'Low':      return '#10b981'; // Emerald
+                default:         return '#6b7280'; // Gray
+            }
+        };
+
+        ctrl.getStatusBadgeClass = function (status) {
+            switch (status) {
+                case 'Open':         return 'bg-danger text-white';
+                case 'In Dev':       return 'bg-warning text-dark';
+                case 'Fixed':        return 'bg-success text-white';
+                case 'Verified Fix': return 'bg-success text-white';
+                case 'Re-Open':      return 'bg-danger text-white';
+                case 'Deferred':     return 'bg-secondary text-white';
+                case 'Duplicate':    return 'bg-dark text-white';
+                case 'Not a Defect': return 'bg-info text-white';
+                case 'Closed':       return 'bg-secondary text-white';
+                default:             return 'bg-secondary text-white';
+            }
+        };
+
+        // --- Defect Modal Handling ---
+        ctrl.showDefectsModal = false;
+        ctrl.currentControl = null;
+        ctrl.currentSubIndex = null;
+
+        ctrl.openDefectsModal = function (control, subIndex) {
+            ctrl.currentControl = control;
+            ctrl.currentSubIndex = subIndex;
+            ctrl.showDefectsModal = true;
+            
+            // Add modal-open class to body to prevent scrolling
+            if (document.body && document.body.classList) {
+                document.body.classList.add('modal-open');
+            }
+        };
+
+        ctrl.closeDefectsModal = function () {
+            ctrl.showDefectsModal = false;
+            ctrl.currentControl = null;
+            ctrl.currentSubIndex = null;
+            
+            // Remove modal-open class
+            if (document.body && document.body.classList) {
+                document.body.classList.remove('modal-open');
+            }
+        };
+
         // Highlighted control ID (from query parameter)
         ctrl.highlightedControlId = null;
 
@@ -1547,6 +1697,9 @@ app.component('developerProgress', {
             }
             if (locationWatch) {
                 locationWatch();
+            }
+            if (defectsUpdateListener) {
+                defectsUpdateListener();
             }
         };
     }

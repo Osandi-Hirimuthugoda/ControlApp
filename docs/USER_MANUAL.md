@@ -2,12 +2,15 @@
 
 > **Version 2.0** | Last Updated: April 2026 | Proprietary & Confidential — Virtusa
 
+> 🌐 **Interactive Documentation Site:** [docs/index.html](index.html) — Full visual site with live Mermaid diagrams, all role guides, API reference, and setup instructions. Open in your browser for the best experience.
+
 ---
 
 ## 📋 Table of Contents
 
 | # | Section |
 |---|---------|
+| 🌐 | [**Interactive Documentation Site**](index.html) |
 | 1 | [System Architecture Overview](#1-system-architecture-overview) |
 | 2 | [Data Model — Entity Relationship Diagram](#2-data-model--entity-relationship-diagram) |
 | 3 | [Class Diagram](#3-class-diagram) |
@@ -678,25 +681,85 @@ On success → automatically logged in and redirected to `/controls`.
 
 ## 7. User Roles & Permissions
 
+> **v2.0 Update:** Three new roles have been added — **Release Manager**, **Security Auditor**, and **Business Analyst** — bringing the total to **11 roles**. See the [Interactive Documentation Site](index.html#roles) for the visual role matrix.
+
+### All Roles
+
+| Role | Access Level | Primary Responsibilities |
+|------|-------------|--------------------------|
+| **Super Admin** | 🌐 System-wide | Manage all teams, configure role permissions, company-wide analytics |
+| **Admin** | 🏢 Team-scope | Register employees, manage controls, releases |
+| **Project Manager** | 📊 Executive | View aggregate KPIs, resource workloads, executive dashboard |
+| **Software Architect** | 🏗️ Technical Lead | Design WBS, assign developers, monitor flow |
+| **Team Lead** | 👥 Operational | Assign controls, manage sub-objectives, monitor team |
+| **Developer** | 💻 Task Execution | Update sub-objectives, resolve defects, log progress |
+| **QA Engineer** | 🧪 Quality | Create/execute test cases, raise defects, verify fixes |
+| **Intern** | 🎓 Restricted | View and limited execution based on team config |
+| **Release Manager** ✦ NEW | 🚀 Release Pipeline | Manage releases, Release Hub calendar, deployment planning, generate reports |
+| **Security Auditor** ✦ NEW | 🔐 Read-only Audit | View all activity logs across all teams, audit defect/test history, export compliance reports |
+| **Business Analyst** ✦ NEW | 📋 Requirements | Add controls from requirement specs, edit sub-objectives, add insights, view dashboards and RC Matrix |
+
+### 🚀 Release Manager (New in v2.0)
+
+The **Release Manager** role is dedicated to controlling the software release pipeline.
+
+**Capabilities:**
+- Create, edit, and delete Release records
+- View the full Release Hub calendar across teams
+- Browse all Controls to assess release readiness
+- Generate release progress reports
+- View Activity Logs for audit purposes
+
+**Restrictions:** Cannot create/edit controls directly, cannot report defects or manage test cases, cannot manage employees or team membership.
+
+### 🔐 Security Auditor (New in v2.0)
+
+The **Security Auditor** role provides compliance oversight across the entire application.
+
+**Capabilities:**
+- Read-only access to all controls, defects, test cases, and progress logs
+- Full access to Activity Logs across all teams
+- Export audit trails for compliance reporting
+- View the permission matrix (read-only)
+
+**Restrictions:** Cannot create, edit, or delete any records. Strictly read-only. Cannot access the Super Admin Panel.
+
+### 📋 Business Analyst (New in v2.0)
+
+The **Business Analyst** role bridges business requirements and technical delivery.
+
+**Capabilities:**
+- Create new Controls and Sub-Objectives from requirement specifications
+- Edit Sub-Objectives (description, owner, dates)
+- Add Insights/Comments to sub-objectives
+- View role-based dashboards with KPI data
+- Access and consume RC Matrix reports
+
+**Restrictions:** Cannot report defects, create test cases, manage team membership, or access the Super Admin Panel.
+
 ### Role Access Matrix
 
-| Permission | Super Admin | Admin | Architect | Team Lead | Project Mgr | Developer | QA Engineer | Intern |
-|-----------|:-----------:|:-----:|:---------:|:---------:|:-----------:|:---------:|:-----------:|:------:|
-| Add Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Edit Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Delete Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Add Employees | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Edit Employees | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Delete Employees | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Mark Progress | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ |
-| Add Comments | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Edit Sub-Objectives | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Add Test Cases | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Report Defects | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Manage Teams | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Super Admin Panel | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Permission | Super Admin | Admin | Architect | Team Lead | Proj Mgr | Developer | QA Eng | Intern | Release Mgr ✦ | Sec. Auditor ✦ | Biz Analyst ✦ |
+|-----------|:-----------:|:-----:|:---------:|:---------:|:--------:|:---------:|:------:|:------:|:-----------:|:-------------:|:------------:|
+| Add Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Edit Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Delete Controls | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Add Employees | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Edit Employees | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Delete Employees | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Mark Progress | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Add Comments | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Edit Sub-Objectives | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Add Test Cases | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Report Defects | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Manage Teams | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Manage Releases | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| View Activity Logs | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Export Audit Reports | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Super Admin Panel | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 > **Note:** Super Admin permissions are **always full** and cannot be overridden.
+> ✦ New roles added in v2.0
 
 ### Role Dashboard Views
 
@@ -708,6 +771,9 @@ graph TD
     Check -->|Team Lead / Architect| TL["📋 Management View\n• Pipeline counters by status\n• Sub-objective distribution\n• Team health overview"]
     Check -->|Developer| DEV["💻 My Tasks View\n• Assigned sub-objectives\n• Progress bars\n• Assigned defects"]
     Check -->|QA Engineer| QA["🧪 QA Queue View\n• Ready for QA sub-objectives\n• Test execution links\n• Defect inbox"]
+    Check -->|Release Manager| RM["🚀 Release Hub\n• Release Calendar\n• Controls in scope\n• Deployment checklist"]
+    Check -->|Security Auditor| AUD["🔐 Audit View\n• Read-only all data\n• Activity log export\n• Compliance trail"]
+    Check -->|Business Analyst| BA["📋 Analyst View\n• Controls + KPIs\n• RC Matrix reports\n• Requirements trace"]
 ```
 
 ---
@@ -1602,6 +1668,22 @@ sequenceDiagram
 
 ---
 
+## 🌐 Interactive Documentation Site
+
+For the best documentation experience, open the interactive documentation website in your browser:
+
+**[docs/index.html](index.html)** — Features:
+- Live Mermaid diagrams (Architecture, ER, Class, Use Case, Workflow)
+- Full permission matrix for all 11 roles with visual cards
+- API reference with colour-coded HTTP methods
+- Step-by-step setup and deployment guide
+- Dark-mode interface with sidebar navigation
+
+---
+
 *📘 This manual covers **all features** of Control App v2.0.  
 For deployment setup and API documentation, refer to [README.md](../README.md).  
+For the interactive documentation site with all diagrams, open [index.html](index.html) in your browser.  
 For technical support, contact your System Administrator.*
+
+*Last Updated: April 2026 — v2.0 | 11 User Roles | 26 Components | 50+ API Endpoints*

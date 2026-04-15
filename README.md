@@ -8,6 +8,7 @@
 
 | Document | Description |
 |----------|-------------|
+| **[🌐 Documentation Site](docs/index.html)** | Full interactive documentation website — all diagrams, role guides, API reference, workflows, and setup in one beautiful site. Open in your browser. |
 | **[📘 User Manual](docs/USER_MANUAL.md)** | Complete guide covering every feature — registration, dashboards, controls board, QA testing, defect management, RC Matrix, release hub, activity logs, and more. Includes ER diagrams, class diagrams, use case diagrams, and system workflow diagrams. |
 | **[README.md](README.md)** | Project overview, technology stack, setup, and API reference (this file) |
 
@@ -53,6 +54,8 @@
 
 ## 👤 User Roles
 
+> v2.0 introduces **3 new roles** — Release Manager, Security Auditor, and Business Analyst — bringing the total to **11 roles**.
+
 | Role | Access Level | Primary Responsibilities |
 |------|-------------|--------------------------|
 | **Super Admin** | 🌐 System-wide | Manage all teams, configure role permissions, company-wide analytics |
@@ -63,6 +66,11 @@
 | **Developer** | 💻 Task Execution | Update sub-objectives, resolve defects, log progress |
 | **QA Engineer** | 🧪 Quality | Create/execute test cases, raise defects, verify fixes |
 | **Intern** | 🎓 Restricted | View and limited execution based on team config |
+| **Release Manager** ✦ NEW | 🚀 Release Pipeline | Manage releases, Release Hub calendar, deployment planning, report generation |
+| **Security Auditor** ✦ NEW | 🔐 Read-only Audit | View all activity logs, audit defect/test history, export compliance reports |
+| **Business Analyst** ✦ NEW | 📋 Requirements | Add controls, edit sub-objectives, add insights, view dashboards and RC Matrix |
+
+> **See the full permission matrix** in the [Documentation Site](docs/index.html#roles) or [User Manual](docs/USER_MANUAL.md#7-user-roles--permissions).
 
 ---
 
@@ -406,12 +414,13 @@ ASPNETCORE_ENVIRONMENT=Production
 | **Backend Models** | 14 |
 | **API Endpoints** | 50+ |
 | **Database Tables** | 13 core tables |
-| **User Roles** | 8 |
+| **User Roles** | 11 (3 new in v2.0) |
 | **Defect Statuses** | 8 |
 | **Sub-Objective Statuses** | 6 |
 | **RC Categories** | 10 |
 | **Real-time Events** | 4 SignalR events |
 | **Max Screenshot Attachments** | 5 per defect |
+| **Permissions in Matrix** | 16 permissions × 11 roles |
 
 ---
 
@@ -424,7 +433,7 @@ ASPNETCORE_ENVIRONMENT=Production
 | **v1.2** | Enhanced defect management; status filtering; screenshot uploads |
 | **v1.3** | Test case management; QA quick-add; pass/fail execution flow |
 | **v1.4** | Activity Log tab; defect duration badges; status timeline visual |
-| **v2.0** | PM Executive Dashboard; RC Matrix with compare mode; Weekly Progress; Daily Update Rate; improved defect role-specific edit forms; per-user permission overrides; multi-team cross-access; comprehensive User Manual with system diagrams |
+| **v2.0** | PM Executive Dashboard; RC Matrix with compare mode; Weekly Progress; Daily Update Rate; improved defect role-specific edit forms; per-user permission overrides; multi-team cross-access; **3 new roles** (Release Manager, Security Auditor, Business Analyst); comprehensive User Manual; **full interactive documentation site** with all architecture, ER, class, use case, and workflow diagrams |
 
 ---
 

@@ -1,4 +1,4 @@
-# Control App — SDLC Management Platform
+# Control App - SDLC Management Platform
 
 > A comprehensive end-to-end Software Development Lifecycle (SDLC) management platform for teams. Manage controls, track defects, execute test cases, monitor daily progress, and collaborate in real-time all in one place.
 

@@ -1,50 +1,50 @@
-# 🎛️ Control App — SDLC Management Platform
+# Control App — SDLC Management Platform
 
-> A comprehensive end-to-end Software Development Lifecycle (SDLC) management platform for teams. Manage controls, track defects, execute test cases, monitor daily progress, and collaborate in real-time — all in one place.
+> A comprehensive end-to-end Software Development Lifecycle (SDLC) management platform for teams. Manage controls, track defects, execute test cases, monitor daily progress, and collaborate in real-time all in one place.
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| **[🌐 Documentation Site](docs/index.html)** | Full interactive documentation website — all diagrams, role guides, API reference, workflows, and setup in one beautiful site. Open in your browser. |
-| **[📘 User Manual](docs/USER_MANUAL.md)** | Complete guide covering every feature — registration, dashboards, controls board, QA testing, defect management, RC Matrix, release hub, activity logs, and more. Includes ER diagrams, class diagrams, use case diagrams, and system workflow diagrams. |
+| **[ Documentation Site](docs/index.html)** | Full interactive documentation website — all diagrams, role guides, API reference, workflows, and setup in one beautiful site. Open in your browser. |
+| **[ User Manual](docs/USER_MANUAL.md)** | Complete guide covering every feature — registration, dashboards, controls board, QA testing, defect management, RC Matrix, release hub, activity logs, and more. Includes ER diagrams, class diagrams, use case diagrams, and system workflow diagrams. |
 | **[README.md](README.md)** | Project overview, technology stack, setup, and API reference (this file) |
 
 ---
 
-## ✨ Feature Overview
+##  Feature Overview
 
-### 🏗️ Core SDLC Management
+###  Core SDLC Management
 - **System Controls Board** — Create controls with full WBS (Work Breakdown Structure); manage sub-objectives with inline editing, status tracking, comments (insights), and progress %
 - **Role-Based Dashboards** — Every role sees a uniquely tailored Command Center: PM Executive view, Lead pipeline view, Developer task view, QA queue view
 - **Release Hub** — Plan and track releases with a monthly calendar; auto-create releases from control target dates
 - **RC Matrix** — Root Cause Matrix for test case type analysis; drill-down by category; multi-control compare mode with side-by-side bar charts
 
-### 🧪 Quality Assurance
+###  Quality Assurance
 - **Test Case Management** — Create test cases (Functional / Regression / Bug Verification / Validation); quick-add inline bar for QA; Pass / Fail / Reset execution; actual result capture
 - **Defect Tracking** — Full defect lifecycle (Open → In Dev → Fixed → Re-Open → Closed); 9 defect categories; up to 5 screenshot attachments; per-transition duration badges; status timeline visual
 - **Defect Resolution Flow** — Developers see a read-only defect view with restricted status options; QA gets full edit access; both receive real-time push notifications on changes
 
-### 📣 Real-Time Collaboration
+###  Real-Time Collaboration
 - **SignalR Notifications** — Instant push notifications for defect assignments, status changes, test case failures, and QA assignments; no page refresh needed
 - **Notification Bell** — Per-user notification inbox with unread count badge, "time ago" timestamps, clear all, and direct navigation to linked defects
 - **My Defects Inbox** — Dedicated tab showing all active defects assigned to the current user
 
-### 📊 Analytics & Reporting
+###  Analytics & Reporting
 - **Daily Progress Tracking** — Date-based progress log viewer with summary stats (Total Objectives, Updated Today, Avg Progress, Daily Update Rate); circular progress indicators
 - **Weekly Summary** — Mon–Sun summary cards per week showing updates count + average progress
 - **Dashboard Charts** — Chart.js pie charts for sub-objective status distribution and release health
 - **Activity & Audit Log** — Full timeline of actions on defects and test cases; old→new value badges; performed-by tracking
 
-### 👥 Team & Administration
+###  Team & Administration
 - **Multi-Team Support** — Users can belong to multiple teams; Team Switcher in NavBar instantly re-scopes all data
 - **Super Admin Panel** — Company-wide stats, per-team breakdown cards, role permission matrix (9 permissions × 8 roles), per-user permission overrides, cross-team access management
 - **Employee Registration** — Create employee records linked to user accounts; role assignment; team provisioning
 - **Control Types** — Define and manage SDLC categories (API, UI, Database, etc.) used to classify controls
 
-### 🔐 Security
+###  Security
 - **JWT Authentication** — All API requests require a valid Bearer token
 - **BCrypt Password Hashing** — Passwords never stored in plain text
 - **Soft Delete** — All entities use `ISDeleted` flag; nothing is permanently destroyed
@@ -52,29 +52,29 @@
 
 ---
 
-## 👤 User Roles
+##  User Roles
 
 > v2.0 introduces **3 new roles** — Release Manager, Security Auditor, and Business Analyst — bringing the total to **11 roles**.
 
 | Role | Access Level | Primary Responsibilities |
 |------|-------------|--------------------------|
-| **Super Admin** | 🌐 System-wide | Manage all teams, configure role permissions, company-wide analytics |
-| **Admin** | 🏢 Team-scope | Register employees, manage controls, releases |
-| **Project Manager** | 📊 Executive | View aggregate KPIs, resource workloads |
-| **Software Architect** | 🏗️ Technical Lead | Design WBS, assign developers, monitor flow |
-| **Team Lead** | 👥 Operational | Assign controls, manage sub-objectives, monitor team |
-| **Developer** | 💻 Task Execution | Update sub-objectives, resolve defects, log progress |
-| **QA Engineer** | 🧪 Quality | Create/execute test cases, raise defects, verify fixes |
-| **Intern** | 🎓 Restricted | View and limited execution based on team config |
-| **Release Manager** ✦ NEW | 🚀 Release Pipeline | Manage releases, Release Hub calendar, deployment planning, report generation |
-| **Security Auditor** ✦ NEW | 🔐 Read-only Audit | View all activity logs, audit defect/test history, export compliance reports |
-| **Business Analyst** ✦ NEW | 📋 Requirements | Add controls, edit sub-objectives, add insights, view dashboards and RC Matrix |
+| **Super Admin** |  System-wide | Manage all teams, configure role permissions, company-wide analytics |
+| **Admin** |  Team-scope | Register employees, manage controls, releases |
+| **Project Manager** |  Executive | View aggregate KPIs, resource workloads |
+| **Software Architect** |  Technical Lead | Design WBS, assign developers, monitor flow |
+| **Team Lead** |  Operational | Assign controls, manage sub-objectives, monitor team |
+| **Developer** |  Task Execution | Update sub-objectives, resolve defects, log progress |
+| **QA Engineer** |  Quality | Create/execute test cases, raise defects, verify fixes |
+| **Intern** |  Restricted | View and limited execution based on team config |
+| **Release Manager** ✦ NEW |  Release Pipeline | Manage releases, Release Hub calendar, deployment planning, report generation |
+| **Security Auditor** ✦ NEW |  Read-only Audit | View all activity logs, audit defect/test history, export compliance reports |
+| **Business Analyst** ✦ NEW |  Requirements | Add controls, edit sub-objectives, add insights, view dashboards and RC Matrix |
 
 > **See the full permission matrix** in the [Documentation Site](docs/index.html#roles) or [User Manual](docs/USER_MANUAL.md#7-user-roles--permissions).
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 ### Backend
 | Technology | Version | Purpose |
@@ -98,7 +98,7 @@
 
 ---
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - **.NET 8.0 SDK** or later
 - **SQL Server 2022** (or SQL Server Express)
@@ -106,7 +106,7 @@
 
 ---
 
-## 🔧 Installation & Setup
+##  Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -148,7 +148,7 @@ App available at: **`http://localhost:5088`**
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 Control_App/
@@ -187,7 +187,7 @@ Control_App/
 
 ---
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### Core Tables
 
@@ -226,7 +226,7 @@ Employee ─────────────── │
 
 ---
 
-## 🔑 Authentication & First Login
+##  Authentication & First Login
 
 After running migrations, create the first account:
 
@@ -239,7 +239,7 @@ After running migrations, create the first account:
 
 ---
 
-## 📡 Key API Endpoints
+##  Key API Endpoints
 
 ### Authentication
 | Method | Endpoint | Description |
@@ -294,7 +294,7 @@ After running migrations, create the first account:
 
 ---
 
-## 📊 Defect Statuses
+##  Defect Statuses
 
 ```
 Open → In Dev → Fixed → Re-Open → Closed
@@ -316,7 +316,7 @@ Open → In Dev → Fixed → Re-Open → Closed
 
 ---
 
-## 🧪 Sub-Objective Statuses
+##  Sub-Objective Statuses
 
 | Status | Phase |
 |--------|-------|
@@ -325,11 +325,11 @@ Open → In Dev → Fixed → Re-Open → Closed
 | **Dev Testing** | Developer self-test |
 | **Ready for QA** | Handover to QA |
 | **QA** | Under QA testing |
-| **Completed** | Done ✅ |
+| **Completed** | Done  |
 
 ---
 
-## 🔔 SignalR Real-Time Events
+##  SignalR Real-Time Events
 
 | Event | Sent To | Trigger |
 |-------|---------|---------|
@@ -340,7 +340,7 @@ Open → In Dev → Fixed → Re-Open → Closed
 
 ---
 
-## 🚀 Deployment
+##  Deployment
 
 ### Production Build
 
@@ -376,7 +376,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ---
 
-## 🔧 Troubleshooting
+##  Troubleshooting
 
 | Problem | Solution |
 |---------|---------|
@@ -389,7 +389,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ---
 
-## 🧪 Manual Testing Checklist
+##  Manual Testing Checklist
 
 - [ ] Register first Admin account
 - [ ] Create a team and assign employees
@@ -406,7 +406,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ---
 
-## 📈 Project Statistics
+##  Project Statistics
 
 | Metric | Value |
 |--------|-------|
@@ -424,7 +424,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ---
 
-## 🔄 Version History
+##  Version History
 
 | Version | Changes |
 |---------|---------|
@@ -437,34 +437,34 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ---
 
-## 🌐 Browser Support
+##  Browser Support
 
 | Browser | Support |
 |---------|---------|
-| ✅ Chrome 90+ | Full |
-| ✅ Firefox 88+ | Full |
-| ✅ Edge 90+ | Full |
-| ✅ Safari 14+ | Full |
-| ⚠️ Internet Explorer | Not supported |
-| 📱 Mobile | Responsive; mobile-optimised NavBar |
+|  Chrome 90+ | Full |
+|  Firefox 88+ | Full |
+|  Edge 90+ | Full |
+|  Safari 14+ | Full |
+|  Internet Explorer | Not supported |
+|  Mobile | Responsive; mobile-optimised NavBar |
 
 ---
 
-## 🔒 Security Checklist
+##  Security Checklist
 
-- ✅ JWT Bearer authentication on all API routes
-- ✅ BCrypt password hashing (never plain text)
-- ✅ Soft delete — no data permanently destroyed
-- ✅ Role-based authorization at controller level (`[Authorize(Roles=...)]`)
-- ✅ RBAC enforced at UI level (features hidden per role)
-- ✅ CORS policy configured in `Program.cs`
-- ✅ EF Core parameterised queries — SQL injection prevention
-- ✅ SignalR session verified on hub connection
-- ✅ HTTPS enforcement in production
+-  JWT Bearer authentication on all API routes
+-  BCrypt password hashing (never plain text)
+-  Soft delete — no data permanently destroyed
+-  Role-based authorization at controller level (`[Authorize(Roles=...)]`)
+-  RBAC enforced at UI level (features hidden per role)
+-  CORS policy configured in `Program.cs`
+-  EF Core parameterised queries — SQL injection prevention
+-  SignalR session verified on hub connection
+-  HTTPS enforcement in production
 
 ---
 
-## 📚 External References
+##  External References
 
 - [ASP.NET Core 8 Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
@@ -492,7 +492,7 @@ dotnet ef database drop
 
 ---
 
-## 📄 License
+##  License
 
 Copyright © 2026 Virtusa. All rights reserved.
 
@@ -500,6 +500,6 @@ This software is proprietary and confidential. Unauthorised copying, distributio
 
 ---
 
-**Built with ❤️ for efficient team collaboration and quality software delivery**
+**Built with for efficient team collaboration and quality software delivery**
 
 *Last Updated: April 2026 — v2.0*

@@ -1,82 +1,129 @@
-# Employee Control Management System
+# 🎛️ Control App — SDLC Management Platform
 
-A comprehensive web application for managing software development controls, test cases, defects, and team progress tracking with real-time notifications.
+> A comprehensive end-to-end Software Development Lifecycle (SDLC) management platform for teams. Manage controls, track defects, execute test cases, monitor daily progress, and collaborate in real-time — all in one place.
 
-## 🚀 Features
+---
 
-### Core Functionality
-- **Control Management**: Create, assign, and track software development controls
-- **Test Case Management**: Define and execute test cases for quality assurance
-- **Defect Tracking**: Report, assign, and track defects with status updates
-- **Real-time Notifications**: SignalR-powered instant notifications for team collaboration
-- **Progress Tracking**: Monitor daily progress and team performance
-- **Multi-team Support**: Manage multiple teams with role-based access control
-- **Release Management**: Track controls across different releases
+## 📖 Documentation
 
-### User Roles
-- **Super Admin**: Full system access and configuration
-- **Admin**: Team management and oversight
-- **Team Lead**: Team coordination and progress monitoring
-- **Software Architect**: Technical oversight and control management
-- **Developer**: Control implementation and defect resolution
-- **QA Engineer**: Test case execution and defect reporting
-- **Intern Developer/QA**: Limited access for training purposes
+| Document | Description |
+|----------|-------------|
+| **[📘 User Manual](docs/USER_MANUAL.md)** | Complete guide covering every feature — registration, dashboards, controls board, QA testing, defect management, RC Matrix, release hub, activity logs, and more. Includes ER diagrams, class diagrams, use case diagrams, and system workflow diagrams. |
+| **[README.md](README.md)** | Project overview, technology stack, setup, and API reference (this file) |
 
-### Key Features
-- 📊 **Dashboard Analytics**: Visual insights into team performance and progress
-- 🔔 **Real-time Notifications**: Instant updates on defect assignments and status changes
-- 🐛 **Defect Management**: Complete defect lifecycle with status tracking and resolution notes
-- ✅ **Test Case Execution**: Structured testing with pass/fail tracking
-- 📈 **Progress Monitoring**: Daily progress logs and team statistics
-- 🔐 **JWT Authentication**: Secure user authentication and authorization
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+---
+
+## ✨ Feature Overview
+
+### 🏗️ Core SDLC Management
+- **System Controls Board** — Create controls with full WBS (Work Breakdown Structure); manage sub-objectives with inline editing, status tracking, comments (insights), and progress %
+- **Role-Based Dashboards** — Every role sees a uniquely tailored Command Center: PM Executive view, Lead pipeline view, Developer task view, QA queue view
+- **Release Hub** — Plan and track releases with a monthly calendar; auto-create releases from control target dates
+- **RC Matrix** — Root Cause Matrix for test case type analysis; drill-down by category; multi-control compare mode with side-by-side bar charts
+
+### 🧪 Quality Assurance
+- **Test Case Management** — Create test cases (Functional / Regression / Bug Verification / Validation); quick-add inline bar for QA; Pass / Fail / Reset execution; actual result capture
+- **Defect Tracking** — Full defect lifecycle (Open → In Dev → Fixed → Re-Open → Closed); 9 defect categories; up to 5 screenshot attachments; per-transition duration badges; status timeline visual
+- **Defect Resolution Flow** — Developers see a read-only defect view with restricted status options; QA gets full edit access; both receive real-time push notifications on changes
+
+### 📣 Real-Time Collaboration
+- **SignalR Notifications** — Instant push notifications for defect assignments, status changes, test case failures, and QA assignments; no page refresh needed
+- **Notification Bell** — Per-user notification inbox with unread count badge, "time ago" timestamps, clear all, and direct navigation to linked defects
+- **My Defects Inbox** — Dedicated tab showing all active defects assigned to the current user
+
+### 📊 Analytics & Reporting
+- **Daily Progress Tracking** — Date-based progress log viewer with summary stats (Total Objectives, Updated Today, Avg Progress, Daily Update Rate); circular progress indicators
+- **Weekly Summary** — Mon–Sun summary cards per week showing updates count + average progress
+- **Dashboard Charts** — Chart.js pie charts for sub-objective status distribution and release health
+- **Activity & Audit Log** — Full timeline of actions on defects and test cases; old→new value badges; performed-by tracking
+
+### 👥 Team & Administration
+- **Multi-Team Support** — Users can belong to multiple teams; Team Switcher in NavBar instantly re-scopes all data
+- **Super Admin Panel** — Company-wide stats, per-team breakdown cards, role permission matrix (9 permissions × 8 roles), per-user permission overrides, cross-team access management
+- **Employee Registration** — Create employee records linked to user accounts; role assignment; team provisioning
+- **Control Types** — Define and manage SDLC categories (API, UI, Database, etc.) used to classify controls
+
+### 🔐 Security
+- **JWT Authentication** — All API requests require a valid Bearer token
+- **BCrypt Password Hashing** — Passwords never stored in plain text
+- **Soft Delete** — All entities use `ISDeleted` flag; nothing is permanently destroyed
+- **RBAC** — Role checks enforced at both UI layer and API controller layer
+
+---
+
+## 👤 User Roles
+
+| Role | Access Level | Primary Responsibilities |
+|------|-------------|--------------------------|
+| **Super Admin** | 🌐 System-wide | Manage all teams, configure role permissions, company-wide analytics |
+| **Admin** | 🏢 Team-scope | Register employees, manage controls, releases |
+| **Project Manager** | 📊 Executive | View aggregate KPIs, resource workloads |
+| **Software Architect** | 🏗️ Technical Lead | Design WBS, assign developers, monitor flow |
+| **Team Lead** | 👥 Operational | Assign controls, manage sub-objectives, monitor team |
+| **Developer** | 💻 Task Execution | Update sub-objectives, resolve defects, log progress |
+| **QA Engineer** | 🧪 Quality | Create/execute test cases, raise defects, verify fixes |
+| **Intern** | 🎓 Restricted | View and limited execution based on team config |
+
+---
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- **.NET 8.0**: Modern C# framework
-- **ASP.NET Core 8.0**: Web API framework
-- **Entity Framework Core 8.0**: ORM for database operations
-- **SQL Server 2022**: Relational database
-- **SignalR**: Real-time communication
-- **JWT Authentication**: Secure token-based auth
-- **BCrypt**: Password hashing
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| **.NET / C#** | 8.0 | Core runtime and language |
+| **ASP.NET Core** | 8.0 | REST API framework |
+| **Entity Framework Core** | 8.0 | ORM — database access |
+| **SQL Server** | 2022 | Relational database |
+| **SignalR** | built-in | Real-time WebSocket communication |
+| **BCrypt.Net** | — | Password hashing |
+| **JWT Bearer** | — | Token-based authentication |
 
 ### Frontend
-- **AngularJS 1.8.3**: Frontend framework
-- **Bootstrap 5.3.0**: UI component library
-- **Font Awesome 6.4.0**: Icon library
-- **Chart.js 4.4.0**: Data visualization
-- **SweetAlert2**: Beautiful alerts and modals
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| **AngularJS** | 1.8.3 | SPA framework |
+| **Bootstrap** | 5.3.0 | Responsive UI components |
+| **Font Awesome** | 6.4.0 | Icon library |
+| **Chart.js** | 4.4.0 | Pie/bar/doughnut charts |
+| **SweetAlert2** | — | Confirmation dialogs and alerts |
+
+---
 
 ## 📋 Prerequisites
 
-- .NET 8.0 SDK or later
-- SQL Server 2022 (or SQL Server Express)
-- Node.js (for package management, optional)
-- Modern web browser (Chrome, Firefox, Edge)
+- **.NET 8.0 SDK** or later
+- **SQL Server 2022** (or SQL Server Express)
+- **Modern browser**: Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
+
+---
 
 ## 🔧 Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd ControlApp
+cd Control_App
 ```
 
-### 2. Database Configuration
+### 2. Configure the Database
 
-Update the connection string in `appsettings.json`:
+Edit `ControlApp.API/appsettings.json`:
 
 ```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=YOUR_SERVER;Database=ControlDB;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "your-super-secret-key-min-32-chars",
+    "Issuer": "ControlApp",
+    "Audience": "ControlAppUsers"
   }
 }
 ```
 
-### 3. Database Migration
+### 3. Apply Database Migrations
 
 ```bash
 cd ControlApp.API
@@ -89,493 +136,361 @@ dotnet ef database update
 dotnet run
 ```
 
-The application will be available at: `http://localhost:5088`
+App available at: **`http://localhost:5088`**
+
+---
 
 ## 📁 Project Structure
 
 ```
-ControlApp.API/
-├── Controllers/          # API endpoints
-├── Services/            # Business logic layer
-├── Repositories/        # Data access layer
-├── Models/              # Entity models
-├── DTOs/                # Data transfer objects
-├── Hubs/                # SignalR hubs for real-time communication
-├── Migrations/          # EF Core migrations
-├── Data/                # Database context
-└── wwwroot/             # Frontend files
-    ├── components/      # AngularJS components
-    ├── services/        # Frontend services
-    ├── templates/       # HTML templates
-    └── styles.css       # Application styles
+Control_App/
+├── ControlApp.API/
+│   ├── Controllers/          # REST API endpoints
+│   ├── Services/             # Business logic layer
+│   ├── Repositories/         # Data access (EF Core)
+│   ├── Models/               # Entity models (14 models)
+│   │   ├── User.cs
+│   │   ├── Employee.cs
+│   │   ├── Team.cs
+│   │   ├── UserTeam.cs
+│   │   ├── Controls.cs
+│   │   ├── ControlType.cs
+│   │   ├── Status.cs
+│   │   ├── Defect.cs
+│   │   ├── TestCase.cs
+│   │   ├── ProgressLog.cs
+│   │   ├── ActivityLog.cs
+│   │   ├── Release.cs
+│   │   ├── Insight.cs
+│   │   └── ISoftDelete.cs
+│   ├── DTOs/                 # Data transfer objects
+│   ├── Hubs/                 # SignalR hub (NotificationHub)
+│   ├── Migrations/           # EF Core migration history
+│   ├── Data/                 # AppDbContext
+│   ├── Program.cs            # App startup + middleware config
+│   └── wwwroot/              # Frontend (AngularJS SPA)
+│       ├── components/       # 26 AngularJS components
+│       ├── services/         # api.service.js, auth.service.js, etc.
+│       └── index.html        # SPA entry point
+├── docs/
+│   └── USER_MANUAL.md        # Complete user documentation
+└── README.md
 ```
 
-## 🔑 Default Login Credentials
+---
 
-After running migrations, you can create users through the registration page or use the database seeding if configured.
+## 🗄️ Database Schema
 
-## 🎯 Usage Guide
+### Core Tables
 
-### For Developers
-1. Login with your credentials
-2. View assigned controls on the dashboard
-3. Update control progress and status
-4. Resolve assigned defects with resolution notes
-5. Track your daily progress
+| Table | Description |
+|-------|-------------|
+| **Users** | Login accounts (username, email, BCrypt hash, role, JWT) |
+| **Employees** | Employee profiles linked to Users; team assignment |
+| **Teams** | Team records with Architect, PM, TeamLead FKs |
+| **UserTeam** | Many-to-many: User ↔ Team memberships |
+| **Controls** | SDLC work items with sub-objectives (JSON), type, status, progress |
+| **ControlTypes** | Categories for classifying controls |
+| **Status** | Lookup table for control/sub-objective statuses |
+| **Defects** | Bug reports linked to Controls with severity, category, attachments |
+| **TestCases** | QA test cases linked to Controls (+ sub-objective index) |
+| **ProgressLogs** | Daily progress snapshots per employee per control |
+| **ActivityLogs** | Audit trail for defect and test case actions |
+| **Releases** | Release records with planned dates |
+| **Insights** | Comment threads on sub-objectives |
 
-### For QA Engineers
-1. Access assigned controls for testing
-2. Create and execute test cases
-3. Report defects with screenshots
-4. Track defect resolution status
-5. Verify fixed defects
+### Key Relationships
 
-### For Team Leads/Admins
-1. Monitor team progress and statistics
-2. Assign controls to team members
-3. Review defect reports and resolutions
-4. Generate insights and reports
-5. Manage team members and roles
+```
+User ──── UserTeam ──── Team
+ │                       │
+Employee ─────────────── │
+ │                       │
+ └── Controls ──── ControlType
+         │   └── Status
+         │   └── Release
+         ├── Defects
+         ├── TestCases ──── Defects (link)
+         ├── ProgressLogs
+         ├── ActivityLogs
+         └── Insights
+```
 
-## 🔔 Real-time Notifications
+---
 
-The system provides instant notifications for:
-- Defect assignments
-- Defect status changes
-- Test case failures
-- Control updates
-- Team announcements
+## 🔑 Authentication & First Login
 
-## 🐛 Defect Management Workflow
+After running migrations, create the first account:
 
-1. **Report**: QA reports defect with details and screenshot
-2. **Assign**: Defect assigned to developer
-3. **In Progress**: Developer works on fix
-4. **Fixed**: Developer marks as fixed with resolution notes
-5. **Verify**: QA verifies the fix
-6. **Closed**: Defect closed after verification
+1. Navigate to `http://localhost:5088`
+2. Click **Register** (visible on the login page)
+3. Create an **Admin** account first
+4. Use that Admin account to register other team members
 
-## 📊 Status Options
+> **Super Admin** accounts are created directly in the database by setting `IsSuperAdmin = true` on the `Users` table.
 
-### Defect Statuses
-- Open
-- In Progress
-- Fixed
-- Not a Defect
-- Deferred
-- Duplicate
-- Resolved
-- Closed
+---
 
-### Test Case Statuses
-- Not Tested
-- Pass
-- Fail
+## 📡 Key API Endpoints
 
-## 🔒 Security Features
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/login` | Authenticate; returns JWT token |
+| `POST` | `/api/auth/register` | Register new user + employee |
 
-- JWT token-based authentication
-- BCrypt password hashing
-- Role-based authorization
-- Secure API endpoints
-- CORS configuration
-- SQL injection prevention via EF Core
+### Controls
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/controls?teamId=` | List controls for a team |
+| `POST` | `/api/controls` | Create a new control |
+| `PUT` | `/api/controls/{id}` | Update control details |
+| `DELETE` | `/api/controls/{id}` | Soft-delete a control |
+
+### Defects
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/defects/by-control/{id}` | Defects for a control |
+| `POST` | `/api/defects` | Create a defect |
+| `PUT` | `/api/defects/{id}` | Update defect (status, assignee, notes) |
+| `DELETE` | `/api/defects/{id}` | Soft-delete a defect |
+
+### Test Cases
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/testcases/by-control/{id}` | Test cases for a control |
+| `POST` | `/api/testcases` | Create a test case |
+| `PUT` | `/api/testcases/{id}` | Update test case (status, result) |
+| `DELETE` | `/api/testcases/{id}` | Delete a test case |
+
+### Progress & Activity
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/progresslog/daily-summary` | Daily progress summary |
+| `GET` | `/api/progresslog/weekly-summary` | Weekly progress breakdown |
+| `GET` | `/api/activitylogs/by-control/{id}` | Activity log for a control |
+
+### Teams & Employees
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/teams` | List all teams |
+| `POST` | `/api/teams` | Create a team |
+| `GET` | `/api/employees?teamId=` | Employees in a team |
+| `POST` | `/api/teams/{id}/members/{userId}` | Add user to team |
+| `DELETE` | `/api/teams/{id}/members/{userId}` | Remove user from team |
+
+### Super Admin
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/teams/dashboard-stats` | Company-wide analytics |
+
+---
+
+## 📊 Defect Statuses
+
+```
+Open → In Dev → Fixed → Re-Open → Closed
+              ↘ Not a Defect
+              ↘ Deferred
+              ↘ Duplicate
+```
+
+| Status | Set By | Meaning |
+|--------|--------|---------|
+| **Open** | QA | Newly reported, unassigned |
+| **In Dev** | Developer | Developer started working on fix |
+| **Fixed** | Developer | Fix implemented, awaiting QA verification |
+| **Re-Open** | QA | Fix failed verification |
+| **Not a Defect** | Developer | Determined to be expected behaviour |
+| **Deferred** | Developer | Postponed to a future release |
+| **Duplicate** | Developer | Already reported elsewhere |
+| **Closed** | QA | Verified fixed and sign-off complete |
+
+---
+
+## 🧪 Sub-Objective Statuses
+
+| Status | Phase |
+|--------|-------|
+| **Analyze** | Planning |
+| **Development** | Active coding |
+| **Dev Testing** | Developer self-test |
+| **Ready for QA** | Handover to QA |
+| **QA** | Under QA testing |
+| **Completed** | Done ✅ |
+
+---
+
+## 🔔 SignalR Real-Time Events
+
+| Event | Sent To | Trigger |
+|-------|---------|---------|
+| `defectAssigned` | Assigned developer | QA assigns a defect |
+| `defectStatusChanged` | Involved parties | Developer updates defect status |
+| `testCaseFailed` | Related developer | Test case marked Fail |
+| `qaAssigned` | Newly assigned QA | Sub-objective owner set to QA Engineer |
+
+---
 
 ## 🚀 Deployment
 
-### Production Configuration
-
-1. Update `appsettings.Production.json` with production settings
-2. Set environment variable: `ASPNETCORE_ENVIRONMENT=Production`
-3. Build the application:
-```bash
-dotnet publish -c Release
-```
-4. Deploy to your hosting environment (IIS, Azure, AWS, etc.)
-
-## 📝 API Documentation
-
-Key API endpoints:
-
-- `POST /api/auth/login` - User authentication
-- `POST /api/auth/register` - User registration
-- `GET /api/controls` - Get all controls
-- `POST /api/defects` - Create defect
-- `PUT /api/defects/{id}` - Update defect
-- `GET /api/testcases/control/{id}` - Get test cases for control
-- `POST /api/testcases` - Create test case
-- `GET /api/controls/{id}/activity` - Get activity log for a control
-- `POST /api/controls/{id}/activity` - Log a sub-objective status change
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
-
-## 👥 Team
-
-Developed for efficient software development lifecycle management and team collaboration.
-
-## 📞 Support
-
-For issues or questions, please contact your system administrator or create an issue in the repository.
-
-## 🔄 Version History
-
-- **v1.0** - Initial release with core features
-- **v1.1** - Added SignalR real-time notifications
-- **v1.2** - Enhanced defect management with status filtering
-- **v1.3** - Test case management improvements
-- **v1.4** - Activity Log tab, sub-objective status change tracking, defect duration metrics
-
-## 🎨 Screenshots
-
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
-*Main dashboard showing team statistics and progress overview*
-
-### Control Board
-![Control Board](docs/screenshots/control-board.png)
-*Kanban-style board for managing controls across different statuses*
-
-### Defect Management
-![Defect Management](docs/screenshots/defects.png)
-*Comprehensive defect tracking with status filtering and assignment*
-
-### Test Case Execution
-![Test Cases](docs/screenshots/test-cases.png)
-*Test case management with pass/fail tracking*
-
-### Real-time Notifications
-![Notifications](docs/screenshots/notifications.png)
-*Instant notifications for defects and updates*
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### Database Connection Failed
-**Problem**: Cannot connect to SQL Server
-**Solution**:
-- Verify SQL Server is running
-- Check connection string in `appsettings.json`
-- Ensure Windows Authentication or SQL Authentication is properly configured
-- Add `TrustServerCertificate=True` to connection string if using SSL
-
-#### Migration Errors
-**Problem**: `dotnet ef database update` fails
-**Solution**:
-```bash
-# Install EF Core tools if not installed
-dotnet tool install --global dotnet-ef
-
-# Clean and rebuild
-dotnet clean
-dotnet build
-
-# Try migration again
-dotnet ef database update
-```
-
-#### SignalR Connection Issues
-**Problem**: Real-time notifications not working
-**Solution**:
-- Check browser console for connection errors
-- Verify JWT token is valid
-- Ensure CORS is properly configured in `Program.cs`
-- Check if SignalR hub endpoint is accessible
-
-#### Login Issues
-**Problem**: Cannot login with valid credentials
-**Solution**:
-- Verify user exists in database
-- Check if password was hashed correctly
-- Clear browser cache and cookies
-- Check JWT configuration in `appsettings.json`
-
-#### Port Already in Use
-**Problem**: Port 5088 is already in use
-**Solution**:
-```bash
-# Find process using the port (Windows)
-netstat -ano | findstr :5088
-
-# Kill the process
-taskkill /PID <process_id> /F
-
-# Or change port in launchSettings.json
-```
-
-## 🧪 Testing
-
-### Running Tests
-```bash
-# Run all tests
-dotnet test
-
-# Run with coverage
-dotnet test /p:CollectCoverage=true
-```
-
-### Manual Testing Checklist
-- [ ] User registration and login
-- [ ] Control creation and assignment
-- [ ] Test case creation and execution
-- [ ] Defect reporting and assignment
-- [ ] Real-time notification delivery
-- [ ] Status updates and filtering
-- [ ] Role-based access control
-- [ ] Progress tracking and reporting
-
-## 🔐 Environment Variables
-
-Create a `.env` file or set environment variables:
+### Production Build
 
 ```bash
-ASPNETCORE_ENVIRONMENT=Development
-JWT_SECRET=your-super-secret-key-here
-JWT_ISSUER=ControlApp
-JWT_AUDIENCE=ControlAppUsers
-DATABASE_SERVER=YOUR_SERVER_NAME
-DATABASE_NAME=ControlDB
+dotnet publish -c Release -o ./publish
 ```
 
-## 📊 Database Schema
+### Environment Variables
 
-### Key Tables
-- **Users**: User authentication and profile information
-- **Employees**: Employee details and team assignments
-- **Teams**: Team organization and management
-- **Controls**: Development controls and tasks
-- **TestCases**: QA test cases linked to controls
-- **Defects**: Bug reports and defect tracking
-- **ProgressLogs**: Daily progress entries
-- **Insights**: System-generated insights and analytics
-- **Releases**: Release management and versioning
+```bash
+ASPNETCORE_ENVIRONMENT=Production
+# Or set in appsettings.Production.json
+```
 
-### Relationships
-- Users ↔ Employees (One-to-One)
-- Employees ↔ Teams (Many-to-Many via UserTeam)
-- Controls ↔ Employees (Many-to-One for assignment)
-- Controls ↔ TestCases (One-to-Many)
-- Controls ↔ Defects (One-to-Many)
-- TestCases ↔ Defects (One-to-One optional link)
-
-## 🚦 Performance Optimization
-
-### Backend
-- Entity Framework query optimization with `.AsNoTracking()`
-- Async/await for all database operations
-- Proper indexing on frequently queried columns
-- Connection pooling for database connections
-
-### Frontend
-- Lazy loading of components
-- Efficient AngularJS digest cycle management
-- Debouncing for search and filter operations
-- Caching of frequently accessed data
-
-<!-- ## 🔄 CI/CD Pipeline
-
-### Recommended Setup
-```yaml
-# Example GitHub Actions workflow
-name: Build and Deploy
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Publish
-      run: dotnet publish -c Release -o ./publish
-``` -->
-
-## 📱 Browser Support
-
-- ✅ Chrome 90+
-- ✅ Firefox 88+
-- ✅ Edge 90+
-- ✅ Safari 14+
-- ⚠️ Internet Explorer (Not supported)
-
-## 🌐 API Rate Limiting
-
-The API implements rate limiting to prevent abuse:
-- 100 requests per minute per user
-- 1000 requests per hour per IP address
-
-## 📈 Monitoring & Logging
-
-### Application Insights
-Configure Application Insights for production monitoring:
+`appsettings.Production.json`:
 ```json
 {
-  "ApplicationInsights": {
-    "InstrumentationKey": "your-key-here"
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=PROD_SERVER;Database=ControlDB;..."
+  },
+  "Jwt": {
+    "Key": "STRONG_SECRET_KEY_32_CHARS_MIN",
+    "Issuer": "ControlApp",
+    "Audience": "ControlAppUsers"
   }
 }
 ```
 
-### Logging Levels
-- **Development**: Debug and above
-- **Production**: Information and above
-- **Critical errors**: Always logged with full stack trace
+### Hosting Options
+- **IIS** on Windows Server
+- **Azure App Service** (recommended)
+- **Docker** (containerise with `dotnet publish`)
 
-## 🔒 Security Best Practices
+---
 
-### Implemented
-- ✅ JWT token authentication
-- ✅ Password hashing with BCrypt
-- ✅ SQL injection prevention via parameterized queries
-- ✅ CORS configuration
+## 🔧 Troubleshooting
+
+| Problem | Solution |
+|---------|---------|
+| **Cannot connect to SQL Server** | Check `DefaultConnection` string; ensure SQL Server is running; add `TrustServerCertificate=True` |
+| **Migration fails** | Run `dotnet tool install --global dotnet-ef`, then `dotnet clean && dotnet build && dotnet ef database update` |
+| **SignalR not connecting** | Check browser console for WebSocket errors; verify JWT is valid; ensure CORS is configured in `Program.cs` |
+| **Login fails** | Verify user exists; clear browser cache; check JWT config in `appsettings.json` |
+| **Port 5088 in use** | `netstat -ano \| findstr :5088` → `taskkill /PID <id> /F`, or change port in `launchSettings.json` |
+| **Notifications not arriving** | Refresh page; check SignalR hub URL; ensure authenticated session is active |
+
+---
+
+## 🧪 Manual Testing Checklist
+
+- [ ] Register first Admin account
+- [ ] Create a team and assign employees
+- [ ] Create a Control with sub-objectives
+- [ ] Assign developer and QA to sub-objectives
+- [ ] Change sub-objective status → verify notification delivered
+- [ ] Add a test case → mark as Fail → raise a defect
+- [ ] Developer resolves defect → QA closes it
+- [ ] Check Activity Log for full trail
+- [ ] Open RC Matrix → generate and compare
+- [ ] Open Daily Progress → verify summary stats
+- [ ] Toggle Weekly Summary
+- [ ] Super Admin: modify permission matrix → verify effect after re-login
+
+---
+
+## 📈 Project Statistics
+
+| Metric | Value |
+|--------|-------|
+| **AngularJS Components** | 26 |
+| **Backend Models** | 14 |
+| **API Endpoints** | 50+ |
+| **Database Tables** | 13 core tables |
+| **User Roles** | 8 |
+| **Defect Statuses** | 8 |
+| **Sub-Objective Statuses** | 6 |
+| **RC Categories** | 10 |
+| **Real-time Events** | 4 SignalR events |
+| **Max Screenshot Attachments** | 5 per defect |
+
+---
+
+## 🔄 Version History
+
+| Version | Changes |
+|---------|---------|
+| **v1.0** | Core controls board, user auth, basic role management |
+| **v1.1** | SignalR real-time notifications for defect assignments |
+| **v1.2** | Enhanced defect management; status filtering; screenshot uploads |
+| **v1.3** | Test case management; QA quick-add; pass/fail execution flow |
+| **v1.4** | Activity Log tab; defect duration badges; status timeline visual |
+| **v2.0** | PM Executive Dashboard; RC Matrix with compare mode; Weekly Progress; Daily Update Rate; improved defect role-specific edit forms; per-user permission overrides; multi-team cross-access; comprehensive User Manual with system diagrams |
+
+---
+
+## 🌐 Browser Support
+
+| Browser | Support |
+|---------|---------|
+| ✅ Chrome 90+ | Full |
+| ✅ Firefox 88+ | Full |
+| ✅ Edge 90+ | Full |
+| ✅ Safari 14+ | Full |
+| ⚠️ Internet Explorer | Not supported |
+| 📱 Mobile | Responsive; mobile-optimised NavBar |
+
+---
+
+## 🔒 Security Checklist
+
+- ✅ JWT Bearer authentication on all API routes
+- ✅ BCrypt password hashing (never plain text)
+- ✅ Soft delete — no data permanently destroyed
+- ✅ Role-based authorization at controller level (`[Authorize(Roles=...)]`)
+- ✅ RBAC enforced at UI level (features hidden per role)
+- ✅ CORS policy configured in `Program.cs`
+- ✅ EF Core parameterised queries — SQL injection prevention
+- ✅ SignalR session verified on hub connection
 - ✅ HTTPS enforcement in production
-- ✅ Role-based authorization
-- ✅ Input validation and sanitization
 
-### Recommendations
-- Use HTTPS in production
-- Regularly update dependencies
-- Implement rate limiting
-- Enable audit logging
-- Regular security audits
-- Keep JWT secrets secure
+---
 
-## 📚 Additional Resources
+## 📚 External References
 
-### Project Documentation
-- **[User Manual](docs/USER_MANUAL.md)** - Complete guide for end users
-- **[User Manual Update (v1.4)](ControlApp.API/document/USER_MANUAL_UPDATE.md)** - New features added in v1.4
-- **[Quick Reference Guide](docs/QUICK_REFERENCE_GUIDE.md)** - Quick reference for common tasks
-- **[Screenshots](docs/screenshots/)** - Application screenshots
-
-### External Documentation
-- [ASP.NET Core Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
+- [ASP.NET Core 8 Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
 - [SignalR Documentation](https://docs.microsoft.com/en-us/aspnet/core/signalr/)
 - [AngularJS Guide](https://docs.angularjs.org/guide)
+- [Chart.js Documentation](https://www.chartjs.org/docs/)
 
-### Useful Commands
+### Useful EF Core Commands
 ```bash
-# Create new migration
+# Add new migration
 dotnet ef migrations add MigrationName
+
+# Apply migrations
+dotnet ef database update
 
 # Remove last migration
 dotnet ef migrations remove
 
-# Update database to specific migration
-dotnet ef database update MigrationName
-
 # Generate SQL script
 dotnet ef migrations script
 
-# Drop database (careful!)
+# Drop database (⚠️ careful!)
 dotnet ef database drop
-
-# Check EF Core version
-dotnet ef --version
 ```
 
-## 🎯 Roadmap
-
-### Planned Features
-- [ ] Email notifications
-- [ ] Advanced reporting and analytics
-- [ ] File attachment support for controls
-- [ ] Integration with external tools (Jira, Slack)
-- [ ] Mobile application
-- [ ] Dark mode theme
-- [ ] Export to Excel/PDF
-- [ ] Advanced search and filtering
-- [ ] Audit trail and history tracking
-- [ ] Automated testing integration
-
-## 🤝 Contributing Guidelines
-
-### Code Style
-- Follow C# coding conventions
-- Use meaningful variable and method names
-- Add XML documentation for public APIs
-- Write unit tests for new features
-- Keep methods small and focused
-
-### Pull Request Process
-1. Create a feature branch from `main`
-2. Make your changes with clear commit messages
-3. Update documentation if needed
-4. Ensure all tests pass
-5. Submit PR with detailed description
-6. Wait for code review and approval
-
-### Commit Message Format
-```
-type(scope): subject
-
-body
-
-footer
-```
-
-Types: feat, fix, docs, style, refactor, test, chore
-
-## 📞 Support & Contact
-
-### Getting Help
-- 📧 Email: support@controlapp.com
-- 💬 Slack: #controlapp-support
-- 📖 Wiki: [Internal Documentation](link-to-wiki)
-- 🐛 Issues: [GitHub Issues](link-to-issues)
-
-### Team Contacts
-- **Project Lead**: [Name] - [email]
-- **Backend Lead**: [Name] - [email]
-- **Frontend Lead**: [Name] - [email]
-- **QA Lead**: [Name] - [email]
+---
 
 ## 📄 License
 
-Copyright © 2024 [Your Company Name]. All rights reserved.
+Copyright © 2026 Virtusa. All rights reserved.
 
-This software is proprietary and confidential. Unauthorized copying, distribution, or use of this software, via any medium, is strictly prohibited.
-
-##  Acknowledgments
-
-- Thanks to all team members who contributed to this project
-- Built with modern web technologies and best practices
-- Inspired by agile development methodologies
-
-## 📊 Project Statistics
-
-- **Lines of Code**: ~15,000
-- **Components**: 25+ AngularJS components
-- **API Endpoints**: 50+ RESTful endpoints
-- **Database Tables**: 12 core tables
-- **Supported Roles**: 7 user roles
-- **Real-time Features**: SignalR notifications
+This software is proprietary and confidential. Unauthorised copying, distribution, or use of this software, via any medium, is strictly prohibited.
 
 ---
 
 **Built with ❤️ for efficient team collaboration and quality software delivery**
 
-*Last Updated: March 2026*
+*Last Updated: April 2026 — v2.0*

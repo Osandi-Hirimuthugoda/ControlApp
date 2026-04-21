@@ -2,15 +2,15 @@
 
 > **Version 2.0** | Last Updated: April 2026 | Proprietary & Confidential — Virtusa
 
-> 🌐 **Interactive Documentation Site:** [docs/index.html](index.html) — Full visual site with live Mermaid diagrams, all role guides, API reference, and setup instructions. Open in your browser for the best experience.
+>  **Interactive Documentation Site:** [docs/index.html](index.html) — Full visual site with live Mermaid diagrams, all role guides, API reference, and setup instructions. Open in your browser for the best experience.
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 | # | Section |
 |---|---------|
-| 🌐 | [**Interactive Documentation Site**](index.html) |
+|  | [**Interactive Documentation Site**](index.html) |
 | 1 | [System Architecture Overview](#1-system-architecture-overview) |
 | 2 | [Data Model — Entity Relationship Diagram](#2-data-model--entity-relationship-diagram) |
 | 3 | [Class Diagram](#3-class-diagram) |
@@ -437,14 +437,14 @@ classDiagram
 
 ```mermaid
 graph LR
-    SA(["👑 Super Admin"])
-    AD(["🔑 Admin"])
-    PM(["📊 Project Manager"])
-    AR(["🏗️ Software Architect"])
-    TL(["👥 Team Lead"])
-    DEV(["💻 Developer"])
-    QA(["🧪 QA Engineer"])
-    INT(["🎓 Intern"])
+    SA([" Super Admin"])
+    AD([" Admin"])
+    PM([" Project Manager"])
+    AR([" Software Architect"])
+    TL([" Team Lead"])
+    DEV([" Developer"])
+    QA([" QA Engineer"])
+    INT([" Intern"])
 
     SA --> UC1["Manage All Teams"]
     SA --> UC2["Configure Role Permissions"]
@@ -641,13 +641,13 @@ flowchart TD
 
 ## 6. Getting Started — Registration & Login
 
-### 🔑 Login
+###  Login
 
 | Field | Notes |
 |-------|-------|
 | **Username or Email** | Either format accepted |
 | **Password** | BCrypt-verified; minimum 6 characters |
-| **👁️ Show/Hide** | Eye icon toggles password visibility |
+| ** Show/Hide** | Eye icon toggles password visibility |
 
 **Steps:**
 1. Navigate to the application URL.
@@ -661,7 +661,7 @@ flowchart TD
 
 ---
 
-### 📝 Registration
+###  Registration
 
 > Only **Admin** users see the Register link. Others see: *"Contact Admin or Project Manager to register"*.
 
@@ -687,19 +687,19 @@ On success → automatically logged in and redirected to `/controls`.
 
 | Role | Access Level | Primary Responsibilities |
 |------|-------------|--------------------------|
-| **Super Admin** | 🌐 System-wide | Manage all teams, configure role permissions, company-wide analytics |
-| **Admin** | 🏢 Team-scope | Register employees, manage controls, releases |
-| **Project Manager** | 📊 Executive | View aggregate KPIs, resource workloads, executive dashboard |
-| **Software Architect** | 🏗️ Technical Lead | Design WBS, assign developers, monitor flow |
-| **Team Lead** | 👥 Operational | Assign controls, manage sub-objectives, monitor team |
-| **Developer** | 💻 Task Execution | Update sub-objectives, resolve defects, log progress |
-| **QA Engineer** | 🧪 Quality | Create/execute test cases, raise defects, verify fixes |
-| **Intern** | 🎓 Restricted | View and limited execution based on team config |
-| **Release Manager** ✦ NEW | 🚀 Release Pipeline | Manage releases, Release Hub calendar, deployment planning, generate reports |
-| **Security Auditor** ✦ NEW | 🔐 Read-only Audit | View all activity logs across all teams, audit defect/test history, export compliance reports |
-| **Business Analyst** ✦ NEW | 📋 Requirements | Add controls from requirement specs, edit sub-objectives, add insights, view dashboards and RC Matrix |
+| **Super Admin** |  System-wide | Manage all teams, configure role permissions, company-wide analytics |
+| **Admin** |  Team-scope | Register employees, manage controls, releases |
+| **Project Manager** |  Executive | View aggregate KPIs, resource workloads, executive dashboard |
+| **Software Architect** |  Technical Lead | Design WBS, assign developers, monitor flow |
+| **Team Lead** |  Operational | Assign controls, manage sub-objectives, monitor team |
+| **Developer** |  Task Execution | Update sub-objectives, resolve defects, log progress |
+| **QA Engineer** |  Quality | Create/execute test cases, raise defects, verify fixes |
+| **Intern** |  Restricted | View and limited execution based on team config |
+| **Release Manager**  NEW |  Release Pipeline | Manage releases, Release Hub calendar, deployment planning, generate reports |
+| **Security Auditor**  NEW |  Read-only Audit | View all activity logs across all teams, audit defect/test history, export compliance reports |
+| **Business Analyst**  NEW |  Requirements | Add controls from requirement specs, edit sub-objectives, add insights, view dashboards and RC Matrix |
 
-### 🚀 Release Manager (New in v2.0)
+###  Release Manager (New in v2.0)
 
 The **Release Manager** role is dedicated to controlling the software release pipeline.
 
@@ -712,7 +712,7 @@ The **Release Manager** role is dedicated to controlling the software release pi
 
 **Restrictions:** Cannot create/edit controls directly, cannot report defects or manage test cases, cannot manage employees or team membership.
 
-### 🔐 Security Auditor (New in v2.0)
+###  Security Auditor (New in v2.0)
 
 The **Security Auditor** role provides compliance oversight across the entire application.
 
@@ -724,7 +724,7 @@ The **Security Auditor** role provides compliance oversight across the entire ap
 
 **Restrictions:** Cannot create, edit, or delete any records. Strictly read-only. Cannot access the Super Admin Panel.
 
-### 📋 Business Analyst (New in v2.0)
+###  Business Analyst (New in v2.0)
 
 The **Business Analyst** role bridges business requirements and technical delivery.
 
@@ -767,13 +767,13 @@ The **Business Analyst** role bridges business requirements and technical delive
 graph TD
     Login([Login]) --> Check{Role Check}
     Check -->|Super Admin| SA["Crown icon Dashboard\n• Company-wide stats\n• All teams + employees\n• Permission matrix"]
-    Check -->|Project Manager| PM["📊 PM Executive View\n• Overall Progress KPI\n• Active Resources count\n• Top 3 Workload Leaders\n• Sub-objective flow"]
-    Check -->|Team Lead / Architect| TL["📋 Management View\n• Pipeline counters by status\n• Sub-objective distribution\n• Team health overview"]
-    Check -->|Developer| DEV["💻 My Tasks View\n• Assigned sub-objectives\n• Progress bars\n• Assigned defects"]
-    Check -->|QA Engineer| QA["🧪 QA Queue View\n• Ready for QA sub-objectives\n• Test execution links\n• Defect inbox"]
-    Check -->|Release Manager| RM["🚀 Release Hub\n• Release Calendar\n• Controls in scope\n• Deployment checklist"]
-    Check -->|Security Auditor| AUD["🔐 Audit View\n• Read-only all data\n• Activity log export\n• Compliance trail"]
-    Check -->|Business Analyst| BA["📋 Analyst View\n• Controls + KPIs\n• RC Matrix reports\n• Requirements trace"]
+    Check -->|Project Manager| PM[" PM Executive View\n• Overall Progress KPI\n• Active Resources count\n• Top 3 Workload Leaders\n• Sub-objective flow"]
+    Check -->|Team Lead / Architect| TL[" Management View\n• Pipeline counters by status\n• Sub-objective distribution\n• Team health overview"]
+    Check -->|Developer| DEV[" My Tasks View\n• Assigned sub-objectives\n• Progress bars\n• Assigned defects"]
+    Check -->|QA Engineer| QA[" QA Queue View\n• Ready for QA sub-objectives\n• Test execution links\n• Defect inbox"]
+    Check -->|Release Manager| RM[" Release Hub\n• Release Calendar\n• Controls in scope\n• Deployment checklist"]
+    Check -->|Security Auditor| AUD[" Audit View\n• Read-only all data\n• Activity log export\n• Compliance trail"]
+    Check -->|Business Analyst| BA[" Analyst View\n• Controls + KPIs\n• RC Matrix reports\n• Requirements trace"]
 ```
 
 ---
@@ -784,13 +784,13 @@ The sticky navigation bar contains (left to right):
 
 | Element | Visible To | Description |
 |---------|-----------|-------------|
-| **🌐 Logo** | All | "Control Management System" — links to home |
+| ** Logo** | All | "Control Management System" — links to home |
 | **Username + Role Badge** | All (desktop) | Shows your name and role in a coloured badge |
 | **Avatar Circle** | All (mobile) | First letter of username, tap to see name |
 | **Team Switcher** | Multi-team users | Dropdown to switch active team context |
-| **🔔 Bell** | Authenticated | Opens Notification Panel with unread count |
-| **⚙️ Profile** | Authenticated | Navigates to `/profile` |
-| **🚪 Logout** | Authenticated | SweetAlert2 confirmation before signing out |
+| ** Bell** | Authenticated | Opens Notification Panel with unread count |
+| ** Profile** | Authenticated | Navigates to `/profile` |
+| ** Logout** | Authenticated | SweetAlert2 confirmation before signing out |
 
 ### Team Switcher
 
@@ -820,7 +820,7 @@ Shows a SweetAlert2 modal:
 
 ## 9. Notification Center
 
-Click the **🔔 Bell icon** to open the panel. The badge shows total unread (notifications + active defects).
+Click the ** Bell icon** to open the panel. The badge shows total unread (notifications + active defects).
 
 ### Tab 1: Notifications
 
@@ -863,7 +863,7 @@ Access via **⚙️ Profile** button → `/profile`
 
 The top panel shows your current account: **Username, Email, Phone Number, Role badge**.
 
-### ✉️ Change Email
+###  Change Email
 
 1. Enter **New Email Address** — validated in real-time (turns red if invalid format).
 2. Enter **Current Password** to confirm identity (👁️ eye icon toggle available).
@@ -872,14 +872,14 @@ The top panel shows your current account: **Username, Email, Phone Number, Role 
 
 > The new email becomes both your email *and* username for future logins.
 
-### 📱 Change Phone Number
+###  Change Phone Number
 
 1. Enter phone number with country code, e.g. `+94 77 123 4567`.
 2. Maximum **20 characters**.
 3. Click **Update Phone Number**.
 4. No logout required — number is updated in-session immediately.
 
-### 🔐 Change Password
+###  Change Password
 
 | Field | Validation |
 |-------|-----------|
@@ -893,11 +893,11 @@ The **Save** button is disabled until all validations pass. On success → **aut
 
 ## 11. Super Admin Dashboard
 
-> 🔒 **Exclusively for Super Admin accounts.** All other roles are redirected away with an access denied alert.
+>  **Exclusively for Super Admin accounts.** All other roles are redirected away with an access denied alert.
 
 Route: `/super-admin`
 
-### 📊 Company-Wide Stat Cards
+###  Company-Wide Stat Cards
 
 Five gradient metric cards at the top:
 
@@ -909,7 +909,7 @@ Five gradient metric cards at the top:
 | **Avg Progress** | 🟡 Amber | Company-wide avg % | "company-wide" |
 | **Control Types** | 🟣 Purple | Active category count | "active categories" |
 
-### 🏢 Per-Team Cards
+###  Per-Team Cards
 
 Each team renders a gradient card showing:
 - **Team Name** + Team Code badge
@@ -919,7 +919,7 @@ Each team renders a gradient card showing:
 - **Role breakdown** pills (up to 4 top roles, e.g. "Developer: 3", "QA: 2")
 - **Buttons**: `Controls` | `Members`
 
-### ⚡ Quick Actions Bar
+###  Quick Actions Bar
 
 | Button | What it does |
 |--------|-------------|
@@ -927,7 +927,7 @@ Each team renders a gradient card showing:
 | **Manage Teams** | Navigates to `/teams` page |
 | **Assign Employees** | Opens employee → team assignment workflow |
 
-### 🛡️ Role Permissions Matrix
+###  Role Permissions Matrix
 
 A full **9 permission × 8 role** toggle matrix:
 
@@ -947,7 +947,7 @@ A full **9 permission × 8 role** toggle matrix:
 - **Save Changes** → persists to `localStorage`; members must **re-login** for effect
 - **Reset** → reverts all to system defaults
 
-### 👤 User Permission Overrides
+###  User Permission Overrides
 
 Override specific permissions **per individual employee** beyond their role:
 
@@ -959,7 +959,7 @@ Override specific permissions **per individual employee** beyond their role:
 
 Employees with active overrides display **green pills** showing their extra permissions.
 
-### 🌐 Team Access Management
+###  Team Access Management
 
 Assign employees to **additional teams** beyond their primary team:
 
@@ -973,7 +973,7 @@ Assign employees to **additional teams** beyond their primary team:
 
 ## 12. Command Center — Role-Based Dashboards
 
-### 👑 Project Manager — Executive View
+###  Project Manager — Executive View
 
 ```
 ┌──────────────────┬──────────────────┐
@@ -986,14 +986,14 @@ Assign employees to **additional teams** beyond their primary team:
 │  Ready:3 | Completed:18            │
 └────────────────────────────────────┘
 ┌────────────────────────────────────┐
-│  🏆 Top Workloads Leaderboard     │
+│   Top Workloads Leaderboard     │
 │  1. John Smith    ████████ 78%    │
 │  2. Jane Doe      ██████   65%    │
 │  3. Bob Chen      █████    54%    │
 └────────────────────────────────────┘
 ```
 
-### 🧭 Team Lead / Architect — Management View
+###  Team Lead / Architect — Management View
 
 Pipeline status counters for the current team:
 
@@ -1005,7 +1005,7 @@ Pipeline status counters for the current team:
 | **Ready for QA** | Dev complete, awaiting QA start |
 | **Completed** | Done ✅ |
 
-### 💻 Developer — My Tasks
+###  Developer — My Tasks
 
 Table of sub-objectives assigned to the logged-in developer:
 - Control name → Sub-objective name
@@ -1014,7 +1014,7 @@ Table of sub-objectives assigned to the logged-in developer:
 - Deadline date
 - Inline progress update button
 
-### 🧪 QA Engineer — Verification Queue
+###  QA Engineer — Verification Queue
 
 Filtered list of sub-objectives with status **"Ready for QA"**:
 - Control and sub-objective name
@@ -1022,7 +1022,7 @@ Filtered list of sub-objectives with status **"Ready for QA"**:
 - **+ New Defect** quick button
 - Pass/Fail count summary
 
-### 📅 Release Hub Calendar Widget
+###  Release Hub Calendar Widget
 
 - Monthly calendar view embedded in the dashboard
 - Dots on dates that have planned releases
@@ -1033,7 +1033,7 @@ Filtered list of sub-objectives with status **"Ready for QA"**:
 
 ## 13. Team & Employee Administration
 
-### 👥 Team Management (`/teams`)
+###  Team Management (`/teams`)
 
 | Action | Who Can | Description |
 |--------|---------|-------------|
@@ -1048,7 +1048,7 @@ Each team card shows:
 - **Stats**: Employee count, Control count, Control Type count
 - **Status badge**: Active (green) / Inactive (grey)
 
-### 👤 Employee Management
+###  Employee Management
 
 Available in the Employees List page:
 
@@ -1065,7 +1065,7 @@ Available in the Employees List page:
 
 Route: `/controls` — The primary workspace for all SDLC activity.
 
-### 🔧 Creating a New Control
+###  Creating a New Control
 
 Click **+ New Control** (requires `canAddControl` permission):
 
@@ -1081,13 +1081,13 @@ Click **+ New Control** (requires `canAddControl` permission):
 
 Click **Init New System Control** to save.
 
-### 📋 Board Views
+###  Board Views
 
 **Flat View** (default) — All controls in reverse-chronological order.
 
 **Grouped View** — Select a category from the filter to group by Control Type. Shows category header with item count badge.
 
-### 🔍 Filter Bar
+###  Filter Bar
 
 Toggle with **"Show/Hide Filters"** button. Five filter controls:
 
@@ -1099,7 +1099,7 @@ Toggle with **"Show/Hide Filters"** button. Five filter controls:
 | **Objective** | Dropdown | Filter by specific sub-objective text |
 | **Release Date** | Date picker | Filter by target date (with ✕ clear button) |
 
-### 📊 Sub-Objective WBS Table
+###  Sub-Objective WBS Table
 
 Each control shows sub-objectives navigated **one at a time** with Previous / Next arrows:
 
@@ -1117,7 +1117,7 @@ Each control shows sub-objectives navigated **one at a time** with Previous / Ne
 
 All inline edits save **instantly** — no Save button required.
 
-### 💬 Adding an Insight / Comment
+###  Adding an Insight / Comment
 
 At the bottom of each sub-objective row:
 1. Type in the **"Add Insight..."** input field.
@@ -1125,7 +1125,7 @@ At the bottom of each sub-objective row:
 3. Comment appears immediately in the "Latest Insights" column.
 4. System comments (auto-generated on status changes) appear in **italic** with a 🕐 history icon.
 
-### 🔧 Full Edit Mode
+###  Full Edit Mode
 
 Click the **Edit** button on a control (requires `canEditControl`):
 
@@ -1143,19 +1143,19 @@ Click the **Edit** button on a control (requires `canEditControl`):
 
 Click **Save** to commit all changes or **Cancel** to discard.
 
-### 🐛 Control-Level Defects Button
+###  Control-Level Defects Button
 
 The **Defects** button on any control row shows a **red count badge** (e.g., `Defects [3]`).
 Clicking opens the **QA Testing & Defects modal** filtered to that control scope.
 
-### 🧪 Test Cases Button
+###  Test Cases Button
 
 The **Test Cases** button opens the test grid for the whole control.
 The **TC** mini-button on each sub-objective row opens the test grid filtered to **that specific sub-objective**.
 
 A mini pass/fail progress bar shows at a glance in the sub-objective table.
 
-### 📄 Pagination
+###  Pagination
 
 Controls are paginated (default 10 per page):
 
@@ -1218,7 +1218,7 @@ Each day card shows:
 
 From the Controls Board, click **Test Cases** or **Defects** on any control or sub-objective. The modal opens with three tabs.
 
-### Tab 1: Test Cases 🧪
+### Tab 1: Test Cases 
 
 #### Adding a Test Case (QA only)
 
@@ -1280,7 +1280,7 @@ QA Engineers see a 🗑️ trash button on each card. Clicking requires a confir
 
 ---
 
-### Tab 2: Defects 🐛
+### Tab 2: Defects 
 
 #### Reporting a New Defect (QA only)
 
@@ -1377,7 +1377,7 @@ Click **Edit** → expand inline form → **Save Changes**.
 
 ---
 
-### Tab 3: Activity Log 📜
+### Tab 3: Activity Log 
 
 A **timeline view** of all actions taken on defects and test cases for this control:
 
@@ -1668,7 +1668,7 @@ sequenceDiagram
 
 ---
 
-## 🌐 Interactive Documentation Site
+##  Interactive Documentation Site
 
 For the best documentation experience, open the interactive documentation website in your browser:
 
@@ -1681,7 +1681,7 @@ For the best documentation experience, open the interactive documentation websit
 
 ---
 
-*📘 This manual covers **all features** of Control App v2.0.  
+* This manual covers **all features** of Control App v2.0.  
 For deployment setup and API documentation, refer to [README.md](../README.md).  
 For the interactive documentation site with all diagrams, open [index.html](index.html) in your browser.  
 For technical support, contact your System Administrator.*

@@ -214,17 +214,82 @@ app.controller('MainController', function ($rootScope, AuthService, $location, $
 });
 
 // Controller for Toast Notifications
-app.controller('ToastController', function (NotificationService) {
+app.controller('ToastController', function (NotificationService, $location, $rootScope, $scope) {
     var vm = this;
     vm.message = '';
     vm.type = '';
+    vm.metadata = null;
 
-    NotificationService.subscribe(function (msg, type) {
+    NotificationService.subscribe(function (msg, type, metadata) {
         vm.message = msg;
         vm.type = type;
+        vm.metadata = metadata;
     });
 
-    vm.clear = function () {
+    vm.clear = function (event) {
+        if (event) event.stopPropagation();
         vm.message = '';
+        vm.metadata = null;
+    };
+
+    vm.handleClick = function () {
+        if (!vm.metadata) return;
+
+        if (vm.metadata.controlId || vm.metadata.defectId) {
+            if ($location.path() !== '/controls') {
+                $location.path('/controls');
+            }
+
+            setTimeout(function() {
+                if (vm.metadata.controlId) {
+                    $rootScope.$broadcast('openControlDetails', vm.metadata.controlId);
+                }
+                if (vm.metadata.defectId) {
+                    $rootScope.$broadcast('highlightDefect', vm.metadata.defectId);
+                }
+            }, 500);
+        }
+
+        vm.clear();
+    };
+
+    vm.getIcon = function () {
+        switch (vm.type) {
+            case 'success': return 'fa-check-circle';
+            case 'error': return 'fa-exclamation-circle';
+            case 'info': return 'fa-info-circle';
+            case 'warning': return 'fa-exclamation-triangle';
+            default: return 'fa-bell';
+        }
+    };
+
+    vm.getBorderColor = function () {
+        switch (vm.type) {
+            case 'success': return '#10b981';
+            case 'error': return '#ef4444';
+            case 'info': return '#3b82f6';
+            case 'warning': return '#f59e0b';
+            default: return '#64748b';
+        }
+    };
+
+    vm.getIconBg = function () {
+        switch (vm.type) {
+            case 'success': return '#dcfce7';
+            case 'error': return '#fee2e2';
+            case 'info': return '#dbeafe';
+            case 'warning': return '#fef3c7';
+            default: return '#f1f5f9';
+        }
+    };
+
+    vm.getIconColor = function () {
+        switch (vm.type) {
+            case 'success': return '#166534';
+            case 'error': return '#991b1b';
+            case 'info': return '#1e40af';
+            case 'warning': return '#92400e';
+            default: return '#475569';
+        }
     };
 });

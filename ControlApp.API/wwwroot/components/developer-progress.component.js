@@ -544,8 +544,8 @@ app.component('developerProgress', {
             if (isNaN(d.getTime())) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         // Get controls assigned to Developers (show ALL controls assigned to developers, regardless of status)
@@ -1214,8 +1214,8 @@ app.component('developerProgress', {
             if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         ctrl.formatCommentDate = function (dateStr) {
@@ -1225,8 +1225,8 @@ app.component('developerProgress', {
                 if (isNaN(date.getTime())) return dateStr;
                 var day = String(date.getDate()).padStart(2, '0');
                 var month = String(date.getMonth() + 1).padStart(2, '0');
-                var year = date.getFullYear();
-                return month + '/' + day + '/' + year;
+                var year = date.getFullYear().toString().substring(2);
+                return year + '.' + month + '.' + day;
             } catch (e) { return dateStr; }
         };
 

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "PcYpuRO8azo3dxCVsl5aJRg6KQ0V3qxETLp9lvKM1OQ=",
+  "Hash": "Xa5UuCF1kG2+WrQqOpJJjt6lkrcDd41dnS8OPE1j8OU=",
   "Source": "ControlApp.API",
   "BasePath": "_content/ControlApp.API",
   "Mode": "Default",
@@ -31,8 +31,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "xfghvd80q0",
-      "Integrity": "gz/sRPZ8QRrO6dJP/qxU0WVwOmRGRefnu7ZQtLHFXVc=",
+      "Fingerprint": "ug5ekd7dxc",
+      "Integrity": "0lR3PFcXwNuEbDf495qz5uaGnSo2xfGPUo87ovzaFO8=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\app.module.js"
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "f3tzt71hti",
-      "Integrity": "9XiOtoA38bH3sMgXmpgmMYKzhzPi7KQWZa5DNnc2rZ0=",
+      "Fingerprint": "sgjadpr5h0",
+      "Integrity": "DKK93edfi4xsk/fPhac4IFQr9eIwEKrLuRNfVXZvlM4=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\add-control-type.component.js"
@@ -94,32 +94,11 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "vhflk013lo",
-      "Integrity": "s6X+TqHkMipNkSoUq3ENlEyeV3A14i4zEUj/mVqgy40=",
+      "Fingerprint": "zzhbhn8ts8",
+      "Integrity": "31xyPwI1bh05w77hLWXMkwFPFQP+AZS7PrXoNNs/6Yw=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\control-board.component.js"
-    },
-    {
-      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-type-sidebar.component.js",
-      "SourceId": "ControlApp.API",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
-      "BasePath": "_content/ControlApp.API",
-      "RelativePath": "components/control-type-sidebar.component#[.{fingerprint}]?.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "7d84xqzlyj",
-      "Integrity": "pSPCnMTOBgny3UeTG5S07zpIGqAJtT1cTeXS6Q5J35Y=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\components\\control-type-sidebar.component.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-types-list.component.js",
@@ -136,8 +115,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "rr8pa5n4wx",
-      "Integrity": "p+aOrn1WIPEelIQLTzdA/hWh85+gAafu7ApcbSBF8Ww=",
+      "Fingerprint": "tth227ve30",
+      "Integrity": "PwuzmARWa1+dpZqXBLrEOM1uPhTItUTnNOI+iA3ZQ8w=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\control-types-list.component.js"
@@ -178,8 +157,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "zynpsdhkw8",
-      "Integrity": "Zbp4/4NjN7/xlN+CaeQLvm1IpmCMpOdgWBLc77EQmLY=",
+      "Fingerprint": "vvs9t0g29o",
+      "Integrity": "hUhb9otxJ7OG1voAq6Elg8V8aiR2bGidwd+xJbOc3zY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\controls-sidebar.component.js"
@@ -199,8 +178,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "8h44rumn0z",
-      "Integrity": "VL062akX/L6zhyb/fuZab2ElEd4EfIROHMXSDfi0jDk=",
+      "Fingerprint": "v0valbp0ee",
+      "Integrity": "j4y1KEXj3217523NVkQXyGOHukh1s+qVzTFJbeIju28=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\controls-view.component.js"
@@ -241,8 +220,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "3p1382txev",
-      "Integrity": "qXT2CkSFkXKkqpumD7RJ8+EX/1qeeoleZkGHDOTOchg=",
+      "Fingerprint": "elq5vmrnt0",
+      "Integrity": "HuOrxLsyc1fTm6/fvcdyvkxR5EHH1Pl0V+EAfMLHVAc=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\dashboard.component.js"
@@ -283,32 +262,11 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "y0iiz5d084",
-      "Integrity": "wjJvLS5gXRJQK4EwfsutwDagKf2+nKrRB9MTKQD4c7c=",
+      "Fingerprint": "0izlcmwpqt",
+      "Integrity": "CHXuvUE8nRzDcpLL328DhPWAVOtXCZH7sa6ytnN/VFw=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\developer-progress.component.js"
-    },
-    {
-      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
-      "SourceId": "ControlApp.API",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
-      "BasePath": "_content/ControlApp.API",
-      "RelativePath": "components/employee-sidebar.component#[.{fingerprint}]?.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "pj2ef8zq0l",
-      "Integrity": "ZUOlTia1cyppCVagPoj5v7kPGMO00S4s0JN1iVbxFz8=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\components\\employee-sidebar.component.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employees-list.component.js",
@@ -330,27 +288,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\employees-list.component.js"
-    },
-    {
-      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\latest-insights.component.js",
-      "SourceId": "ControlApp.API",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
-      "BasePath": "_content/ControlApp.API",
-      "RelativePath": "components/latest-insights.component#[.{fingerprint}]?.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "n0maiga0u5",
-      "Integrity": "978X5NZDmZlSbpzJZaxzrC22ED3z/ZZVwnyIf/QRri4=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\components\\latest-insights.component.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\login.component.js",
@@ -388,8 +325,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "1cimwev0ql",
-      "Integrity": "UQ4KEUPYSTo4r9H6XEv/j4SWL4wc/sPS2+IhUX808uc=",
+      "Fingerprint": "4ywjs38db6",
+      "Integrity": "dIrf8IVZwaTMm/YW2PEUc9xltq00i9BtwWQAjnU7K7M=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\navbar.component.js"
@@ -437,6 +374,27 @@
       "OriginalItemSpec": "wwwroot\\components\\profile.component.js"
     },
     {
+      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-defects.component.js",
+      "SourceId": "ControlApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
+      "BasePath": "_content/ControlApp.API",
+      "RelativePath": "components/qa-defects.component#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "qrr27q15ik",
+      "Integrity": "FliC8TBFBaklHyUpnZHlygHZZtB3ueEEUHfARlu3fBE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\components\\qa-defects.component.js"
+    },
+    {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress-view.component.js",
       "SourceId": "ControlApp.API",
       "SourceType": "Discovered",
@@ -472,11 +430,32 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "rldh3h4bkt",
-      "Integrity": "4dnwvsVN5Iat/IsmoSsYFrY559l6tr1L7DxUrwa3pmA=",
+      "Fingerprint": "1btklf523l",
+      "Integrity": "XXJHlS82KScCv8CXIw2KKvLKDBO21dDXh7yt+yKOIMY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\qa-progress.component.js"
+    },
+    {
+      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\rc-matrix.component.js",
+      "SourceId": "ControlApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
+      "BasePath": "_content/ControlApp.API",
+      "RelativePath": "components/rc-matrix.component#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "uvdb5tlc5d",
+      "Integrity": "9tviVa8uLougnffWXxEA3Ee7vC9BAx7PW3o+j5ulG10=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\components\\rc-matrix.component.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\sub-objectives-view.component.js",
@@ -493,8 +472,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "ckelpfy774",
-      "Integrity": "BI51cLs2krnyn2NhFEhSU6gAbDw36JHrtq+ovaE/TjM=",
+      "Fingerprint": "okmu26q0dt",
+      "Integrity": "yIdBfG0soGY5B5G/+icRT7ah/LRFM2GGRKFrZam07sU=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\sub-objectives-view.component.js"
@@ -514,11 +493,53 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "9f4ukkcjbe",
-      "Integrity": "5VWBo9HLLiVjh1yu9GpgfdBoPKqPbdaJvX5xKbrlqKA=",
+      "Fingerprint": "y1tmr4j5a1",
+      "Integrity": "ljdC+Ji6IZQWa/uO84bl7xuRhArrNlan5Tj4mPkQ+ms=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\components\\super-admin-dashboard.component.js"
+    },
+    {
+      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\team-management.component.js",
+      "SourceId": "ControlApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
+      "BasePath": "_content/ControlApp.API",
+      "RelativePath": "components/team-management.component#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "ryc9bf3q51",
+      "Integrity": "HR93qiMgS1XK4Dcj6ONCnAddCRrmTd5egvc+jDll6Mk=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\components\\team-management.component.js"
+    },
+    {
+      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\test-cases-grid.component.js",
+      "SourceId": "ControlApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
+      "BasePath": "_content/ControlApp.API",
+      "RelativePath": "components/test-cases-grid.component#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "eapag58j11",
+      "Integrity": "et18vqtHZbyPoyfM30g5sQg4zD3vvh6un6nbEusbrPY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\components\\test-cases-grid.component.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",
@@ -535,8 +556,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "m3py3squx2",
-      "Integrity": "bln0yyyryBjT4SHuLxylvkJMJdC25lXXM+zt43/YYRk=",
+      "Fingerprint": "m56pa7mnwc",
+      "Integrity": "li5A2oNdPr6xpNPwOCpPvxxb3zQqTUpHifGCNCcyalQ=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\index.html"
@@ -556,8 +577,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "a6w4fw8ou0",
-      "Integrity": "4upUSUZKApZRPgQYVZhSXKOrQ0s3VEyZw+PazLHK5VI=",
+      "Fingerprint": "tngz6sz5lq",
+      "Integrity": "GWXAQy1ejHxalgYdLryiuDk4durzW9zjqUd6zmjCSxg=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\services\\api.service.js"
@@ -577,8 +598,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "2soie3tlk2",
-      "Integrity": "Duh/1UfvQJjDnDr6EuDJ5AG7isCkEdT6AkE0uxPPAJM=",
+      "Fingerprint": "kt86ubv5bp",
+      "Integrity": "KIxzNFMkipZPTWcVwJVURsA2tyDUwmxwrqEQp3impsc=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\services\\auth.service.js"
@@ -598,11 +619,32 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "qbp353n86a",
-      "Integrity": "CtwCQLSYpv2J+PB+lsDDTDmk8K5P+faySIttXzZP31A=",
+      "Fingerprint": "5p8wsh4uq9",
+      "Integrity": "98sApPKVUQXPyivBe6+VZPlJXpeXTfIKmlHw1roaKgA=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\services\\notification.service.js"
+    },
+    {
+      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\signalr.service.js",
+      "SourceId": "ControlApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
+      "BasePath": "_content/ControlApp.API",
+      "RelativePath": "services/signalr.service#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "h8ozow3e0i",
+      "Integrity": "j1IOsQX/Z77momRGy6t0ufN1SVXuwlD1eb93D1f8a4g=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\services\\signalr.service.js"
     },
     {
       "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
@@ -619,32 +661,11 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "61uuft3gp9",
-      "Integrity": "iiY5sqBRInttv1BuhVJgBBraC6Cu/CjGsrDH8Lj7DVs=",
+      "Fingerprint": "wyr27j6bth",
+      "Integrity": "GK2Hg6mkIn4/9QhVsFT5E/XAc1+fjj2zoHf/in/AWhI=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\styles.css"
-    },
-    {
-      "Identity": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\templates\\controls-view.html",
-      "SourceId": "ControlApp.API",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\",
-      "BasePath": "_content/ControlApp.API",
-      "RelativePath": "templates/controls-view#[.{fingerprint}]?.html",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "Fingerprint": "w3z4qe292w",
-      "Integrity": "RMMcI3fl0jCZm+SlG/KYC//3UmBNKz/DWWjr72w9bRw=",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\templates\\controls-view.html"
     }
   ],
   "Endpoints": [
@@ -659,7 +680,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7209"
+          "Value": "9599"
         },
         {
           "Name": "Content-Type",
@@ -667,11 +688,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"gz/sRPZ8QRrO6dJP/qxU0WVwOmRGRefnu7ZQtLHFXVc=\""
+          "Value": "\"0lR3PFcXwNuEbDf495qz5uaGnSo2xfGPUo87ovzaFO8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:54:19 GMT"
+          "Value": "Sat, 25 Apr 2026 17:11:18 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -681,12 +702,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-gz/sRPZ8QRrO6dJP/qxU0WVwOmRGRefnu7ZQtLHFXVc="
+          "Value": "sha256-0lR3PFcXwNuEbDf495qz5uaGnSo2xfGPUo87ovzaFO8="
         }
       ]
     },
     {
-      "Route": "app.module.xfghvd80q0.js",
+      "Route": "app.module.ug5ekd7dxc.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\app.module.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -696,7 +717,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7209"
+          "Value": "9599"
         },
         {
           "Name": "Content-Type",
@@ -704,11 +725,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"gz/sRPZ8QRrO6dJP/qxU0WVwOmRGRefnu7ZQtLHFXVc=\""
+          "Value": "\"0lR3PFcXwNuEbDf495qz5uaGnSo2xfGPUo87ovzaFO8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:54:19 GMT"
+          "Value": "Sat, 25 Apr 2026 17:11:18 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -718,7 +739,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "xfghvd80q0"
+          "Value": "ug5ekd7dxc"
         },
         {
           "Name": "label",
@@ -726,7 +747,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-gz/sRPZ8QRrO6dJP/qxU0WVwOmRGRefnu7ZQtLHFXVc="
+          "Value": "sha256-0lR3PFcXwNuEbDf495qz5uaGnSo2xfGPUo87ovzaFO8="
         }
       ]
     },
@@ -813,51 +834,6 @@
       ]
     },
     {
-      "Route": "components/add-control-type.component.f3tzt71hti.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\add-control-type.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "16408"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"9XiOtoA38bH3sMgXmpgmMYKzhzPi7KQWZa5DNnc2rZ0=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "f3tzt71hti"
-        },
-        {
-          "Name": "label",
-          "Value": "components/add-control-type.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-9XiOtoA38bH3sMgXmpgmMYKzhzPi7KQWZa5DNnc2rZ0="
-        }
-      ]
-    },
-    {
       "Route": "components/add-control-type.component.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\add-control-type.component.js",
       "Selectors": [],
@@ -868,7 +844,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "16408"
+          "Value": "20763"
         },
         {
           "Name": "Content-Type",
@@ -876,11 +852,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"9XiOtoA38bH3sMgXmpgmMYKzhzPi7KQWZa5DNnc2rZ0=\""
+          "Value": "\"DKK93edfi4xsk/fPhac4IFQr9eIwEKrLuRNfVXZvlM4=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Mon, 25 May 2026 05:17:28 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -890,7 +866,52 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-9XiOtoA38bH3sMgXmpgmMYKzhzPi7KQWZa5DNnc2rZ0="
+          "Value": "sha256-DKK93edfi4xsk/fPhac4IFQr9eIwEKrLuRNfVXZvlM4="
+        }
+      ]
+    },
+    {
+      "Route": "components/add-control-type.component.sgjadpr5h0.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\add-control-type.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "20763"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"DKK93edfi4xsk/fPhac4IFQr9eIwEKrLuRNfVXZvlM4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:17:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "sgjadpr5h0"
+        },
+        {
+          "Name": "label",
+          "Value": "components/add-control-type.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-DKK93edfi4xsk/fPhac4IFQr9eIwEKrLuRNfVXZvlM4="
         }
       ]
     },
@@ -905,7 +926,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "256559"
+          "Value": "329337"
         },
         {
           "Name": "Content-Type",
@@ -913,11 +934,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"s6X+TqHkMipNkSoUq3ENlEyeV3A14i4zEUj/mVqgy40=\""
+          "Value": "\"31xyPwI1bh05w77hLWXMkwFPFQP+AZS7PrXoNNs/6Yw=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Tue, 26 May 2026 04:42:12 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -927,12 +948,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-s6X+TqHkMipNkSoUq3ENlEyeV3A14i4zEUj/mVqgy40="
+          "Value": "sha256-31xyPwI1bh05w77hLWXMkwFPFQP+AZS7PrXoNNs/6Yw="
         }
       ]
     },
     {
-      "Route": "components/control-board.component.vhflk013lo.js",
+      "Route": "components/control-board.component.zzhbhn8ts8.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-board.component.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -942,7 +963,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "256559"
+          "Value": "329337"
         },
         {
           "Name": "Content-Type",
@@ -950,11 +971,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"s6X+TqHkMipNkSoUq3ENlEyeV3A14i4zEUj/mVqgy40=\""
+          "Value": "\"31xyPwI1bh05w77hLWXMkwFPFQP+AZS7PrXoNNs/6Yw=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Tue, 26 May 2026 04:42:12 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -964,7 +985,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "vhflk013lo"
+          "Value": "zzhbhn8ts8"
         },
         {
           "Name": "label",
@@ -972,89 +993,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-s6X+TqHkMipNkSoUq3ENlEyeV3A14i4zEUj/mVqgy40="
-        }
-      ]
-    },
-    {
-      "Route": "components/control-type-sidebar.component.7d84xqzlyj.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-type-sidebar.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "12084"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"pSPCnMTOBgny3UeTG5S07zpIGqAJtT1cTeXS6Q5J35Y=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 01 Feb 2026 17:03:02 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "7d84xqzlyj"
-        },
-        {
-          "Name": "label",
-          "Value": "components/control-type-sidebar.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-pSPCnMTOBgny3UeTG5S07zpIGqAJtT1cTeXS6Q5J35Y="
-        }
-      ]
-    },
-    {
-      "Route": "components/control-type-sidebar.component.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-type-sidebar.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "12084"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"pSPCnMTOBgny3UeTG5S07zpIGqAJtT1cTeXS6Q5J35Y=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 01 Feb 2026 17:03:02 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-pSPCnMTOBgny3UeTG5S07zpIGqAJtT1cTeXS6Q5J35Y="
+          "Value": "sha256-31xyPwI1bh05w77hLWXMkwFPFQP+AZS7PrXoNNs/6Yw="
         }
       ]
     },
@@ -1069,7 +1008,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "54026"
+          "Value": "57899"
         },
         {
           "Name": "Content-Type",
@@ -1077,11 +1016,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"p+aOrn1WIPEelIQLTzdA/hWh85+gAafu7ApcbSBF8Ww=\""
+          "Value": "\"PwuzmARWa1+dpZqXBLrEOM1uPhTItUTnNOI+iA3ZQ8w=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Fri, 03 Apr 2026 05:35:14 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1091,12 +1030,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-p+aOrn1WIPEelIQLTzdA/hWh85+gAafu7ApcbSBF8Ww="
+          "Value": "sha256-PwuzmARWa1+dpZqXBLrEOM1uPhTItUTnNOI+iA3ZQ8w="
         }
       ]
     },
     {
-      "Route": "components/control-types-list.component.rr8pa5n4wx.js",
+      "Route": "components/control-types-list.component.tth227ve30.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-types-list.component.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -1106,7 +1045,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "54026"
+          "Value": "57899"
         },
         {
           "Name": "Content-Type",
@@ -1114,11 +1053,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"p+aOrn1WIPEelIQLTzdA/hWh85+gAafu7ApcbSBF8Ww=\""
+          "Value": "\"PwuzmARWa1+dpZqXBLrEOM1uPhTItUTnNOI+iA3ZQ8w=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Fri, 03 Apr 2026 05:35:14 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1128,7 +1067,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "rr8pa5n4wx"
+          "Value": "tth227ve30"
         },
         {
           "Name": "label",
@@ -1136,7 +1075,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-p+aOrn1WIPEelIQLTzdA/hWh85+gAafu7ApcbSBF8Ww="
+          "Value": "sha256-PwuzmARWa1+dpZqXBLrEOM1uPhTItUTnNOI+iA3ZQ8w="
         }
       ]
     },
@@ -1233,7 +1172,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12963"
+          "Value": "13538"
         },
         {
           "Name": "Content-Type",
@@ -1241,11 +1180,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Zbp4/4NjN7/xlN+CaeQLvm1IpmCMpOdgWBLc77EQmLY=\""
+          "Value": "\"hUhb9otxJ7OG1voAq6Elg8V8aiR2bGidwd+xJbOc3zY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:53:14 GMT"
+          "Value": "Wed, 15 Apr 2026 09:26:19 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1255,12 +1194,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-Zbp4/4NjN7/xlN+CaeQLvm1IpmCMpOdgWBLc77EQmLY="
+          "Value": "sha256-hUhb9otxJ7OG1voAq6Elg8V8aiR2bGidwd+xJbOc3zY="
         }
       ]
     },
     {
-      "Route": "components/controls-sidebar.component.zynpsdhkw8.js",
+      "Route": "components/controls-sidebar.component.vvs9t0g29o.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-sidebar.component.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -1270,7 +1209,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12963"
+          "Value": "13538"
         },
         {
           "Name": "Content-Type",
@@ -1278,11 +1217,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Zbp4/4NjN7/xlN+CaeQLvm1IpmCMpOdgWBLc77EQmLY=\""
+          "Value": "\"hUhb9otxJ7OG1voAq6Elg8V8aiR2bGidwd+xJbOc3zY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:53:14 GMT"
+          "Value": "Wed, 15 Apr 2026 09:26:19 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1292,7 +1231,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "zynpsdhkw8"
+          "Value": "vvs9t0g29o"
         },
         {
           "Name": "label",
@@ -1300,52 +1239,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-Zbp4/4NjN7/xlN+CaeQLvm1IpmCMpOdgWBLc77EQmLY="
-        }
-      ]
-    },
-    {
-      "Route": "components/controls-view.component.8h44rumn0z.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-view.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "11563"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"VL062akX/L6zhyb/fuZab2ElEd4EfIROHMXSDfi0jDk=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 11 Feb 2026 04:55:52 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "8h44rumn0z"
-        },
-        {
-          "Name": "label",
-          "Value": "components/controls-view.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-VL062akX/L6zhyb/fuZab2ElEd4EfIROHMXSDfi0jDk="
+          "Value": "sha256-hUhb9otxJ7OG1voAq6Elg8V8aiR2bGidwd+xJbOc3zY="
         }
       ]
     },
@@ -1360,7 +1254,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "11563"
+          "Value": "10966"
         },
         {
           "Name": "Content-Type",
@@ -1368,11 +1262,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"VL062akX/L6zhyb/fuZab2ElEd4EfIROHMXSDfi0jDk=\""
+          "Value": "\"j4y1KEXj3217523NVkQXyGOHukh1s+qVzTFJbeIju28=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 11 Feb 2026 04:55:52 GMT"
+          "Value": "Fri, 03 Apr 2026 05:12:20 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1382,7 +1276,52 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-VL062akX/L6zhyb/fuZab2ElEd4EfIROHMXSDfi0jDk="
+          "Value": "sha256-j4y1KEXj3217523NVkQXyGOHukh1s+qVzTFJbeIju28="
+        }
+      ]
+    },
+    {
+      "Route": "components/controls-view.component.v0valbp0ee.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\controls-view.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "10966"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"j4y1KEXj3217523NVkQXyGOHukh1s+qVzTFJbeIju28=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 03 Apr 2026 05:12:20 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "v0valbp0ee"
+        },
+        {
+          "Name": "label",
+          "Value": "components/controls-view.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-j4y1KEXj3217523NVkQXyGOHukh1s+qVzTFJbeIju28="
         }
       ]
     },
@@ -1469,7 +1408,7 @@
       ]
     },
     {
-      "Route": "components/dashboard.component.3p1382txev.js",
+      "Route": "components/dashboard.component.elq5vmrnt0.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\dashboard.component.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -1479,7 +1418,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "19016"
+          "Value": "206358"
         },
         {
           "Name": "Content-Type",
@@ -1487,11 +1426,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"qXT2CkSFkXKkqpumD7RJ8+EX/1qeeoleZkGHDOTOchg=\""
+          "Value": "\"HuOrxLsyc1fTm6/fvcdyvkxR5EHH1Pl0V+EAfMLHVAc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 17 Feb 2026 06:27:59 GMT"
+          "Value": "Wed, 27 May 2026 05:54:09 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1501,7 +1440,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "3p1382txev"
+          "Value": "elq5vmrnt0"
         },
         {
           "Name": "label",
@@ -1509,7 +1448,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-qXT2CkSFkXKkqpumD7RJ8+EX/1qeeoleZkGHDOTOchg="
+          "Value": "sha256-HuOrxLsyc1fTm6/fvcdyvkxR5EHH1Pl0V+EAfMLHVAc="
         }
       ]
     },
@@ -1524,7 +1463,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "19016"
+          "Value": "206358"
         },
         {
           "Name": "Content-Type",
@@ -1532,11 +1471,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"qXT2CkSFkXKkqpumD7RJ8+EX/1qeeoleZkGHDOTOchg=\""
+          "Value": "\"HuOrxLsyc1fTm6/fvcdyvkxR5EHH1Pl0V+EAfMLHVAc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 17 Feb 2026 06:27:59 GMT"
+          "Value": "Wed, 27 May 2026 05:54:09 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1546,7 +1485,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-qXT2CkSFkXKkqpumD7RJ8+EX/1qeeoleZkGHDOTOchg="
+          "Value": "sha256-HuOrxLsyc1fTm6/fvcdyvkxR5EHH1Pl0V+EAfMLHVAc="
         }
       ]
     },
@@ -1633,6 +1572,51 @@
       ]
     },
     {
+      "Route": "components/developer-progress.component.0izlcmwpqt.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\developer-progress.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "108256"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CHXuvUE8nRzDcpLL328DhPWAVOtXCZH7sa6ytnN/VFw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:40:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "0izlcmwpqt"
+        },
+        {
+          "Name": "label",
+          "Value": "components/developer-progress.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-CHXuvUE8nRzDcpLL328DhPWAVOtXCZH7sa6ytnN/VFw="
+        }
+      ]
+    },
+    {
       "Route": "components/developer-progress.component.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\developer-progress.component.js",
       "Selectors": [],
@@ -1643,7 +1627,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "99299"
+          "Value": "108256"
         },
         {
           "Name": "Content-Type",
@@ -1651,11 +1635,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"wjJvLS5gXRJQK4EwfsutwDagKf2+nKrRB9MTKQD4c7c=\""
+          "Value": "\"CHXuvUE8nRzDcpLL328DhPWAVOtXCZH7sa6ytnN/VFw=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 09 Feb 2026 10:50:36 GMT"
+          "Value": "Mon, 25 May 2026 05:40:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1665,134 +1649,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-wjJvLS5gXRJQK4EwfsutwDagKf2+nKrRB9MTKQD4c7c="
-        }
-      ]
-    },
-    {
-      "Route": "components/developer-progress.component.y0iiz5d084.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\developer-progress.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "99299"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"wjJvLS5gXRJQK4EwfsutwDagKf2+nKrRB9MTKQD4c7c=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 09 Feb 2026 10:50:36 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "y0iiz5d084"
-        },
-        {
-          "Name": "label",
-          "Value": "components/developer-progress.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-wjJvLS5gXRJQK4EwfsutwDagKf2+nKrRB9MTKQD4c7c="
-        }
-      ]
-    },
-    {
-      "Route": "components/employee-sidebar.component.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "13796"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"ZUOlTia1cyppCVagPoj5v7kPGMO00S4s0JN1iVbxFz8=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 30 Dec 2025 07:23:37 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-ZUOlTia1cyppCVagPoj5v7kPGMO00S4s0JN1iVbxFz8="
-        }
-      ]
-    },
-    {
-      "Route": "components/employee-sidebar.component.pj2ef8zq0l.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "13796"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"ZUOlTia1cyppCVagPoj5v7kPGMO00S4s0JN1iVbxFz8=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 30 Dec 2025 07:23:37 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "pj2ef8zq0l"
-        },
-        {
-          "Name": "label",
-          "Value": "components/employee-sidebar.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-ZUOlTia1cyppCVagPoj5v7kPGMO00S4s0JN1iVbxFz8="
+          "Value": "sha256-CHXuvUE8nRzDcpLL328DhPWAVOtXCZH7sa6ytnN/VFw="
         }
       ]
     },
@@ -1879,88 +1736,6 @@
       ]
     },
     {
-      "Route": "components/latest-insights.component.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\latest-insights.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "27291"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"978X5NZDmZlSbpzJZaxzrC22ED3z/ZZVwnyIf/QRri4=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 10 Feb 2026 05:48:48 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-978X5NZDmZlSbpzJZaxzrC22ED3z/ZZVwnyIf/QRri4="
-        }
-      ]
-    },
-    {
-      "Route": "components/latest-insights.component.n0maiga0u5.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\latest-insights.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "27291"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"978X5NZDmZlSbpzJZaxzrC22ED3z/ZZVwnyIf/QRri4=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 10 Feb 2026 05:48:48 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "n0maiga0u5"
-        },
-        {
-          "Name": "label",
-          "Value": "components/latest-insights.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-978X5NZDmZlSbpzJZaxzrC22ED3z/ZZVwnyIf/QRri4="
-        }
-      ]
-    },
-    {
       "Route": "components/login.component.5i4nz18s9r.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\login.component.js",
       "Selectors": [],
@@ -2043,7 +1818,7 @@
       ]
     },
     {
-      "Route": "components/navbar.component.1cimwev0ql.js",
+      "Route": "components/navbar.component.4ywjs38db6.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\navbar.component.js",
       "Selectors": [],
       "ResponseHeaders": [
@@ -2053,7 +1828,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "9517"
+          "Value": "30702"
         },
         {
           "Name": "Content-Type",
@@ -2061,11 +1836,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"UQ4KEUPYSTo4r9H6XEv/j4SWL4wc/sPS2+IhUX808uc=\""
+          "Value": "\"dIrf8IVZwaTMm/YW2PEUc9xltq00i9BtwWQAjnU7K7M=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Wed, 15 Apr 2026 09:26:03 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2075,7 +1850,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "1cimwev0ql"
+          "Value": "4ywjs38db6"
         },
         {
           "Name": "label",
@@ -2083,7 +1858,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-UQ4KEUPYSTo4r9H6XEv/j4SWL4wc/sPS2+IhUX808uc="
+          "Value": "sha256-dIrf8IVZwaTMm/YW2PEUc9xltq00i9BtwWQAjnU7K7M="
         }
       ]
     },
@@ -2098,7 +1873,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "9517"
+          "Value": "30702"
         },
         {
           "Name": "Content-Type",
@@ -2106,11 +1881,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"UQ4KEUPYSTo4r9H6XEv/j4SWL4wc/sPS2+IhUX808uc=\""
+          "Value": "\"dIrf8IVZwaTMm/YW2PEUc9xltq00i9BtwWQAjnU7K7M=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Wed, 15 Apr 2026 09:26:03 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2120,7 +1895,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-UQ4KEUPYSTo4r9H6XEv/j4SWL4wc/sPS2+IhUX808uc="
+          "Value": "sha256-dIrf8IVZwaTMm/YW2PEUc9xltq00i9BtwWQAjnU7K7M="
         }
       ]
     },
@@ -2289,6 +2064,88 @@
       ]
     },
     {
+      "Route": "components/qa-defects.component.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-defects.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "112990"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FliC8TBFBaklHyUpnZHlygHZZtB3ueEEUHfARlu3fBE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:41:45 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-FliC8TBFBaklHyUpnZHlygHZZtB3ueEEUHfARlu3fBE="
+        }
+      ]
+    },
+    {
+      "Route": "components/qa-defects.component.qrr27q15ik.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-defects.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "112990"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FliC8TBFBaklHyUpnZHlygHZZtB3ueEEUHfARlu3fBE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:41:45 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "qrr27q15ik"
+        },
+        {
+          "Name": "label",
+          "Value": "components/qa-defects.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-FliC8TBFBaklHyUpnZHlygHZZtB3ueEEUHfARlu3fBE="
+        }
+      ]
+    },
+    {
       "Route": "components/qa-progress-view.component.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress-view.component.js",
       "Selectors": [],
@@ -2371,6 +2228,51 @@
       ]
     },
     {
+      "Route": "components/qa-progress.component.1btklf523l.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "94712"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"XXJHlS82KScCv8CXIw2KKvLKDBO21dDXh7yt+yKOIMY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:41:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "1btklf523l"
+        },
+        {
+          "Name": "label",
+          "Value": "components/qa-progress.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-XXJHlS82KScCv8CXIw2KKvLKDBO21dDXh7yt+yKOIMY="
+        }
+      ]
+    },
+    {
       "Route": "components/qa-progress.component.js",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress.component.js",
       "Selectors": [],
@@ -2381,7 +2283,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "85696"
+          "Value": "94712"
         },
         {
           "Name": "Content-Type",
@@ -2389,11 +2291,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4dnwvsVN5Iat/IsmoSsYFrY559l6tr1L7DxUrwa3pmA=\""
+          "Value": "\"XXJHlS82KScCv8CXIw2KKvLKDBO21dDXh7yt+yKOIMY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 09 Feb 2026 10:50:21 GMT"
+          "Value": "Mon, 25 May 2026 05:41:01 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2403,13 +2305,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-4dnwvsVN5Iat/IsmoSsYFrY559l6tr1L7DxUrwa3pmA="
+          "Value": "sha256-XXJHlS82KScCv8CXIw2KKvLKDBO21dDXh7yt+yKOIMY="
         }
       ]
     },
     {
-      "Route": "components/qa-progress.component.rldh3h4bkt.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress.component.js",
+      "Route": "components/rc-matrix.component.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\rc-matrix.component.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2418,7 +2320,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "85696"
+          "Value": "49905"
         },
         {
           "Name": "Content-Type",
@@ -2426,11 +2328,48 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4dnwvsVN5Iat/IsmoSsYFrY559l6tr1L7DxUrwa3pmA=\""
+          "Value": "\"9tviVa8uLougnffWXxEA3Ee7vC9BAx7PW3o+j5ulG10=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 09 Feb 2026 10:50:21 GMT"
+          "Value": "Sun, 26 Apr 2026 05:08:02 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-9tviVa8uLougnffWXxEA3Ee7vC9BAx7PW3o+j5ulG10="
+        }
+      ]
+    },
+    {
+      "Route": "components/rc-matrix.component.uvdb5tlc5d.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\rc-matrix.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "49905"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"9tviVa8uLougnffWXxEA3Ee7vC9BAx7PW3o+j5ulG10=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 26 Apr 2026 05:08:02 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2440,60 +2379,15 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "rldh3h4bkt"
+          "Value": "uvdb5tlc5d"
         },
         {
           "Name": "label",
-          "Value": "components/qa-progress.component.js"
+          "Value": "components/rc-matrix.component.js"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-4dnwvsVN5Iat/IsmoSsYFrY559l6tr1L7DxUrwa3pmA="
-        }
-      ]
-    },
-    {
-      "Route": "components/sub-objectives-view.component.ckelpfy774.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\sub-objectives-view.component.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "31314"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"BI51cLs2krnyn2NhFEhSU6gAbDw36JHrtq+ovaE/TjM=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 10 Feb 2026 10:07:09 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "ckelpfy774"
-        },
-        {
-          "Name": "label",
-          "Value": "components/sub-objectives-view.component.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-BI51cLs2krnyn2NhFEhSU6gAbDw36JHrtq+ovaE/TjM="
+          "Value": "sha256-9tviVa8uLougnffWXxEA3Ee7vC9BAx7PW3o+j5ulG10="
         }
       ]
     },
@@ -2508,7 +2402,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "31314"
+          "Value": "31573"
         },
         {
           "Name": "Content-Type",
@@ -2516,11 +2410,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"BI51cLs2krnyn2NhFEhSU6gAbDw36JHrtq+ovaE/TjM=\""
+          "Value": "\"yIdBfG0soGY5B5G/+icRT7ah/LRFM2GGRKFrZam07sU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 10 Feb 2026 10:07:09 GMT"
+          "Value": "Sun, 24 May 2026 17:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2530,13 +2424,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-BI51cLs2krnyn2NhFEhSU6gAbDw36JHrtq+ovaE/TjM="
+          "Value": "sha256-yIdBfG0soGY5B5G/+icRT7ah/LRFM2GGRKFrZam07sU="
         }
       ]
     },
     {
-      "Route": "components/super-admin-dashboard.component.9f4ukkcjbe.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\super-admin-dashboard.component.js",
+      "Route": "components/sub-objectives-view.component.okmu26q0dt.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\sub-objectives-view.component.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2545,7 +2439,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "30226"
+          "Value": "31573"
         },
         {
           "Name": "Content-Type",
@@ -2553,11 +2447,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"5VWBo9HLLiVjh1yu9GpgfdBoPKqPbdaJvX5xKbrlqKA=\""
+          "Value": "\"yIdBfG0soGY5B5G/+icRT7ah/LRFM2GGRKFrZam07sU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 17 Feb 2026 04:45:39 GMT"
+          "Value": "Sun, 24 May 2026 17:41:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2567,15 +2461,15 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "9f4ukkcjbe"
+          "Value": "okmu26q0dt"
         },
         {
           "Name": "label",
-          "Value": "components/super-admin-dashboard.component.js"
+          "Value": "components/sub-objectives-view.component.js"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-5VWBo9HLLiVjh1yu9GpgfdBoPKqPbdaJvX5xKbrlqKA="
+          "Value": "sha256-yIdBfG0soGY5B5G/+icRT7ah/LRFM2GGRKFrZam07sU="
         }
       ]
     },
@@ -2590,7 +2484,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "30226"
+          "Value": "68878"
         },
         {
           "Name": "Content-Type",
@@ -2598,11 +2492,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"5VWBo9HLLiVjh1yu9GpgfdBoPKqPbdaJvX5xKbrlqKA=\""
+          "Value": "\"ljdC+Ji6IZQWa/uO84bl7xuRhArrNlan5Tj4mPkQ+ms=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 17 Feb 2026 04:45:39 GMT"
+          "Value": "Sun, 24 May 2026 16:35:38 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2612,7 +2506,216 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-5VWBo9HLLiVjh1yu9GpgfdBoPKqPbdaJvX5xKbrlqKA="
+          "Value": "sha256-ljdC+Ji6IZQWa/uO84bl7xuRhArrNlan5Tj4mPkQ+ms="
+        }
+      ]
+    },
+    {
+      "Route": "components/super-admin-dashboard.component.y1tmr4j5a1.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\super-admin-dashboard.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "68878"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ljdC+Ji6IZQWa/uO84bl7xuRhArrNlan5Tj4mPkQ+ms=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 24 May 2026 16:35:38 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y1tmr4j5a1"
+        },
+        {
+          "Name": "label",
+          "Value": "components/super-admin-dashboard.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ljdC+Ji6IZQWa/uO84bl7xuRhArrNlan5Tj4mPkQ+ms="
+        }
+      ]
+    },
+    {
+      "Route": "components/team-management.component.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\team-management.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "21162"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"HR93qiMgS1XK4Dcj6ONCnAddCRrmTd5egvc+jDll6Mk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Apr 2026 17:59:26 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-HR93qiMgS1XK4Dcj6ONCnAddCRrmTd5egvc+jDll6Mk="
+        }
+      ]
+    },
+    {
+      "Route": "components/team-management.component.ryc9bf3q51.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\team-management.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "21162"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"HR93qiMgS1XK4Dcj6ONCnAddCRrmTd5egvc+jDll6Mk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Apr 2026 17:59:26 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "ryc9bf3q51"
+        },
+        {
+          "Name": "label",
+          "Value": "components/team-management.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-HR93qiMgS1XK4Dcj6ONCnAddCRrmTd5egvc+jDll6Mk="
+        }
+      ]
+    },
+    {
+      "Route": "components/test-cases-grid.component.eapag58j11.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\test-cases-grid.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "67080"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"et18vqtHZbyPoyfM30g5sQg4zD3vvh6un6nbEusbrPY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:42:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "eapag58j11"
+        },
+        {
+          "Name": "label",
+          "Value": "components/test-cases-grid.component.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-et18vqtHZbyPoyfM30g5sQg4zD3vvh6un6nbEusbrPY="
+        }
+      ]
+    },
+    {
+      "Route": "components/test-cases-grid.component.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\test-cases-grid.component.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "67080"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"et18vqtHZbyPoyfM30g5sQg4zD3vvh6un6nbEusbrPY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 25 May 2026 05:42:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-et18vqtHZbyPoyfM30g5sQg4zD3vvh6un6nbEusbrPY="
         }
       ]
     },
@@ -2627,7 +2730,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3714"
+          "Value": "5296"
         },
         {
           "Name": "Content-Type",
@@ -2635,11 +2738,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"bln0yyyryBjT4SHuLxylvkJMJdC25lXXM+zt43/YYRk=\""
+          "Value": "\"li5A2oNdPr6xpNPwOCpPvxxb3zQqTUpHifGCNCcyalQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:52:54 GMT"
+          "Value": "Sat, 25 Apr 2026 17:09:39 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2649,12 +2752,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-bln0yyyryBjT4SHuLxylvkJMJdC25lXXM+zt43/YYRk="
+          "Value": "sha256-li5A2oNdPr6xpNPwOCpPvxxb3zQqTUpHifGCNCcyalQ="
         }
       ]
     },
     {
-      "Route": "index.m3py3squx2.html",
+      "Route": "index.m56pa7mnwc.html",
       "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",
       "Selectors": [],
       "ResponseHeaders": [
@@ -2664,7 +2767,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3714"
+          "Value": "5296"
         },
         {
           "Name": "Content-Type",
@@ -2672,11 +2775,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"bln0yyyryBjT4SHuLxylvkJMJdC25lXXM+zt43/YYRk=\""
+          "Value": "\"li5A2oNdPr6xpNPwOCpPvxxb3zQqTUpHifGCNCcyalQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 16 Feb 2026 03:52:54 GMT"
+          "Value": "Sat, 25 Apr 2026 17:09:39 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2686,7 +2789,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "m3py3squx2"
+          "Value": "m56pa7mnwc"
         },
         {
           "Name": "label",
@@ -2694,52 +2797,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-bln0yyyryBjT4SHuLxylvkJMJdC25lXXM+zt43/YYRk="
-        }
-      ]
-    },
-    {
-      "Route": "services/api.service.a6w4fw8ou0.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\api.service.js",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "23512"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/javascript"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"4upUSUZKApZRPgQYVZhSXKOrQ0s3VEyZw+PazLHK5VI=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "a6w4fw8ou0"
-        },
-        {
-          "Name": "label",
-          "Value": "services/api.service.js"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-4upUSUZKApZRPgQYVZhSXKOrQ0s3VEyZw+PazLHK5VI="
+          "Value": "sha256-li5A2oNdPr6xpNPwOCpPvxxb3zQqTUpHifGCNCcyalQ="
         }
       ]
     },
@@ -2754,7 +2812,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "23512"
+          "Value": "29698"
         },
         {
           "Name": "Content-Type",
@@ -2762,11 +2820,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4upUSUZKApZRPgQYVZhSXKOrQ0s3VEyZw+PazLHK5VI=\""
+          "Value": "\"GWXAQy1ejHxalgYdLryiuDk4durzW9zjqUd6zmjCSxg=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Sat, 25 Apr 2026 17:16:01 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2776,13 +2834,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-4upUSUZKApZRPgQYVZhSXKOrQ0s3VEyZw+PazLHK5VI="
+          "Value": "sha256-GWXAQy1ejHxalgYdLryiuDk4durzW9zjqUd6zmjCSxg="
         }
       ]
     },
     {
-      "Route": "services/auth.service.2soie3tlk2.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\auth.service.js",
+      "Route": "services/api.service.tngz6sz5lq.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\api.service.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2791,7 +2849,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12059"
+          "Value": "29698"
         },
         {
           "Name": "Content-Type",
@@ -2799,11 +2857,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Duh/1UfvQJjDnDr6EuDJ5AG7isCkEdT6AkE0uxPPAJM=\""
+          "Value": "\"GWXAQy1ejHxalgYdLryiuDk4durzW9zjqUd6zmjCSxg=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Sat, 25 Apr 2026 17:16:01 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2813,15 +2871,15 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "2soie3tlk2"
+          "Value": "tngz6sz5lq"
         },
         {
           "Name": "label",
-          "Value": "services/auth.service.js"
+          "Value": "services/api.service.js"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-Duh/1UfvQJjDnDr6EuDJ5AG7isCkEdT6AkE0uxPPAJM="
+          "Value": "sha256-GWXAQy1ejHxalgYdLryiuDk4durzW9zjqUd6zmjCSxg="
         }
       ]
     },
@@ -2836,7 +2894,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12059"
+          "Value": "14074"
         },
         {
           "Name": "Content-Type",
@@ -2844,11 +2902,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Duh/1UfvQJjDnDr6EuDJ5AG7isCkEdT6AkE0uxPPAJM=\""
+          "Value": "\"KIxzNFMkipZPTWcVwJVURsA2tyDUwmxwrqEQp3impsc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sun, 22 Feb 2026 05:05:21 GMT"
+          "Value": "Sun, 24 May 2026 16:33:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2858,7 +2916,97 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-Duh/1UfvQJjDnDr6EuDJ5AG7isCkEdT6AkE0uxPPAJM="
+          "Value": "sha256-KIxzNFMkipZPTWcVwJVURsA2tyDUwmxwrqEQp3impsc="
+        }
+      ]
+    },
+    {
+      "Route": "services/auth.service.kt86ubv5bp.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\auth.service.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "14074"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KIxzNFMkipZPTWcVwJVURsA2tyDUwmxwrqEQp3impsc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 24 May 2026 16:33:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "kt86ubv5bp"
+        },
+        {
+          "Name": "label",
+          "Value": "services/auth.service.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-KIxzNFMkipZPTWcVwJVURsA2tyDUwmxwrqEQp3impsc="
+        }
+      ]
+    },
+    {
+      "Route": "services/notification.service.5p8wsh4uq9.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\notification.service.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "420"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"98sApPKVUQXPyivBe6+VZPlJXpeXTfIKmlHw1roaKgA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 25 Apr 2026 17:09:10 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "5p8wsh4uq9"
+        },
+        {
+          "Name": "label",
+          "Value": "services/notification.service.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-98sApPKVUQXPyivBe6+VZPlJXpeXTfIKmlHw1roaKgA="
         }
       ]
     },
@@ -2873,7 +3021,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "365"
+          "Value": "420"
         },
         {
           "Name": "Content-Type",
@@ -2881,11 +3029,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"CtwCQLSYpv2J+PB+lsDDTDmk8K5P+faySIttXzZP31A=\""
+          "Value": "\"98sApPKVUQXPyivBe6+VZPlJXpeXTfIKmlHw1roaKgA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 15 Dec 2025 17:15:28 GMT"
+          "Value": "Sat, 25 Apr 2026 17:09:10 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2895,13 +3043,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-CtwCQLSYpv2J+PB+lsDDTDmk8K5P+faySIttXzZP31A="
+          "Value": "sha256-98sApPKVUQXPyivBe6+VZPlJXpeXTfIKmlHw1roaKgA="
         }
       ]
     },
     {
-      "Route": "services/notification.service.qbp353n86a.js",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\notification.service.js",
+      "Route": "services/signalr.service.h8ozow3e0i.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\signalr.service.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2910,7 +3058,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "365"
+          "Value": "4966"
         },
         {
           "Name": "Content-Type",
@@ -2918,11 +3066,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"CtwCQLSYpv2J+PB+lsDDTDmk8K5P+faySIttXzZP31A=\""
+          "Value": "\"j1IOsQX/Z77momRGy6t0ufN1SVXuwlD1eb93D1f8a4g=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 15 Dec 2025 17:15:28 GMT"
+          "Value": "Sat, 25 Apr 2026 17:09:22 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2932,21 +3080,21 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "qbp353n86a"
+          "Value": "h8ozow3e0i"
         },
         {
           "Name": "label",
-          "Value": "services/notification.service.js"
+          "Value": "services/signalr.service.js"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-CtwCQLSYpv2J+PB+lsDDTDmk8K5P+faySIttXzZP31A="
+          "Value": "sha256-j1IOsQX/Z77momRGy6t0ufN1SVXuwlD1eb93D1f8a4g="
         }
       ]
     },
     {
-      "Route": "styles.61uuft3gp9.css",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
+      "Route": "services/signalr.service.js",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\signalr.service.js",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -2955,37 +3103,29 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "51957"
+          "Value": "4966"
         },
         {
           "Name": "Content-Type",
-          "Value": "text/css"
+          "Value": "text/javascript"
         },
         {
           "Name": "ETag",
-          "Value": "\"iiY5sqBRInttv1BuhVJgBBraC6Cu/CjGsrDH8Lj7DVs=\""
+          "Value": "\"j1IOsQX/Z77momRGy6t0ufN1SVXuwlD1eb93D1f8a4g=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 18 Feb 2026 06:18:43 GMT"
+          "Value": "Sat, 25 Apr 2026 17:09:22 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "61uuft3gp9"
-        },
-        {
-          "Name": "label",
-          "Value": "styles.css"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-iiY5sqBRInttv1BuhVJgBBraC6Cu/CjGsrDH8Lj7DVs="
+          "Value": "sha256-j1IOsQX/Z77momRGy6t0ufN1SVXuwlD1eb93D1f8a4g="
         }
       ]
     },
@@ -3000,7 +3140,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "51957"
+          "Value": "48396"
         },
         {
           "Name": "Content-Type",
@@ -3008,11 +3148,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"iiY5sqBRInttv1BuhVJgBBraC6Cu/CjGsrDH8Lj7DVs=\""
+          "Value": "\"GK2Hg6mkIn4/9QhVsFT5E/XAc1+fjj2zoHf/in/AWhI=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 18 Feb 2026 06:18:43 GMT"
+          "Value": "Tue, 26 May 2026 04:38:58 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3022,13 +3162,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-iiY5sqBRInttv1BuhVJgBBraC6Cu/CjGsrDH8Lj7DVs="
+          "Value": "sha256-GK2Hg6mkIn4/9QhVsFT5E/XAc1+fjj2zoHf/in/AWhI="
         }
       ]
     },
     {
-      "Route": "templates/controls-view.html",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\templates\\controls-view.html",
+      "Route": "styles.wyr27j6bth.css",
+      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -3037,56 +3177,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2831"
+          "Value": "48396"
         },
         {
           "Name": "Content-Type",
-          "Value": "text/html"
+          "Value": "text/css"
         },
         {
           "Name": "ETag",
-          "Value": "\"RMMcI3fl0jCZm+SlG/KYC//3UmBNKz/DWWjr72w9bRw=\""
+          "Value": "\"GK2Hg6mkIn4/9QhVsFT5E/XAc1+fjj2zoHf/in/AWhI=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 23 Jan 2026 03:57:33 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-RMMcI3fl0jCZm+SlG/KYC//3UmBNKz/DWWjr72w9bRw="
-        }
-      ]
-    },
-    {
-      "Route": "templates/controls-view.w3z4qe292w.html",
-      "AssetFile": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\templates\\controls-view.html",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "2831"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/html"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"RMMcI3fl0jCZm+SlG/KYC//3UmBNKz/DWWjr72w9bRw=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Fri, 23 Jan 2026 03:57:33 GMT"
+          "Value": "Tue, 26 May 2026 04:38:58 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3096,15 +3199,15 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "w3z4qe292w"
+          "Value": "wyr27j6bth"
         },
         {
           "Name": "label",
-          "Value": "templates/controls-view.html"
+          "Value": "styles.css"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-RMMcI3fl0jCZm+SlG/KYC//3UmBNKz/DWWjr72w9bRw="
+          "Value": "sha256-GK2Hg6mkIn4/9QhVsFT5E/XAc1+fjj2zoHf/in/AWhI="
         }
       ]
     }

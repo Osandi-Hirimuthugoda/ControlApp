@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,18 +10,7 @@ namespace ControlApp.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "AttachmentUrl",
-                table: "Defects",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Category",
-                table: "Defects",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: true);
+            // Columns AttachmentUrl and Category already exist in database
         }
 
         /// <inheritdoc />

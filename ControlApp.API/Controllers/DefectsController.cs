@@ -191,85 +191,23 @@ namespace ControlApp.API.Controllers
 
                 var allEmployees = await _employeeService.GetAllEmployeesAsync(defect.TeamId);
 
-                // Send SignalR notification if status changed to Fixed/Resolved
-                if (oldDefect != null && 
-                    oldDefect.Status != defect.Status && 
-                    (defect.Status == "Fixed" || defect.Status == "Resolved" || 
-                     defect.Status == "Deferred" || defect.Status == "Duplicate" || defect.Status == "Not a Defect"))
+                // Notify everyone about the status change for real-time UI updates
+                if (oldDefect != null && oldDefect.Status != defect.Status)
                 {
                     try
                     {
-                        // Notify the QA who reported the defect
-                        if (defect.ReportedByEmployeeId.HasValue && defect.ReportedByEmployeeId.Value > 0)
-                        {
-                            var reportedByEmployee = allEmployees.FirstOrDefault(e => e.Id == defect.ReportedByEmployeeId.Value);
-                            
-                            if (reportedByEmployee != null && reportedByEmployee.UserId.HasValue)
-                            {
-                                var reportedByUserId = reportedByEmployee.UserId.Value.ToString();
-                                await _hubContext.Clients.User(reportedByUserId).SendAsync(
-                                    "DefectStatusChanged", 
-                                    defect.Title, 
-                                    defect.DefectId,
-                                    defect.ControlId,
-                                    defect.Status
-                                );
-                            }
-                        }
+                        await _hubContext.Clients.All.SendAsync(
+                            "DefectStatusChanged", 
+                            defect.Title, 
+                            defect.DefectId,
+                            defect.ControlId,
+                            defect.Status
+                        );
+                        Console.WriteLine($"SignalR broadcast sent for defect {defect.DefectId} status change to {defect.Status}");
                     }
                     catch (Exception signalREx)
                     {
-                        Console.WriteLine($"Error sending SignalR notification for status change: {signalREx.Message}");
-                    }
-                }
-
-                // Notify assigned developer on ANY status change
-                if (oldDefect != null && oldDefect.Status != defect.Status &&
-                    defect.AssignedToEmployeeId.HasValue && defect.AssignedToEmployeeId.Value > 0)
-                {
-                    try
-                    {
-                        var assignedEmployee = allEmployees.FirstOrDefault(e => e.Id == defect.AssignedToEmployeeId.Value);
-                        if (assignedEmployee != null && assignedEmployee.UserId.HasValue)
-                        {
-                            var assignedUserId = assignedEmployee.UserId.Value.ToString();
-                            await _hubContext.Clients.User(assignedUserId).SendAsync(
-                                "DefectStatusChanged",
-                                defect.Title,
-                                defect.DefectId,
-                                defect.ControlId,
-                                defect.Status
-                            );
-                        }
-                    }
-                    catch (Exception signalREx)
-                    {
-                        Console.WriteLine($"Error sending developer status notification: {signalREx.Message}");
-                    }
-                }
-
-                // Notify QA reporter on ANY status change from developer
-                if (oldDefect != null && oldDefect.Status != defect.Status &&
-                    defect.ReportedByEmployeeId.HasValue && defect.ReportedByEmployeeId.Value > 0)
-                {
-                    try
-                    {
-                        var reportedByEmployee = allEmployees.FirstOrDefault(e => e.Id == defect.ReportedByEmployeeId.Value);
-                        if (reportedByEmployee != null && reportedByEmployee.UserId.HasValue)
-                        {
-                            var reportedByUserId = reportedByEmployee.UserId.Value.ToString();
-                            await _hubContext.Clients.User(reportedByUserId).SendAsync(
-                                "DefectStatusChanged",
-                                defect.Title,
-                                defect.DefectId,
-                                defect.ControlId,
-                                defect.Status
-                            );
-                        }
-                    }
-                    catch (Exception signalREx)
-                    {
-                        Console.WriteLine($"Error sending QA status notification: {signalREx.Message}");
+                        Console.WriteLine($"Error broadcasting SignalR status change: {signalREx.Message}");
                     }
                 }
 

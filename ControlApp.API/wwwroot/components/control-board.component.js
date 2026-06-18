@@ -66,12 +66,86 @@ app.component('controlBoard', {
                         </select>
                     </div>
                     <div style="min-width: 180px;">
-                        <div class="input-group input-group-sm rounded-3 overflow-hidden shadow-sm">
+                        <div class="input-group input-group-sm rounded-3 overflow-hidden shadow-sm" style="position: relative;">
                             <span class="input-group-text bg-white border-0 text-success"><i class="fas fa-calendar-day"></i></span>
-                            <input type="date" class="form-control border-0" ng-model="$ctrl.selectedReleaseDateFilter">
+                            <div class="form-control border-0 bg-white cursor-pointer d-flex align-items-center justify-content-between" 
+                                 ng-click="$ctrl.openFilterCalendar()" 
+                                 style="font-size: 0.85rem; min-width: 130px;">
+                                <span ng-if="!$ctrl.selectedReleaseDateFilter" class="text-muted">Target Date</span>
+                                <span ng-if="$ctrl.selectedReleaseDateFilter">{{$ctrl.selectedReleaseDateFilter | date:'yy.MM.dd'}}</span>
+                            </div>
                             <button class="btn btn-white border-0" ng-click="$ctrl.clearReleaseDateFilter()" ng-if="$ctrl.selectedReleaseDateFilter">
                                 <i class="fas fa-times text-danger"></i>
                             </button>
+
+                            <!-- Fixed Filter Calendar Overlay -->
+                            <div ng-if="$ctrl.showFilterCalendar" 
+                                 style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; display:flex; align-items:center; justify-content:center;" 
+                                 ng-click="$ctrl.showFilterCalendar = false; $event.stopPropagation()">
+                                
+                                <div class="card border-0 shadow-lg rounded-4 overflow-hidden" 
+                                     style="width:340px; background: white; animation: zoomIn 0.2s ease-out;" 
+                                     ng-click="$event.stopPropagation()">
+                                     
+                                     <!-- Header -->
+                                     <div class="card-header border-0 py-3 px-4 d-flex justify-content-between align-items-center" 
+                                          style="background:linear-gradient(135deg, #10b981, #059669); color: white;">
+                                         <h6 class="fw-bold mb-0"><i class="fas fa-filter me-2"></i>Filter by Date</h6>
+                                         <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="background:rgba(255,255,255,0.2); color:white; width:28px; height:28px;" 
+                                                 ng-click="$ctrl.showFilterCalendar = false">
+                                             <i class="fas fa-times"></i>
+                                         </button>
+                                     </div>
+                                     
+                                     <div class="card-body p-4">
+                                         <!-- Month/Year Navigation -->
+                                         <div class="d-flex justify-content-between align-items-center mb-4">
+                                             <button class="btn btn-sm btn-light rounded-circle shadow-sm" ng-click="$ctrl.calendar.changeMonth($ctrl.filterCalendarState, -1)">
+                                                 <i class="fas fa-chevron-left text-primary"></i>
+                                             </button>
+                                             <div class="fw-bold text-dark fs-5">
+                                                 {{$ctrl.calendar.monthNames[$ctrl.filterCalendarState._viewDate.getMonth()]}} {{$ctrl.filterCalendarState._viewDate.getFullYear()}}
+                                             </div>
+                                             <button class="btn btn-sm btn-light rounded-circle shadow-sm" ng-click="$ctrl.calendar.changeMonth($ctrl.filterCalendarState, 1)">
+                                                 <i class="fas fa-chevron-right text-primary"></i>
+                                             </button>
+                                         </div>
+                                         
+                                         <!-- Days Header -->
+                                         <div class="d-flex mb-2 border-bottom pb-2">
+                                             <div ng-repeat="day in $ctrl.calendar.daysOfWeek" class="text-center text-muted fw-bold" style="width: 14.28%; font-size: 0.75rem; text-transform: uppercase;">
+                                                 {{day}}
+                                             </div>
+                                         </div>
+                                         
+                                         <!-- Days Grid -->
+                                         <div class="d-flex flex-wrap">
+                                             <div ng-repeat="dayDate in $ctrl.filterCalendarState._calendarDays track by $index" 
+                                                  class="text-center py-1" 
+                                                  style="width: 14.28%;">
+                                                  <div ng-if="dayDate" 
+                                                       class="rounded-circle cursor-pointer day-cell d-flex align-items-center justify-content-center"
+                                                       ng-class="{'bg-primary text-white shadow-sm fw-bold': $ctrl.calendar.isSelected(dayDate, $ctrl.selectedReleaseDateFilter), 'text-primary fw-bold border border-primary': $ctrl.calendar.isToday(dayDate) && !$ctrl.calendar.isSelected(dayDate, $ctrl.selectedReleaseDateFilter), 'text-dark': !$ctrl.calendar.isSelected(dayDate, $ctrl.selectedReleaseDateFilter) && !$ctrl.calendar.isToday(dayDate)}"
+                                                       style="width: 38px; height: 38px; margin: 0 auto; transition: all 0.2s; font-size: 0.95rem;"
+                                                       ng-click="$ctrl.selectedReleaseDateFilter = dayDate; $ctrl.showFilterCalendar = false;">
+                                                      {{dayDate.getDate()}}
+                                                  </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                     
+                                     <!-- Footer -->
+                                     <div class="card-footer bg-light border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                                         <button class="btn btn-sm btn-link text-muted text-decoration-none p-0 fw-bold" ng-click="$ctrl.showFilterCalendar = false">
+                                             Cancel
+                                         </button>
+                                         <button class="btn btn-sm btn-link text-danger text-decoration-none p-0 fw-bold" ng-click="$ctrl.selectedReleaseDateFilter = null; $ctrl.showFilterCalendar = false;">
+                                             Clear Filter
+                                         </button>
+                                     </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -116,7 +190,11 @@ app.component('controlBoard', {
                                 <div class="control-content-card p-3 rounded-4 shadow-sm" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.03); max-height: 60vh; overflow-y: auto;">
                                     <div ng-if="!control.editing">
                                             <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <h6 class="fw-bold text-dark mb-0 fs-5 line-height-base">{{control.description}}</h6>
+                                            <h6 class="fw-bold text-dark mb-0 fs-5 line-height-base">
+                                                <span class="badge rounded-pill me-2" style="background:#eef2ff;color:#4f46e5;font-size:0.65rem;font-weight:700;">#{{control.controlId}}</span>
+                                                <span ng-if="control.customId" class="badge bg-secondary me-2">{{control.customId}}</span>
+                                                {{control.description}}
+                                            </h6>
                                             <div class="d-flex gap-2 align-items-center">
                                                 <button class="btn btn-sm btn-outline-primary rounded-3 px-3 py-2" ng-click="$ctrl.openTestCasesGrid(control)" title="Manage Test Cases">
                                                     <i class="fas fa-table me-1"></i>Test Cases
@@ -157,206 +235,174 @@ app.component('controlBoard', {
                                                 <table class="table table-hover table-borderless mb-0 align-middle" style="font-size: 0.95rem;">
                                                     <thead style="background: #f1f5f9;">
                                                         <tr class="small text-secondary fw-bold text-uppercase">
-                                                            <th class="ps-3 py-3" style="width: 20%;">Objective</th>
-                                                            <th class="py-3" style="width: 12%;">Owner</th>
-                                                            <th class="py-3" style="width: 15%;">Release / Deadline</th>
-                                                            <th class="py-3" style="width: 10%;">Status</th>
-                                                            <th class="py-3" style="width: 9%;">Progress</th>
-                                                            <th class="py-3" style="width: 12%;">Test Status</th>
-                                                            <th class="py-3" style="width: 22%;">Latest Insights</th>
+                                                            <th class="ps-3 py-3" style="width: 12%;">Objective</th>
+                                                            <th class="py-3" style="width: 7%;">Owner</th>
+                                                            <th class="py-3" style="width: 8%;">Status</th>
+                                                            <th class="py-3 text-center" style="width: 12%; border-left: 1px solid #e2e8f0;">Progress</th>
+                                                            <th class="py-3 text-center" style="width: 10%; border-left: 1px solid #e2e8f0;">Release</th>
+
+                                                            <th class="py-3 text-center" style="width: 6%; border-left: 1px solid #e2e8f0;">Test Status</th>
+                                                            <th class="py-3" style="width: 45%;">Latest Insights</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <!-- Show only current sub-objective using limitTo filter -->
-                                                        <tr ng-repeat="subDesc in control._subDescriptionsArray | limitTo:1:(control._currentSubIndex || 0) track by $index" 
+                                                        <!-- Show current sub-objective in a multi-status matrix format -->
+                                                        <tr ng-repeat="subDesc in [control._subDescriptionsArray[control._currentSubIndex || 0]]" 
                                                             style="border-bottom: 1px solid #f1f5f9; transition: all 0.2s; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                                                            
+                                                            <!-- Objective Column -->
                                                             <td class="ps-3 py-4" style="vertical-align: top;">
-                                                                <div ng-if="!subDesc.editing">
-                                                                    <div ng-if="!subDesc._showDescriptionPicker" ng-click="$ctrl.canEditSubDescription() && (subDesc._showDescriptionPicker = true); $event.stopPropagation()" class="fw-bold text-dark" style="font-size: 1rem; line-height: 1.5;" ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription()}">{{subDesc.description}}</div>
-                                                                    <input ng-if="subDesc._showDescriptionPicker" type="text" class="form-control form-control-sm border-success shadow-none py-1 h-auto" style="font-size: 0.9rem;"
-                                                                           ng-model="subDesc.description"
-                                                                           ng-keypress="$event.keyCode === 13 && $ctrl.updateSubDescriptionFieldQuick(control, subDesc); $event.keyCode === 13 && (subDesc._showDescriptionPicker = false)"
-                                                                           ng-blur="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showDescriptionPicker = false"
-                                                                           id="subdesc-desc-{{$index}}">
-                                                                    <!-- Sub-description level Test Cases & Defects buttons -->
-                                                                    <div class="d-flex gap-1 mt-2">
-                                                                        <button class="btn btn-xs btn-outline-primary rounded-2 px-2 py-1 position-relative"
-                                                                                style="font-size:0.7rem;"
-                                                                                ng-click="$ctrl.openTestCasesGrid(control, (control._currentSubIndex || 0)); $event.stopPropagation()"
-                                                                                title="Test Cases for this sub-objective">
-                                                                            <i class="fas fa-clipboard-check me-1"></i>TC
-                                                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" 
-                                                                                  style="font-size: 0.6rem; padding: 2px 5px;"
-                                                                                  ng-if="$ctrl.getTestCaseStats(control, control._currentSubIndex).total > 0">
-                                                                                {{$ctrl.getTestCaseStats(control, control._currentSubIndex).total}}
-                                                                            </span>
-                                                                        </button>
-                                                                        <button class="btn btn-xs btn-outline-danger rounded-2 px-2 py-1 position-relative"
-                                                                                style="font-size:0.7rem;"
-                                                                                ng-click="$ctrl.openDefectsModal(control, (control._currentSubIndex || 0)); $event.stopPropagation()"
-                                                                                title="Defects for this sub-objective">
-                                                                            <i class="fas fa-bug me-1"></i>Defects
-                                                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                                                                  style="font-size: 0.6rem; padding: 2px 5px;"
-                                                                                  ng-if="$ctrl.getDefectCount(control, control._currentSubIndex) > 0">
-                                                                                {{$ctrl.getDefectCount(control, control._currentSubIndex)}}
-                                                                            </span>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                                <input ng-if="subDesc.editing" type="text" class="form-control form-control-sm border-success shadow-none" ng-model="subDesc.editModel.description">
-                                                            </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                <div ng-if="!subDesc.editing" class="d-flex align-items-center">
-                                                                    <div ng-if="!subDesc._showOwnerPicker" ng-click="$ctrl.canEditSubDescription() && (subDesc._showOwnerPicker = true); $event.stopPropagation()" class="d-flex align-items-center" ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription()}">
-                                                                        <div class="avatar-circle-xs me-2 position-relative" 
-                                                                             style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display:flex; align-items:center; justify-content:center; font-size: 0.8rem; font-weight: 700;"
-                                                                             ng-class="{'border border-danger pulse-red': $ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId}">
-                                                                            {{subDesc.employeeId ? ($ctrl.getEmployeeName(subDesc.employeeId).charAt(0)) : '?'}}
-                                                                            <span ng-if="$ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem; padding: 2px;">!</span>
-                                                                        </div>
-                                                                        <span style="font-size: 0.95rem;" ng-class="subDesc.employeeId ? 'text-primary fw-medium' : ($ctrl.isQAStatus(subDesc.statusName) ? 'text-danger fw-bold' : 'text-danger')">
-                                                                            {{subDesc.employeeId ? $ctrl.getEmployeeName(subDesc.employeeId) : 'Unassigned'}}
-                                                                            <small ng-if="$ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId" class="d-block text-danger" style="font-size: 0.65rem;">QA Owner Required</small>
+                                                                <div>
+                                                                    <div class="fw-bold text-dark" style="font-size: 0.95rem; line-height: 1.4;">{{subDesc.description}}</div>
+                                                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                                                        <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" style="font-size: 0.7rem;">
+                                                                            <i class="fas fa-tag me-1"></i>{{subDesc.statusName || 'Analyze'}}
+                                                                        </span>
+                                                                        <span class="badge rounded-pill bg-primary-subtle text-primary px-2 py-1" style="font-size: 0.7rem;">
+                                                                            Overall: {{subDesc.progress || 0}}%
                                                                         </span>
                                                                     </div>
-                                                                    <select ng-if="subDesc._showOwnerPicker" class="form-select form-select-sm py-0 h-auto" style="font-size: 0.85rem;" 
-                                                                            ng-class="$ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId ? 'border-danger' : 'border-success'"
-                                                                            ng-model="subDesc.employeeId" 
-                                                                            ng-options="e.id as e.employeeName for e in $ctrl.getEmployeesForStatus(subDesc.statusName)"
-                                                                            ng-change="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showOwnerPicker = false;"
-                                                                            ng-blur="subDesc._showOwnerPicker = false">
-                                                                        <option value="">Unassigned</option>
-                                                                    </select>
                                                                 </div>
-                                                                <select ng-if="subDesc.editing" class="form-select form-select-sm border-success" ng-model="subDesc.editModel.employeeId" ng-options="e.id as e.employeeName for e in $ctrl.getEmployeesForStatus(subDesc.statusName)">
-                                                                    <option value="">Unassigned</option>
-                                                                </select>
                                                             </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                <div ng-if="!subDesc.editing">
-                                                                    <div ng-if="!subDesc._showReleaseDatePicker" 
-                                                                         ng-click="$ctrl.canEditSubDescription() && (subDesc._showReleaseDatePicker = true); $event.stopPropagation()" 
-                                                                         class="text-muted small fw-bold d-flex align-items-center" 
-                                                                         ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription()}">
-                                                                        <i class="fas fa-calendar-alt me-2" ng-style="{'color': subDesc.releaseDate ? '#10b981' : '#94a3b8'}"></i>
-                                                                        {{subDesc.releaseDate ? $ctrl.formatDate(subDesc.releaseDate) : 'No Date'}}
-                                                                    </div>
-                                                                    <input ng-if="subDesc._showReleaseDatePicker" type="date" class="form-control form-control-sm border-success py-1 h-auto" style="font-size: 0.85rem;" 
-                                                                           ng-model="subDesc.releaseDate" 
-                                                                           ng-change="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showReleaseDatePicker = false;"
-                                                                           ng-blur="subDesc._showReleaseDatePicker = false"
-                                                                           id="subdesc-date-{{$index}}">
-                                                                </div>
-                                                                <input ng-if="subDesc.editing" type="date" class="form-control form-control-sm border-success" ng-model="subDesc.editModel.releaseDate">
-                                                            </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                <div ng-if="!subDesc.editing">
-                                                                    <span ng-if="!subDesc._showStatusPicker" 
-                                                                          ng-click="$ctrl.canEditSubDescription() && (subDesc._showStatusPicker = true); $event.stopPropagation()" 
-                                                                          class="badge rounded-pill fw-bold" 
-                                                                          ng-class="{'cursor-pointer hover-shadow': $ctrl.canEditSubDescription()}" 
-                                                                          ng-style="{'background-color': $ctrl.getStatusColor(subDesc.statusName).bg, 'color': $ctrl.getStatusColor(subDesc.statusName).text}"
-                                                                          style="font-size: 0.85rem; letter-spacing: 0.02em; padding: 0.6rem 1.2rem;">
-                                                                        {{subDesc.statusName || 'No Status'}}
-                                                                    </span>
-                                                                    <select ng-if="subDesc._showStatusPicker" class="form-select form-select-sm border-success py-0 h-auto" style="font-size: 0.85rem;" 
-                                                                            ng-model="subDesc.statusId" 
-                                                                            ng-options="s.id as s.statusName for s in $ctrl.store.statuses"
-                                                                            ng-change="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showStatusPicker = false;"
-                                                                            ng-blur="subDesc._showStatusPicker = false">
-                                                                    </select>
-                                                                </div>
-                                                                <select ng-if="subDesc.editing" class="form-select form-select-sm border-success" ng-model="subDesc.editModel.statusId" ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
-                                                                </select>
-                                                            </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                <div ng-if="!subDesc.editing">
-                                                                    <div ng-if="!subDesc._showProgressPicker" ng-click="$ctrl.canEditSubDescription() && (subDesc._showProgressPicker = true); $event.stopPropagation()" ng-class="{'cursor-pointer': $ctrl.canEditSubDescription()}">
-                                                                        <div class="progress rounded-pill shadow-none" style="height: 20px; background: #e2e8f0;">
-                                                                             <div class="progress-bar rounded-pill progress-bar-animated" role="progressbar" 
-                                                                                  ng-style="{'width': (subDesc.progress || 0) + '%', 'background-color': $ctrl.getStatusColor(subDesc.statusName).bg + ' !important'}">
-                                                                             </div>
-                                                                        </div>
-                                                                        <div class="text-end small fw-bold mt-1" style="font-size: 0.8rem; color: #64748b;">{{subDesc.progress || 0}}%</div>
-                                                                    </div>
-                                                                    <input ng-if="subDesc._showProgressPicker" type="number" class="form-control form-control-sm border-success py-1 h-auto text-center" style="font-size: 0.85rem; width: 70px;" 
-                                                                           ng-model="subDesc.progress" min="0" max="100"
-                                                                           ng-keypress="$event.keyCode === 13 && ($ctrl.updateSubDescriptionFieldQuick(control, subDesc) || (subDesc._showProgressPicker = false))"
-                                                                           ng-blur="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showProgressPicker = false">
-                                                                </div>
-                                                                <input ng-if="subDesc.editing" type="number" class="form-control form-control-sm border-success" ng-model="subDesc.editModel.progress" min="0" max="100">
-                                                            </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                 <div ng-if="$ctrl.getTestCaseStats(control, control._currentSubIndex).total > 0">
-                                                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                                                         <div class="flex-grow-1">
-                                                                             <div class="progress rounded-pill bg-light" style="height: 6px;">
-                                                                                 <div class="progress-bar bg-success" 
-                                                                                      ng-style="{'width': ($ctrl.getTestCaseStats(control, control._currentSubIndex).pass / $ctrl.getTestCaseStats(control, control._currentSubIndex).total * 100) + '%'}">
-                                                                                 </div>
-                                                                                 <div class="progress-bar bg-danger" 
-                                                                                      ng-style="{'width': ($ctrl.getTestCaseStats(control, control._currentSubIndex).fail / $ctrl.getTestCaseStats(control, control._currentSubIndex).total * 100) + '%'}">
-                                                                                 </div>
-                                                                             </div>
-                                                                         </div>
-                                                                         <span class="small fw-bold text-dark" style="font-size: 0.75rem;">
-                                                                             {{$ctrl.getTestCaseStats(control, control._currentSubIndex).pass}}/{{$ctrl.getTestCaseStats(control, control._currentSubIndex).total}}
-                                                                         </span>
-                                                                     </div>
-                                                                     <div class="d-flex gap-1 flex-wrap">
-                                                                         <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2" style="font-size: 0.65rem;">
-                                                                             Pass: {{$ctrl.getTestCaseStats(control, control._currentSubIndex).pass}}
-                                                                         </span>
-                                                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2" ng-if="$ctrl.getTestCaseStats(control, control._currentSubIndex).fail > 0" style="font-size: 0.65rem;">
-                                                                             Fail: {{$ctrl.getTestCaseStats(control, control._currentSubIndex).fail}}
-                                                                         </span>
-                                                                     </div>
-                                                                 </div>
-                                                                 <div ng-if="$ctrl.getTestCaseStats(control, control._currentSubIndex).total === 0" class="text-muted small">
-                                                                     <i class="fas fa-info-circle me-1 opacity-50"></i>No tests
-                                                                 </div>
-                                                            </td>
-                                                            <td class="py-4" style="vertical-align: top;">
-                                                                <!-- Comments Section with Scroll -->
-                                                                <div>
-                                                                    <!-- Last 3 comments inline -->
-                                                                    <div ng-if="subDesc.comments && subDesc.comments.length > 0">
-                                                                        <div ng-repeat="comment in $ctrl.getLastComments(subDesc, 3) track by $index"
-                                                                             class="p-2 rounded-3 mb-1 border-start border-2"
-                                                                             ng-class="$index === 0 ? 'border-success' : 'border-light'"
-                                                                             ng-style="{'background': $index === 0 ? '#f0fdf4' : '#f8fafc', 'border-color': $index === 0 ? '#10b981 !important' : '#e2e8f0 !important'}"
-                                                                             style="font-size:0.8rem;">
-                                                                            <div class="d-flex justify-content-between align-items-start">
-                                                                                <div class="flex-grow-1" ng-class="{'text-muted fst-italic': comment.text.includes('[SYSTEM]'), 'text-dark': !comment.text.includes('[SYSTEM]')}">
-                                                                                    <i class="fas fa-history me-1 opacity-40" ng-if="comment.text.includes('[SYSTEM]')"></i>
-                                                                                    {{comment.text}}
-                                                                                </div>
-                                                                                <span class="text-muted ms-2 flex-shrink-0" style="font-size:0.65rem;white-space:nowrap;">{{$ctrl.getTimeAgoFromDate(comment.date)}}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
 
-                                                                    <!-- View all button -->
-                                                                    <div ng-if="subDesc.comments && subDesc.comments.length > 3" class="mb-1">
-                                                                        <button class="btn btn-sm w-100 rounded-2"
-                                                                                style="background:#eef2ff;color:#4f46e5;font-size:0.72rem;padding:3px 8px;border:1px solid #c7d2fe;"
-                                                                                ng-click="$ctrl.openInsightsModal(control, subDesc, $index); $event.stopPropagation()">
-                                                                            <i class="fas fa-expand-alt me-1"></i>View all ({{subDesc.comments.length}})
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <div ng-if="!subDesc.comments || subDesc.comments.length === 0" class="text-center py-2 text-muted small">
-                                                                        <i class="fas fa-comment-slash opacity-50 me-2"></i>No recent insights
+                                                            <!-- Owner Column -->
+                                                            <td class="py-4 text-center" style="vertical-align: top;">
+                                                                <div class="d-flex flex-column align-items-center">
+                                                                    <!-- Developer View (Non-QA Status) -->
+                                                                    <div ng-if="!$ctrl.isQAStatus(subDesc.statusName)" class="d-flex flex-column align-items-center w-100">
+                                                                        <div class="avatar-circle-xs mb-1 text-primary bg-primary-subtle" 
+                                                                             style="width: 32px; height: 32px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 0.8rem; font-weight: 700;"
+                                                                             title="{{$ctrl.getEmployeeName(subDesc.employeeId) || 'Unassigned'}}">
+                                                                            {{subDesc.employeeId ? ($ctrl.getEmployeeName(subDesc.employeeId).charAt(0)) : '?'}}
+                                                                        </div>
+                                                                        <select class="form-select form-select-sm border-0 bg-light p-0 text-center" 
+                                                                                style="font-size: 0.75rem; width: 90px;"
+                                                                                ng-model="subDesc.employeeId" 
+                                                                                ng-options="e.id as e.employeeName for e in $ctrl.getNonQAEmployees()"
+                                                                                ng-change="$ctrl.saveSubObjectiveUnified(control, control._currentSubIndex || 0)">
+                                                                            <option value="">Assign Dev</option>
+                                                                        </select>
                                                                     </div>
                                                                     
-                                                                    <!-- Add Comment Input -->
-                                                                    <div ng-if="$ctrl.canAddComment()" class="input-group input-group-sm mt-2">
-                                                                        <input type="text" class="form-control border-0 shadow-none bg-light small" ng-model="subDesc.newComment" placeholder="Add Insight..." ng-keyup="$event.keyCode === 13 && $ctrl.addCommentToSubDescriptionQuick(control, $index)" style="font-size:0.85rem;">
-                                                                        <button class="btn btn-success p-1 border-0" ng-click="$ctrl.addCommentToSubDescriptionQuick(control, $index)" ng-disabled="!subDesc.newComment" title="Add Comment">
-                                                                            <i class="fas fa-paper-plane px-1" style="font-size:0.7rem;"></i>
-                                                                        </button>
+                                                                    <!-- QA View (QA Status) -->
+                                                                    <div ng-if="$ctrl.isQAStatus(subDesc.statusName)" class="d-flex flex-column align-items-center w-100">
+                                                                        <div class="avatar-circle-xs mb-1" ng-class="!subDesc.qaEmployeeId ? 'bg-danger-subtle text-danger pulse-red-soft' : 'bg-purple-subtle text-purple'"
+                                                                             style="width: 32px; height: 32px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 0.8rem; font-weight: 700;"
+                                                                             title="{{$ctrl.getEmployeeName(subDesc.qaEmployeeId) || 'Unassigned'}}">
+                                                                            {{subDesc.qaEmployeeId ? ($ctrl.getEmployeeName(subDesc.qaEmployeeId).charAt(0)) : '?'}}
+                                                                        </div>
+                                                                        <select class="form-select form-select-sm border-0 bg-light p-0 text-center" 
+                                                                                style="font-size: 0.75rem; width: 90px;"
+                                                                                ng-model="subDesc.qaEmployeeId" 
+                                                                                ng-options="e.id as e.employeeName for e in $ctrl.getQAEngineers()"
+                                                                                ng-change="$ctrl.saveSubObjectiveUnified(control, control._currentSubIndex || 0)">
+                                                                            <option value="">Assign QA</option>
+                                                                        </select>
                                                                     </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Status Column -->
+                                                            <td class="py-4 text-center" style="vertical-align: top;">
+                                                                <div ng-if="!subDesc._showStatusPicker" 
+                                                                     ng-click="subDesc._showStatusPicker = true; $event.stopPropagation()" 
+                                                                     class="badge rounded-pill fw-bold cursor-pointer hover-shadow" 
+                                                                     ng-style="{'background-color': $ctrl.getStatusColor(subDesc.statusName).bg, 'color': $ctrl.getStatusColor(subDesc.statusName).text}"
+                                                                     style="font-size: 0.75rem; letter-spacing: 0.02em; padding: 0.5rem 1rem;">
+                                                                    {{subDesc.statusName || 'No Status'}}
+                                                                </div>
+                                                                <select ng-if="subDesc._showStatusPicker" 
+                                                                        class="form-select form-select-sm border-success py-0 h-auto mx-auto" 
+                                                                        style="font-size: 0.8rem; width: 110px;" 
+                                                                        ng-model="subDesc.statusId" 
+                                                                        ng-options="s.id as s.statusName for s in $ctrl.store.statuses"
+                                                                        ng-change="$ctrl.syncSubStatusName(subDesc); $ctrl.saveSubObjectiveUnified(control, control._currentSubIndex || 0); subDesc._showStatusPicker = false;"
+                                                                        ng-blur="subDesc._showStatusPicker = false">
+                                                                </select>
+                                                            </td>
+
+                                                            <!-- Adaptive Progress Column -->
+                                                            <td class="py-4 text-center" style="vertical-align: top; border-left: 1px solid #f1f5f9;">
+                                                                <div class="d-flex flex-column align-items-center" style="min-width: 140px;">
+                                                                    <!-- Phase Label -->
+                                                                    <div class="text-uppercase tracking-wider mb-2" style="font-size: 0.65rem; color: #64748b; font-weight: 800;">
+                                                                        {{subDesc.statusName || 'Status'}} Phase
+                                                                    </div>
+                                                                    
+                                                                    <!-- Progress Input with prominently displayed number -->
+                                                                    <div class="position-relative mb-2">
+                                                                        <div class="input-group input-group-sm shadow-sm rounded-pill overflow-hidden border" style="width: 100px; border-color: #e2e8f0;">
+                                                                            <input type="number" 
+                                                                                   class="form-control text-center fw-bold border-0" 
+                                                                                   style="font-size: 1.1rem; color: #0f172a; padding-right: 0;"
+                                                                                   ng-model="subDesc._statusProgressMap[subDesc.statusId]"
+                                                                                   ng-model-options="{ debounce: 1000 }"
+                                                                                   ng-change="$ctrl.setSubProgressForStatus(subDesc, subDesc.statusId, subDesc._statusProgressMap[subDesc.statusId]); $ctrl.saveSubObjectiveUnified(control, control._currentSubIndex || 0)"
+                                                                                   ng-disabled="!$ctrl.canMarkProgress()"
+                                                                                   min="0" max="100">
+                                                                            <span class="input-group-text border-0 bg-white fw-bold text-secondary px-2" style="font-size: 0.9rem;">%</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Visual Progress Bar -->
+                                                                    <div class="progress rounded-pill shadow-none" style="height: 12px; width: 130px; background: #f1f5f9; border: 1px solid #e2e8f0;">
+                                                                         <div class="progress-bar rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" 
+                                                                              ng-style="{'width': (subDesc._statusProgressMap[subDesc.statusId] || 0) + '%', 'background-color': $ctrl.getStatusColor(subDesc.statusName).bg}">
+                                                                         </div>
+                                                                    </div>
+                                                                    
+                                                                    <!-- Tooltip-like hint -->
+                                                                    <div class="mt-2 fw-medium" style="font-size: 0.7rem; color: #94a3b8;">
+                                                                        <i class="fas fa-magic me-1 opacity-50"></i>Auto-saving enabled
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Release Column -->
+                                                            <td class="py-4 text-center" style="vertical-align: top; border-left: 1px solid #f1f5f9; position: relative;">
+                                                                <div class="d-flex flex-column align-items-center">
+                                                                    <div ng-if="!subDesc._showDatePicker" 
+                                                                         ng-click="$ctrl.openCalendar(control, (control._currentSubIndex || 0)); $event.stopPropagation()" 
+                                                                         class="cursor-pointer hover-underline text-dark fw-bold small">
+                                                                        <i class="fas fa-calendar-alt me-1 text-success"></i>
+                                                                        {{subDesc.releaseDate ? (subDesc.releaseDate | date:'yy.MM.dd') : 'Set Date'}}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Test Status Column -->
+                                                            <td class="py-4 text-center" style="vertical-align: top; border-left: 1px solid #f1f5f9;">
+                                                                <div class="d-flex flex-column gap-2">
+                                                                    <button class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0 position-relative"
+                                                                            style="font-size:0.65rem;"
+                                                                            ng-click="$ctrl.openTestCasesGrid(control, (control._currentSubIndex || 0)); $event.stopPropagation()">
+                                                                        TC: {{$ctrl.getTestCaseStats(control, control._currentSubIndex).total}}
+                                                                    </button>
+                                                                    <button class="btn btn-xs btn-outline-danger rounded-pill px-2 py-0 position-relative"
+                                                                            style="font-size:0.65rem;"
+                                                                            ng-click="$ctrl.openDefectsModal(control, (control._currentSubIndex || 0)); $event.stopPropagation()">
+                                                                        Bug: {{$ctrl.getDefectCount(control, control._currentSubIndex)}}
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Insights Column -->
+                                                            <td class="py-3 pe-3" style="vertical-align: top;">
+                                                                <div class="insight-preview p-2 rounded bg-light" style="max-width: 100%; min-height: 60px;">
+                                                                    <div ng-if="subDesc.comments && subDesc.comments.length > 0">
+                                                                        <div class="text-truncate small text-dark" style="font-size: 0.75rem;" title="{{subDesc.comments[subDesc.comments.length-1].text}}">
+                                                                            {{subDesc.comments[subDesc.comments.length-1].text}}
+                                                                        </div>
+                                                                        <div class="text-muted mt-1" style="font-size: 0.65rem;">
+                                                                            {{subDesc.comments[subDesc.comments.length-1].date | date:'MMM d'}}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div ng-if="!subDesc.comments || subDesc.comments.length === 0" class="text-muted italic" style="font-size: 0.7rem;">
+                                                                        No insights yet
+                                                                    </div>
+                                                                    <button class="btn btn-link btn-sm p-0 text-primary mt-1" style="font-size: 0.7rem;" ng-click="$ctrl.openInsightsModal(control, subDesc, control._currentSubIndex); $event.stopPropagation()">
+                                                                        Add Insight
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -365,12 +411,16 @@ app.component('controlBoard', {
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- Editing Main Control Form -->
                                     <div ng-if="control.editing" class="p-3 bg-white rounded-4 border border-success-subtle shadow-sm">
                                         <div class="mb-3">
                                             <label class="form-label small fw-bold text-success border-bottom pb-1 mb-2 d-block">Modify Main Objective</label>
                                             <textarea class="form-control border-success shadow-none fs-6 fw-bold" ng-model="control.editDescription" rows="2"></textarea>
+                                        </div>
+                                        <!-- Ticket ID -->
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-success border-bottom pb-1 mb-2 d-block">Ticket ID (e.g. Jira ID)</label>
+                                            <input type="text" class="form-control border-success shadow-none fs-6 fw-bold" ng-model="control.editCustomId" placeholder="Enter ID (e.g., L3-1234, CR-987)">
                                         </div>
                                         <!-- Release Date -->
                                         <div class="mb-3">
@@ -393,7 +443,8 @@ app.component('controlBoard', {
                                                         </div>
                                                         <div class="col-md-3">
                                                             <label class="x-small fw-bold text-secondary text-uppercase mb-1">Assignee</label>
-                                                            <select class="form-select form-select-sm" ng-model="subDesc.employeeId" ng-options="e.id as e.employeeName for e in $ctrl.getEmployeesForStatus(subDesc.statusName)"></select>
+                                                            <select ng-if="!$ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm" ng-model="subDesc.employeeId" ng-options="e.id as e.employeeName for e in $ctrl.getNonQAEmployees()"></select>
+                                                            <select ng-if="$ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm border-danger" ng-model="subDesc.qaEmployeeId" ng-options="e.id as e.employeeName for e in $ctrl.getQAEngineers()"></select>
                                                         </div>
                                                         <div class="col-md-2">
                                                             <label class="x-small fw-bold text-secondary text-uppercase mb-1">Progression%</label>
@@ -450,7 +501,10 @@ app.component('controlBoard', {
                                     <div class="mb-2">
                                         <div class="main-desc-box p-3 rounded-4 shadow-sm" style="background: rgba(255,255,255,0.7); border-left: 5px solid #10b981;">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <div class="fw-bold text-dark fs-5">{{control.description}}</div>
+                                                <div class="fw-bold text-dark fs-5">
+                                                    <span ng-if="control.customId" class="badge bg-secondary me-2">{{control.customId}}</span>
+                                                    {{control.description}}
+                                                </div>
                                                 <div class="d-flex gap-2">
                                                     <button class="btn btn-sm btn-outline-primary rounded-3 px-2 py-1" ng-click="$ctrl.openTestCasesGrid(control)" title="Manage Test Cases">
                                                         <i class="fas fa-table me-1"></i>Test Cases
@@ -475,7 +529,7 @@ app.component('controlBoard', {
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <span class="small fw-bold text-secondary text-uppercase" style="font-size: 0.6rem;">Overall Goal Progression</span>
                                                     
-                                                    <span ng-if="!control._showQuickProgress" ng-click="control._showQuickProgress = true; $event.stopPropagation()" class="small fw-bold text-indigo cursor-pointer hover-underline" title="Click to edit">{{control.progress || 0}}%</span>
+                                                    <span ng-if="!control._showQuickProgress" ng-click="$ctrl.canMarkProgress() && (control._showQuickProgress = true); $event.stopPropagation()" ng-class="{'cursor-pointer hover-underline': $ctrl.canMarkProgress()}" class="small fw-bold text-indigo" title="{{$ctrl.canMarkProgress() ? 'Click to edit' : ''}}">{{control.progress || 0}}%</span>
                                                     
                                                     <input ng-if="control._showQuickProgress" type="number" class="form-control form-control-sm border-success py-0 px-1 text-center h-auto d-inline-block shadow-none" style="font-size: 0.8rem; width: 50px;" 
                                                             ng-model="control.progress" min="0" max="100"
@@ -483,7 +537,7 @@ app.component('controlBoard', {
                                                             ng-blur="$ctrl.updateControlProgressQuick(control); control._showQuickProgress = false"
                                                             auto-focus>
                                                 </div>
-                                                <div class="progress shadow-sm cursor-pointer" style="height: 6px; background: #e2e8f0; border-radius: 3px;" ng-click="control._showQuickProgress = true; $event.stopPropagation()" title="Click to edit">
+                                                <div class="progress shadow-sm" ng-class="{'cursor-pointer': $ctrl.canMarkProgress()}" style="height: 6px; background: #e2e8f0; border-radius: 3px;" ng-click="$ctrl.canMarkProgress() && (control._showQuickProgress = true); $event.stopPropagation()" title="{{$ctrl.canMarkProgress() ? 'Click to edit' : ''}}">
                                                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
                                                          ng-style="{'width': (control.progress || 0) + '%', 'background': 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)'}"
                                                          aria-valuenow="{{control.progress || 0}}" aria-valuemin="0" aria-valuemax="100">
@@ -518,14 +572,21 @@ app.component('controlBoard', {
                                                                 </div>
                                                                 <div class="d-flex align-items-center gap-2 mt-1">
                                                                     <span ng-if="!subDesc._showOwnerPicker" ng-click="$ctrl.canEditSubDescription() && (subDesc._showOwnerPicker = true); $event.stopPropagation()" 
-                                                                          class="x-small text-muted d-flex align-items-center" ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription(), 'text-danger fw-bold': $ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId}">
-                                                                        <i class="fas fa-user-gear me-1" ng-class="{'text-danger pulse-red-soft': $ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId}"></i>
-                                                                        {{$ctrl.getEmployeeName(subDesc.employeeId) || ($ctrl.isQAStatus(subDesc.statusName) ? 'QA OWNER REQ.' : 'Pending')}}
+                                                                          class="x-small text-muted d-flex align-items-center" ng-class="{'cursor-pointer hover-underline': $ctrl.canEditSubDescription(), 'text-danger fw-bold': $ctrl.isQAStatus(subDesc.statusName) && !subDesc.qaEmployeeId}">
+                                                                        <i class="fas fa-user-gear me-1" ng-class="{'text-danger pulse-red-soft': $ctrl.isQAStatus(subDesc.statusName) && !subDesc.qaEmployeeId}"></i>
+                                                                        {{$ctrl.getEmployeeName($ctrl.isQAStatus(subDesc.statusName) ? subDesc.qaEmployeeId : subDesc.employeeId) || ($ctrl.isQAStatus(subDesc.statusName) ? 'QA OWNER REQ.' : 'Pending')}}
                                                                     </span>
-                                                                    <select ng-if="subDesc._showOwnerPicker" class="form-select form-select-sm py-0 h-auto" style="font-size: 0.65rem; width: 120px;" 
-                                                                            ng-class="$ctrl.isQAStatus(subDesc.statusName) && !subDesc.employeeId ? 'border-danger bg-danger-subtle' : 'border-success'"
+                                                                    <select ng-if="subDesc._showOwnerPicker && !$ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm py-0 h-auto border-success" style="font-size: 0.65rem; width: 120px;" 
                                                                             ng-model="subDesc.employeeId" 
-                                                                            ng-options="e.id as e.employeeName for e in $ctrl.getEmployeesForStatus(subDesc.statusName)"
+                                                                            ng-options="e.id as e.employeeName for e in $ctrl.getNonQAEmployees()"
+                                                                            ng-change="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showOwnerPicker = false;"
+                                                                            ng-blur="subDesc._showOwnerPicker = false">
+                                                                        <option value="">Pending</option>
+                                                                    </select>
+                                                                    <select ng-if="subDesc._showOwnerPicker && $ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm py-0 h-auto" style="font-size: 0.65rem; width: 120px;" 
+                                                                            ng-class="!subDesc.qaEmployeeId ? 'border-danger bg-danger-subtle' : 'border-success'"
+                                                                            ng-model="subDesc.qaEmployeeId" 
+                                                                            ng-options="e.id as e.employeeName for e in $ctrl.getQAEngineers()"
                                                                             ng-change="$ctrl.updateSubDescriptionFieldQuick(control, subDesc); subDesc._showOwnerPicker = false;"
                                                                             ng-blur="subDesc._showOwnerPicker = false">
                                                                         <option value="">Pending</option>
@@ -636,6 +697,11 @@ app.component('controlBoard', {
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Ticket ID -->
+                                            <div class="mb-3">
+                                                <label class="x-small fw-bold text-secondary text-uppercase mb-1">Ticket ID (e.g. Jira ID)</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="control.editCustomId" placeholder="Enter ID (e.g., L3-1234, CR-987)">
+                                            </div>
                                             <div class="row g-2">
                                                 <div class="col-md-6">
                                                     <label class="x-small fw-bold text-secondary text-uppercase mb-1">Lead Liaison</label>
@@ -659,8 +725,9 @@ app.component('controlBoard', {
                                                             <button class="btn btn-link text-danger p-0" ng-click="$ctrl.removeSubDescriptionFromArray(control, $index)"><i class="fas fa-circle-minus"></i></button>
                                                         </div>
                                                         <div class="col-md-5">
-                                                            <label class="x-small fw-bold text-secondary text-uppercase mb-1">Unit Head</label>
-                                                            <select class="form-select form-select-sm" ng-model="subDesc.employeeId" ng-options="e.id as e.employeeName for e in $ctrl.getEmployeesForStatus(subDesc.statusName)"></select>
+                                                            <label class="x-small fw-bold text-secondary text-uppercase mb-1">Assignee</label>
+                                                            <select ng-if="!$ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm" ng-model="subDesc.employeeId" ng-options="e.id as e.employeeName for e in $ctrl.getNonQAEmployees()"></select>
+                                                            <select ng-if="$ctrl.isQAStatus(subDesc.statusName)" class="form-select form-select-sm border-danger" ng-model="subDesc.qaEmployeeId" ng-options="e.id as e.employeeName for e in $ctrl.getQAEngineers()"></select>
                                                         </div>
                                                         <div class="col-md-3">
                                                             <label class="x-small fw-bold text-secondary text-uppercase mb-1">Progression%</label>
@@ -748,6 +815,11 @@ app.component('controlBoard', {
                             <option ng-repeat="type in $ctrl.store.controlTypes" value="{{type.controlTypeId}}">{{type.typeName}}</option>
                         </select>
                     </div>
+                    <!-- Ticket ID -->
+                    <div class="mb-3">
+                        <label class="form-label x-small fw-bold text-uppercase text-muted">Ticket ID (e.g. Jira ID)</label>
+                        <input type="text" class="form-control border-0 shadow-sm bg-light" ng-model="$ctrl.newControl.customId" placeholder="Enter ID (e.g., L3-1234, CR-987)">
+                    </div>
                     <!-- Primary Objective -->
                     <div class="mb-3">
                         <label class="form-label x-small fw-bold text-uppercase text-muted">Primary Objective <span class="text-danger">*</span></label>
@@ -812,6 +884,73 @@ app.component('controlBoard', {
 
         <!-- Sub-Objectives QA Modal -->
         <sub-objectives-qa ng-if="$ctrl.selectedControlForSubQA" control="$ctrl.selectedControlForSubQA" on-close="$ctrl.selectedControlForSubQA = null"></sub-objectives-qa>
+
+        <!-- Global Release Date Picker Modal (Prevents Flickering) -->
+        <div ng-if="$ctrl.calendarModal.show" 
+             style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center;" 
+             ng-click="$ctrl.calendarModal.show = false">
+            
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden" 
+                 style="width:340px; background: white; animation: zoomIn 0.2s ease-out;" 
+                 ng-click="$event.stopPropagation()">
+                 
+                 <div class="card-header border-0 py-3 px-4 d-flex justify-content-between align-items-center" 
+                      style="background:linear-gradient(135deg, #10b981, #059669); color: white;">
+                     <h6 class="fw-bold mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        {{$ctrl.calendarModal.isFilter ? 'Filter by Date' : 'Target Deadline'}}
+                     </h6>
+                     <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                             style="background:rgba(255,255,255,0.2); color:white; width:28px; height:28px;" 
+                             ng-click="$ctrl.calendarModal.show = false">
+                         <i class="fas fa-times"></i>
+                     </button>
+                 </div>
+                 
+                 <div class="card-body p-4">
+                     <div class="d-flex justify-content-between align-items-center mb-4">
+                         <button class="btn btn-sm btn-light rounded-circle shadow-sm" ng-click="$ctrl.calendar.changeMonth($ctrl.calendarModal.state, -1)">
+                             <i class="fas fa-chevron-left text-primary"></i>
+                         </button>
+                         <div class="fw-bold text-dark fs-5">
+                             {{$ctrl.calendar.monthNames[$ctrl.calendarModal.state._viewDate.getMonth()]}} {{$ctrl.calendarModal.state._viewDate.getFullYear()}}
+                         </div>
+                         <button class="btn btn-sm btn-light rounded-circle shadow-sm" ng-click="$ctrl.calendar.changeMonth($ctrl.calendarModal.state, 1)">
+                             <i class="fas fa-chevron-right text-primary"></i>
+                         </button>
+                     </div>
+                     
+                     <div class="d-flex mb-2 border-bottom pb-2">
+                         <div ng-repeat="day in $ctrl.calendar.daysOfWeek" class="text-center text-muted fw-bold" style="width: 14.28%; font-size: 0.75rem; text-transform: uppercase;">
+                             {{day}}
+                         </div>
+                     </div>
+                     
+                     <div class="d-flex flex-wrap">
+                         <div ng-repeat="dayDate in $ctrl.calendarModal.state._calendarDays track by $index" 
+                              class="text-center py-1" 
+                              style="width: 14.28%;">
+                              <div ng-if="dayDate" 
+                                   class="rounded-circle cursor-pointer day-cell d-flex align-items-center justify-content-center"
+                                   ng-class="{'bg-primary text-white shadow-sm fw-bold': $ctrl.calendar.isSelected(dayDate, $ctrl.calendarModal.isFilter ? $ctrl.selectedReleaseDateFilter : $ctrl.calendarModal.state.releaseDate), 'text-primary fw-bold border border-primary': $ctrl.calendar.isToday(dayDate) && !$ctrl.calendar.isSelected(dayDate, $ctrl.calendarModal.isFilter ? $ctrl.selectedReleaseDateFilter : $ctrl.calendarModal.state.releaseDate), 'text-dark': !$ctrl.calendar.isSelected(dayDate, $ctrl.calendarModal.isFilter ? $ctrl.selectedReleaseDateFilter : $ctrl.calendarModal.state.releaseDate) && !$ctrl.calendar.isToday(dayDate)}"
+                                   style="width: 38px; height: 38px; margin: 0 auto; transition: all 0.2s; font-size: 0.95rem;"
+                                   ng-click="$ctrl.selectDateFromGlobalCalendar(dayDate)">
+                                  {{dayDate.getDate()}}
+                              </div>
+                         </div>
+                     </div>
+                 </div>
+                 
+                 <div class="card-footer bg-light border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                     <button class="btn btn-sm btn-link text-muted text-decoration-none p-0 fw-bold" ng-click="$ctrl.calendarModal.show = false">
+                         Cancel
+                     </button>
+                     <button class="btn btn-sm btn-link text-danger text-decoration-none p-0 fw-bold" ng-click="$ctrl.clearDateFromGlobalCalendar()">
+                         Clear {{$ctrl.calendarModal.isFilter ? 'Filter' : 'Deadline'}}
+                     </button>
+                 </div>
+            </div>
+        </div>
 
         <!-- Insights Full Modal -->
         <div ng-if="$ctrl.insightsModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9990;display:flex;align-items:center;justify-content:center;" ng-click="$ctrl.insightsModal=null">
@@ -929,7 +1068,8 @@ app.component('controlBoard', {
             }
         };
 
-        // Reset pagination when any filter changes
+        // DEBOUNCED Filter Watcher for Performance
+        var filterDebounce;
         $scope.$watchGroup([
             function () { return ctrl.searchText; },
             function () { return ctrl.selectedTypeFilter; },
@@ -937,7 +1077,11 @@ app.component('controlBoard', {
             function () { return ctrl.selectedDescriptionFilter; },
             function () { return ctrl.selectedReleaseDateFilter; }
         ], function () {
-            ctrl.currentPage = 1;
+            if (filterDebounce) $timeout.cancel(filterDebounce);
+            filterDebounce = $timeout(function() {
+                ctrl.currentPage = 1;
+                ctrl.refreshControlsCache();
+            }, 300);
         });
 
         // UI View Helper Methods for Premium Design
@@ -1024,6 +1168,7 @@ app.component('controlBoard', {
         ctrl.newControl = {
             typeId: null,
             description: '',
+            customId: '',
             employeeId: null,
             qaEmployeeId: null,
             statusId: null,
@@ -1057,6 +1202,14 @@ app.component('controlBoard', {
             return AuthService.canDeleteControl();
         };
 
+        ctrl.canMarkProgress = function () {
+            try {
+                return AuthService.canMarkProgress();
+            } catch (e) {
+                return false;
+            }
+        };
+
         // Only Admin, Team Lead, Software Architecture can add progress comments
         ctrl.canAddComment = function () {
             return AuthService.canAddComment();
@@ -1085,31 +1238,9 @@ app.component('controlBoard', {
         // Store admin status for better performance
         ctrl._isAdmin = null;
 
-        // Initialize Data
-        ApiService.init().then(function () {
-            // Get current team ID from AuthService
-            var currentTeamId = AuthService.getTeamId();
-            console.log('Loading data for team:', currentTeamId);
-            
-            // Ensure employees are loaded first
-            return ApiService.loadEmployees(currentTeamId);
-        }).then(function () {
-            // Get current team ID from AuthService
-            var currentTeamId = AuthService.getTeamId();
-            
-            // Load control types for current team
-            return ApiService.loadControlTypes(currentTeamId);
-        }).then(function () {
-            // Get current team ID from AuthService
-            var currentTeamId = AuthService.getTeamId();
-            console.log('Loading controls for team:', currentTeamId);
-            
-            // Then load controls for current team
-            return ApiService.loadAllControls(currentTeamId);
-        }).then(function () {
-            if (!ctrl.store.statuses || ctrl.store.statuses.length === 0) {
-                ApiService.loadStatuses();
-            }
+        // Initialize Data in Parallel for maximum speed
+        var currentTeamId = AuthService.getTeamId();
+        ApiService.init(currentTeamId).then(function () {
             // Ensure models are Date objects initially
             ctrl.ensureDateObjects();
 
@@ -1117,11 +1248,7 @@ app.component('controlBoard', {
             var employeesCount = ctrl.store.employees ? ctrl.store.employees.length : 0;
             var controlTypesCount = ctrl.store.controlTypes ? ctrl.store.controlTypes.length : 0;
             
-            console.log('Controls board initialized:');
-            console.log('  - Total controls loaded:', controlsCount);
-            console.log('  - Total employees loaded:', employeesCount);
-            console.log('  - Total control types loaded:', controlTypesCount);
-            console.log('  - Current team ID:', AuthService.getTeamId());
+            console.log('✓ Controls board fast-initialized');
             
             // Check for control to focus from navigation
             ctrl.checkAndFocusControl();
@@ -1131,7 +1258,7 @@ app.component('controlBoard', {
                 $scope.$apply();
             }
         }).catch(function (error) {
-            console.error('Error initializing controls board:', error);
+            console.error('Error fast-initializing controls board:', error);
             NotificationService.show('Error loading controls data', 'error');
         });
 
@@ -1174,154 +1301,41 @@ app.component('controlBoard', {
             }
         };
 
-        // Listen for team changes and reload controls
+        // Listen for team changes and reload controls FAST
         var teamChangedListener = $rootScope.$on('teamChanged', function(event, data) {
-            console.log('Team changed event received:', data);
-            console.log('Team changed to:', data ? data.teamId : 'null');
+            var teamId = data ? data.teamId : null;
+            if (teamId !== null && teamId !== undefined) teamId = parseInt(teamId);
+
+            console.log('Team changed - fast reloading data for:', teamId);
             
-            // Reset filters and pagination when team changes
+            // Reset state
             ctrl.searchText = '';
-            ctrl.selectedTypeFilter = null;
-            ctrl.selectedEmployeeFilter = null;
-            ctrl.selectedDescriptionFilter = null;
-            ctrl.selectedReleaseDateFilter = null;
             ctrl.currentPage = 1;
             
-            var teamId = data ? data.teamId : null;
-            
-            // Ensure teamId is properly converted (handle string/number mismatch)
-            if (teamId !== null && teamId !== undefined) {
-                teamId = parseInt(teamId);
-            }
-            
-            console.log('Reloading data for team:', teamId, '(parsed)');
-            
-            // Reload all data for new team
-            console.log('Starting data reload for team:', teamId);
-            
-            ApiService.loadEmployees(teamId).then(function(employees) {
-                console.log('✓ Employees loaded for team:', teamId, 'Count:', employees ? employees.length : 0);
-                
-                // Verify employees belong to the selected team (if teamId is provided)
-                if (teamId && employees && employees.length > 0) {
-                    var employeesFromOtherTeams = employees.filter(function(emp) {
-                        var empTeamId = emp.teamId ? parseInt(emp.teamId) : null;
-                        return empTeamId !== null && empTeamId !== teamId;
-                    });
-                    if (employeesFromOtherTeams.length > 0) {
-                        console.warn('⚠ Warning: Found employees from other teams:', employeesFromOtherTeams.length);
-                        console.warn('Expected teamId:', teamId, 'Found teamIds:', employeesFromOtherTeams.map(function(e) { return e.teamId; }));
-                    } else {
-                        console.log('✓ All employees belong to team:', teamId);
-                    }
-                } else if (teamId && (!employees || employees.length === 0)) {
-                    console.warn('⚠ No employees found for team:', teamId);
-                }
-                
-                return ApiService.loadControlTypes(teamId);
-            }).then(function(controlTypes) {
-                console.log('✓ Control types loaded for team:', teamId, 'Count:', controlTypes ? controlTypes.length : 0);
-                return ApiService.loadAllControls(teamId);
-            }).then(function(controls) {
-                console.log('✓ Controls loaded for team:', teamId, 'Count:', controls ? controls.length : 0);
-                
-                // Update store reference to ensure it's current
+            // Load everything in parallel
+            ApiService.init(teamId).then(function() {
                 ctrl.store = ApiService.data;
                 ctrl.ensureDateObjects();
                 
-                var controlsCount = ctrl.store.allControls ? ctrl.store.allControls.length : 0;
-                var employeesCount = ctrl.store.employees ? ctrl.store.employees.length : 0;
-                var controlTypesCount = ctrl.store.controlTypes ? ctrl.store.controlTypes.length : 0;
+                console.log('✓ Team data reloaded fast');
                 
-                console.log('Controls board reloaded for team:', teamId);
-                console.log('  - Total controls:', controlsCount);
-                console.log('  - Total employees:', employeesCount);
-                console.log('  - Total control types:', controlTypesCount);
-                
-                // Log employee team distribution for debugging
-                if (ctrl.store.employees && ctrl.store.employees.length > 0) {
-                    var teamDistribution = {};
-                    ctrl.store.employees.forEach(function(emp) {
-                        var empTeamId = emp.teamId || 'null';
-                        teamDistribution[empTeamId] = (teamDistribution[empTeamId] || 0) + 1;
-                    });
-                    console.log('Employee team distribution:', teamDistribution);
-                }
-                
-                // Force view update - use $timeout to ensure digest cycle runs after data is loaded
+                // Single focused update
                 $timeout(function() {
-                    // Verify teamId is still correct - force fresh read from localStorage
-                    // This ensures we get the latest teamId even if user object was cached
-                    var verifyTeamId = AuthService.getTeamId();
-                    if (verifyTeamId !== null && verifyTeamId !== undefined) {
-                        verifyTeamId = parseInt(verifyTeamId);
+                    if (!$scope.$$phase && !$rootScope.$$phase) {
+                        $scope.$apply();
                     }
-                    console.log('View update - verifying teamId:', verifyTeamId, 'Expected:', teamId);
-                    
-                    // If teamId doesn't match, it means localStorage wasn't updated properly
-                    if (teamId !== null && verifyTeamId !== teamId) {
-                        console.warn('WARNING: TeamId mismatch! Expected:', teamId, 'Got:', verifyTeamId);
-                        console.warn('This might indicate localStorage update issue');
-                    }
-                    
-                    // Ensure store reference is current
-                    ctrl.store = ApiService.data;
-                    
-                    // Trigger digest cycle to update the view
-                    try {
-                        if (!$scope.$$phase && !$rootScope.$$phase) {
-                            $scope.$apply();
-                        }
-                    } catch (e) {
-                        // Already in digest cycle, which is fine
-                        console.log('Already in digest cycle');
-                    }
-                    
-                    // Log final state for debugging
-                    var finalControlsCount = ctrl.store.allControls ? ctrl.store.allControls.length : 0;
-                    var finalEmployeesCount = ctrl.store.employees ? ctrl.store.employees.length : 0;
-                    console.log('View update complete - Controls:', finalControlsCount, 'Employees:', finalEmployeesCount);
-                    
-                    // Force multiple updates to ensure view reflects the changes
-                    // This is needed because getAllControls() is called during digest cycle
-                    $timeout(function() {
-                        // Re-verify teamId and store
-                        ctrl.store = ApiService.data;
-                        var currentTeamIdCheck = AuthService.getTeamId();
-                        console.log('Second update - teamId:', currentTeamIdCheck, 'Controls:', ctrl.store.allControls ? ctrl.store.allControls.length : 0);
-                        
-                        // Force view refresh by triggering digest cycle
-                        if (!$scope.$$phase && !$rootScope.$$phase) {
-                            $scope.$apply();
-                        }
-                        
-                        // One more update to be sure - also re-read from localStorage
-                        $timeout(function() {
-                            // Re-read user from localStorage to ensure we have latest teamId
-                            var user = AuthService.getUser();
-                            var latestTeamId = user ? user.currentTeamId : null;
-                            console.log('Third update - latestTeamId from localStorage:', latestTeamId);
-                            
-                            ctrl.store = ApiService.data;
-                            if (!$scope.$$phase && !$rootScope.$$phase) {
-                                $scope.$apply();
-                            }
-                        }, 50);
-                    }, 50);
-                }, 100);
+                }, 50);
             }).catch(function(error) {
-                console.error('❌ Error reloading data for team:', teamId, error);
-                console.error('Error details:', error.data || error.message || error);
-                NotificationService.show('Error loading data for selected team: ' + (error.data?.message || error.message || 'Unknown error'), 'error');
+                console.error('Error reloading team data:', error);
+                NotificationService.show('Error updating team data', 'error');
             });
         });
 
         // Listen for control types updates to refresh controls
         var controlTypesUpdateListener = $rootScope.$on('controlTypesUpdated', function () {
-            // Reload controls when control types are updated
             ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                 ctrl.ensureDateObjects();
-                // Force view update (only if not already in digest cycle)
+                ctrl.refreshControlsCache();
                 if (!$scope.$$phase && !$rootScope.$$phase) {
                     $scope.$apply();
                 }
@@ -1330,20 +1344,16 @@ app.component('controlBoard', {
 
         // Listen for controls updates to refresh controls board
         var controlsUpdateListener = $rootScope.$on('controlsUpdated', function () {
-            // Block global refresh if we are currently saving locally to prevent UI flicker
-            // BUT we still need to initialize the data for the new objects in the store!
             if (ctrl.isLocalSave) {
                 ctrl.ensureDateObjects();
+                ctrl.refreshControlsCache();
                 return;
             }
-            // Reload controls when controls are updated from other components
             var currentTeamId = AuthService.getTeamId();
-            console.log('Controls updated event - reloading for team:', currentTeamId);
             ApiService.loadAllControls(currentTeamId).then(function () {
                 ctrl.store = ApiService.data;
                 ctrl.ensureDateObjects();
-                console.log('Controls board refreshed - Total controls:', ctrl.store.allControls ? ctrl.store.allControls.length : 0);
-                // Force view update (only if not already in digest cycle)
+                ctrl.refreshControlsCache();
                 if (!$scope.$$phase && !$rootScope.$$phase) {
                     $scope.$apply();
                 }
@@ -1352,12 +1362,11 @@ app.component('controlBoard', {
 
         // Listen for employees updates to refresh controls
         var employeesUpdateListener = $rootScope.$on('employeesUpdated', function () {
-            // Reload employees first, then controls, so new employees appear in controls board
             ApiService.loadEmployees().then(function () {
                 return ApiService.loadAllControls(AuthService.getTeamId());
             }).then(function () {
                 ctrl.ensureDateObjects();
-                // Force view update (only if not already in digest cycle)
+                ctrl.refreshControlsCache();
                 if (!$scope.$$phase && !$rootScope.$$phase) {
                     $scope.$apply();
                 }
@@ -1367,10 +1376,9 @@ app.component('controlBoard', {
         // Listen for route changes to refresh data when navigating back to controls page
         var routeChangeListener = $rootScope.$on('$routeChangeSuccess', function (event, current) {
             if (current && current.$$route && (current.$$route.originalPath === '/controls' || current.$$route.originalPath === '/controls/:section')) {
-                // Reload controls when navigating back to controls page to ensure fresh data
                 ApiService.loadAllControls(AuthService.getTeamId()).then(function () {
                     ctrl.ensureDateObjects();
-                    // Force view update
+                    ctrl.refreshControlsCache();
                     if (!$scope.$$phase && !$rootScope.$$phase) {
                         $scope.$apply();
                     }
@@ -1410,7 +1418,38 @@ app.component('controlBoard', {
                 console.warn('Store or allControls not initialized in ensureDateObjects');
                 return;
             }
+
+            // Map to store current state of displayed controls before overwrite
+            var oldStateMap = {};
+            if (ctrl._cachedControls && ctrl._cachedControls.length > 0) {
+                ctrl._cachedControls.forEach(function (oldCtrl) {
+                    if (oldCtrl.controlId) {
+                        oldStateMap[oldCtrl.controlId] = {
+                            _currentSubIndex: oldCtrl._currentSubIndex,
+                            editing: oldCtrl.editing,
+                            _showQuickProgress: oldCtrl._showQuickProgress,
+                            _quickComment: oldCtrl._quickComment,
+                            subObjectives: (oldCtrl._subDescriptionsArray || []).map(function (sub) {
+                                return {
+                                    _showStatusPicker: sub._showStatusPicker,
+                                    _showDatePicker: sub._showDatePicker
+                                };
+                            })
+                        };
+                    }
+                });
+            }
+
             ctrl.store.allControls.forEach(function (c) {
+                // Restore old state if exists
+                var oldState = c.controlId ? oldStateMap[c.controlId] : null;
+                if (oldState) {
+                    c._currentSubIndex = oldState._currentSubIndex;
+                    c.editing = oldState.editing;
+                    c._showQuickProgress = oldState._showQuickProgress;
+                    c._quickComment = oldState._quickComment;
+                }
+
                 // Ensure progress is always a number, not a string
                 if (c.progress !== undefined && c.progress !== null) {
                     var progressNum = parseInt(c.progress);
@@ -1432,6 +1471,11 @@ app.component('controlBoard', {
                         console.error('Error parsing statusProgress for control', c.controlId, ':', e);
                     }
                 }
+                
+                // Ensure map has at least the current status for L3 unified view
+                if (Object.keys(c.statusProgressMap).length === 0 && c.statusId && (c.progress !== undefined && c.progress !== null)) {
+                    c.statusProgressMap[c.statusId] = c.progress;
+                }
 
                 // Cache sub descriptions array to avoid infinite digest loops
                 if (c.subDescriptions) {
@@ -1440,15 +1484,27 @@ app.component('controlBoard', {
                     c._subDescriptionsArray = [];
                 }
 
-                // Initialize sub-description navigation index.
-                // IMPORTANT: Must be 0, never undefined — the badge uses this value directly
+                // If we have an old state, restore sub-objective specific flags
+                if (oldState && oldState.subObjectives && c._subDescriptionsArray) {
+                    c._subDescriptionsArray.forEach(function (sub, idx) {
+                        var oldSub = oldState.subObjectives[idx];
+                        if (oldSub) {
+                            sub._showStatusPicker = oldSub._showStatusPicker;
+                            sub._showDatePicker = oldSub._showDatePicker;
+                        }
+                    });
+                }
+
+                // Initialize/validate sub-description navigation index.
+                // IMPORTANT: Must be valid index, never undefined — the badge uses this value directly
                 // in getDefectCount / getTestCaseStats, while the click button uses
                 // (control._currentSubIndex || 0). Keeping both at 0 prevents a mismatch
                 // where the badge counts null-indexed defects (cache key -1) but the modal
                 // opens with index 0 and shows nothing.
-                if (c._subDescriptionsArray && c._subDescriptionsArray.length > 0 &&
-                    (c._currentSubIndex === undefined || c._currentSubIndex === null)) {
-                    c._currentSubIndex = 0;
+                if (c._subDescriptionsArray && c._subDescriptionsArray.length > 0) {
+                    if (c._currentSubIndex === undefined || c._currentSubIndex === null || c._currentSubIndex >= c._subDescriptionsArray.length) {
+                        c._currentSubIndex = 0;
+                    }
                 }
 
                 // Cache main comments array to avoid infinite digest loops
@@ -1481,6 +1537,29 @@ app.component('controlBoard', {
                             // Update map for consistency
                             ctrl.qaEmployeeMap[c.controlId] = c.employeeId;
                         }
+                    }
+                }
+
+                // Treat controls without sub-objectives as having one implicit sub-objective for UI consistency
+                if (!c._subDescriptionsArray || c._subDescriptionsArray.length === 0) {
+                    c._subDescriptionsArray = [{
+                        description: c.description || 'Main Objective',
+                        employeeId: c.employeeId,
+                        statusId: c.statusId,
+                        statusName: c.statusName,
+                        progress: c.progress || 0,
+                        releaseId: c.releaseId,
+                        releaseName: c.releaseName,
+                        releaseDate: c.releaseDate,
+                        releaseDateInputFormatted: c.releaseDateInputFormatted,
+                        comments: c._mainCommentsArray || [],
+                        statusProgress: c.statusProgressMap || {},
+                        _statusProgressMap: c.statusProgressMap || {},
+                        isVirtual: true 
+                    }];
+                    // Ensure navigation index is set for L3 as well
+                    if (c._currentSubIndex === undefined || c._currentSubIndex === null || c._currentSubIndex >= c._subDescriptionsArray.length) {
+                        c._currentSubIndex = 0;
                     }
                 }
 
@@ -1517,6 +1596,25 @@ app.component('controlBoard', {
                 // Initialize defect and test case loading for control
                 ctrl.fetchDefectStats(c);
                 ctrl.fetchTestCaseStats(c);
+
+                // Initialize editStatusId for L3 fallback table status dropdown
+                if (!c.editStatusId) {
+                    c.editStatusId = c.statusId || null;
+                }
+                // Initialize editEmployeeId for L3 owner picker
+                if (!c.editEmployeeId) {
+                    c.editEmployeeId = c.employeeId || null;
+                }
+                // Parse statusProgressMap for per-status progress restore
+                if (!c.statusProgressMap && c.statusProgress) {
+                    try {
+                        c.statusProgressMap = JSON.parse(c.statusProgress);
+                    } catch (e) {
+                        c.statusProgressMap = {};
+                    }
+                } else if (!c.statusProgressMap) {
+                    c.statusProgressMap = {};
+                }
             });
         };
 
@@ -1634,28 +1732,39 @@ app.component('controlBoard', {
 
         ctrl.formatDate = function (date) {
             if (!date) return '';
+            if (typeof date === 'string' && date.indexOf('T') !== -1) {
+                var parts = date.split('T')[0].split('-');
+                if (parts.length === 3) return parts[0].substring(2) + '.' + parts[1] + '.' + parts[2];
+            }
             var d = new Date(date);
             if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
-        // Format date with year and month for display (DD.MM.YYYY)
+        // Format date with year and month for display (YY.MM.DD)
         ctrl.formatDateWithYear = function (date) {
             if (!date) return '';
+            if (typeof date === 'string' && date.indexOf('T') !== -1) {
+                var parts = date.split('T')[0].split('-');
+                if (parts.length === 3) return parts[0].substring(2) + '.' + parts[1] + '.' + parts[2];
+            }
             var d = new Date(date);
             if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         // Format date for HTML date input (YYYY-MM-DD)
         ctrl.formatDateForInput = function (date) {
             if (!date) return '';
+            if (typeof date === 'string' && date.indexOf('T') !== -1) {
+                return date.split('T')[0];
+            }
             var d = new Date(date);
             if (isNaN(d)) return '';
             var year = d.getFullYear();
@@ -2003,35 +2112,32 @@ app.component('controlBoard', {
             }
         };
 
+        ctrl._cachedControls = [];
+        
+        ctrl.refreshControlsCache = function() {
+            ctrl._cachedControls = ctrl.calculateAllControls();
+        };
+
         ctrl.getAllControls = function () {
-            if (!ctrl.store) {
-                console.warn('getAllControls: Store not initialized');
-                return [];
+            if (!ctrl._cachedControls || ctrl._cachedControls.length === 0) {
+                if (ctrl.store && ctrl.store.allControls && ctrl.store.allControls.length > 0) {
+                    ctrl.refreshControlsCache();
+                }
             }
-            if (!ctrl.store.allControls) {
-                console.warn('getAllControls: allControls not initialized');
-                ctrl.store.allControls = [];
+            return ctrl._cachedControls || [];
+        };
+
+        ctrl.calculateAllControls = function () {
+            if (!ctrl.store || !ctrl.store.allControls) {
+                return [];
             }
             if (!ctrl.store.employees) {
                 ctrl.store.employees = [];
             }
 
-            // Get current team ID to filter controls
-            // IMPORTANT: Always get fresh teamId from AuthService (reads from localStorage)
             var currentTeamId = AuthService.getTeamId();
-            var totalControls = ctrl.store.allControls.length;
-            
-            // Ensure currentTeamId is properly parsed (handle string/number mismatch)
             if (currentTeamId !== null && currentTeamId !== undefined) {
                 currentTeamId = parseInt(currentTeamId);
-            }
-            
-            console.log('getAllControls - currentTeamId:', currentTeamId, 'Total controls in store:', totalControls);
-            
-            // Log a sample of control teamIds for debugging
-            if (ctrl.store.allControls && ctrl.store.allControls.length > 0) {
-                var sampleTeamIds = ctrl.store.allControls.slice(0, 5).map(function(c) { return c.teamId; });
-                console.log('Sample control teamIds (first 5):', sampleTeamIds);
             }
 
             // For \"All Types\" view we want, for each employee, one row per TYPE,
@@ -2435,9 +2541,16 @@ app.component('controlBoard', {
                 return [];
             }
             return employees.filter(function (emp) {
+                var role = '';
                 if (emp.user && emp.user.role) {
-                    var role = emp.user.role.toLowerCase();
-                    return role !== 'qa engineer' && role !== 'qa';
+                    role = emp.user.role.toLowerCase().trim();
+                } else if (emp.role) {
+                    role = emp.role.toLowerCase().trim();
+                }
+
+                if (role) {
+                    var excludeRoles = ['qa engineer', 'qa', 'intern qa engineer', 'software architecture', 'software architect', 'project manager', 'pm'];
+                    return !excludeRoles.includes(role);
                 }
                 return true; // Include employees without role info
             });
@@ -2463,12 +2576,12 @@ app.component('controlBoard', {
             
             var status = (statusName || '').toLowerCase().trim();
             
-            // If status is QA, show only QA Engineers
-            if (status === 'qa') {
+            // If status is QA-related, show only QA Engineers
+            if (ctrl.isQAStatus(statusName)) {
                 return ctrl.getQAEngineers();
             }
             
-            // For Development and other statuses, show Developers, Team Leads, and Software Architects
+            // For Development and other statuses, show Developers, Team Leads, and Interns
             return employees.filter(function (emp) {
                 if (!emp || !emp.employeeName) return false;
 
@@ -2481,13 +2594,11 @@ app.component('controlBoard', {
                     role = (emp.role || '').toLowerCase().trim();
                 }
 
-                // Include Developers, Team Leads, Software Architects, and Interns
+                // Include Developers, Team Leads, and Interns
                 return role === 'developer' || 
                        role === 'developers' || 
                        role === 'intern developer' ||
-                       role === 'team lead' || 
-                       role === 'software architecture' ||
-                       role === 'software architect';
+                       role === 'team lead';
             });
         };
 
@@ -2766,6 +2877,7 @@ app.component('controlBoard', {
             c.editing = true;
             // Allow editing description and sub descriptions from controls board
             c.editDescription = c.description || '';
+            c.editCustomId = c.customId || '';
             // Initialize editSubDescriptionsArray as array of objects
             if (c.subDescriptions) {
                 c.editSubDescriptionsArray = ctrl.getSubDescriptionsWithDetails(c.subDescriptions);
@@ -2822,6 +2934,34 @@ app.component('controlBoard', {
                     control.progress = 0;
                 }
             }
+        };
+
+        // Save owner change from L3 fallback table
+        ctrl.saveL3Owner = function (control) {
+            var newEmployeeId = control.editEmployeeId ? parseInt(control.editEmployeeId) : null;
+            var payload = {
+                controlId: parseInt(control.controlId),
+                employeeId: newEmployeeId,
+                qaEmployeeId: control.qaEmployeeId || null,
+                typeId: control.typeId,
+                description: control.description,
+                subDescriptions: control.subDescriptions,
+                comments: control.comments,
+                progress: control.progress,
+                statusId: control.statusId,
+                releaseId: control.releaseId,
+                releaseDate: control.releaseDate ? new Date(control.releaseDate).toISOString() : null,
+                statusProgress: control.statusProgress
+            };
+            ApiService.updateControl(control.controlId, payload).then(function (updated) {
+                if (updated) {
+                    control.employeeId = updated.employeeId;
+                    control.employeeName = updated.employeeName;
+                }
+                NotificationService.show('Owner updated', 'success');
+            }).catch(function () {
+                NotificationService.show('Error updating owner', 'error');
+            });
         };
 
         // Quick update for Control Progress
@@ -3068,6 +3208,7 @@ app.component('controlBoard', {
                 return {
                     description: (item.description || '').trim(),
                     employeeId: item.employeeId ? parseInt(item.employeeId) : null,
+                    qaEmployeeId: item.qaEmployeeId ? parseInt(item.qaEmployeeId) : null,
                     statusId: item.statusId ? parseInt(item.statusId) : null,
                     progress: item.progress !== undefined && item.progress !== null ? parseInt(item.progress) : null,
                     statusProgress: item.statusProgress || item._statusProgressMap || {},
@@ -3453,6 +3594,7 @@ app.component('controlBoard', {
             var payload = {
                 typeId: parseInt(ctrl.newControl.typeId),
                 description: ctrl.newControl.description.trim(),
+                customId: ctrl.newControl.customId ? ctrl.newControl.customId.trim() : null,
                 employeeId: ctrl.newControl.employeeId ? parseInt(ctrl.newControl.employeeId) : null,
                 qaEmployeeId: ctrl.newControl.qaEmployeeId ? parseInt(ctrl.newControl.qaEmployeeId) : null,
                 statusId: ctrl.newControl.statusId ? parseInt(ctrl.newControl.statusId) : null,
@@ -3476,6 +3618,7 @@ app.component('controlBoard', {
                 ctrl.newControl = {
                     typeId: null,
                     description: '',
+                    customId: '',
                     employeeId: null,
                     qaEmployeeId: null,
                     statusId: null,
@@ -3814,6 +3957,7 @@ app.component('controlBoard', {
                             return {
                                 description: item,
                                 employeeId: null,
+                                qaEmployeeId: null,
                                 statusId: null,
                                 statusName: null,
                                 progress: null,
@@ -3856,6 +4000,7 @@ app.component('controlBoard', {
                         return {
                             description: item.description || '',
                             employeeId: item.employeeId || null,
+                            qaEmployeeId: item.qaEmployeeId || null,
                             statusId: statusId,
                             statusName: statusName,
                             progress: progress,
@@ -3867,7 +4012,7 @@ app.component('controlBoard', {
                             releaseDateInputFormatted: releaseDate ? ctrl.formatDateForInput(releaseDate) : '',
                             comments: item.comments && Array.isArray(item.comments) ? item.comments : [],
                             statusProgress: item.statusProgress || {},
-                            _statusProgressMap: item.statusProgress || (function() {
+                            _statusProgressMap: item._statusProgressMap || item.statusProgress || (function() {
                                 var map = {};
                                 if (statusId && progress !== undefined) {
                                     map[statusId] = progress;
@@ -3886,6 +4031,7 @@ app.component('controlBoard', {
                     return {
                         description: desc,
                         employeeId: null,
+                        qaEmployeeId: null,
                         statusId: null,
                         statusName: null,
                         progress: null,
@@ -3898,6 +4044,245 @@ app.component('controlBoard', {
                 });
             }
             return [];
+        };
+
+        // Sync statusName when statusId changes in dropdown
+        ctrl.syncSubStatusName = function (sub) {
+            if (!sub || !sub.statusId || !ctrl.store.statuses) return;
+            var status = ctrl.store.statuses.find(function (s) { return s.id == sub.statusId; });
+            if (status) {
+                sub.statusName = status.statusName;
+                
+                // Also ensure this status exists in the progress map
+                if (!sub._statusProgressMap) sub._statusProgressMap = {};
+                if (sub._statusProgressMap[sub.statusId] === undefined) {
+                    sub._statusProgressMap[sub.statusId] = sub.progress || 0;
+                }
+            }
+        };
+
+        // --- Multi-Status Progress Tracking Helpers ---
+
+        // Helper to get progress for a specific status from a sub-objective
+        ctrl.getSubProgressForStatus = function (sub, statusId) {
+            if (!sub || !statusId) return 0;
+            var map = sub._statusProgressMap || sub.statusProgress || {};
+            return map[statusId] !== undefined ? map[statusId] : 0;
+        };
+
+        // Helper to set progress for a specific status
+        ctrl.setSubProgressForStatus = function (sub, statusId, value) {
+            if (!sub || !statusId) return;
+            if (!sub._statusProgressMap) sub._statusProgressMap = {};
+
+            var val = parseInt(value);
+            if (isNaN(val)) val = 0;
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+
+            sub._statusProgressMap[statusId] = val;
+            
+            // Automatically update the main progress and status if this is the "active" one
+            // or if it's the current status of the sub-objective
+            if (sub.statusId == statusId) {
+                sub.progress = val;
+            }
+        };
+
+        // Global Calendar Modal State
+        ctrl.calendarModal = {
+            show: false,
+            state: {},
+            control: null,
+            subIndex: null,
+            isFilter: false
+        };
+
+        ctrl.openCalendar = function (control, subIndex) {
+            var subDesc = control._subDescriptionsArray[subIndex];
+            ctrl.calendarModal.show = true;
+            ctrl.calendarModal.isFilter = false;
+            ctrl.calendarModal.control = control;
+            ctrl.calendarModal.subIndex = subIndex;
+            ctrl.calendarModal.state = {
+                releaseDate: subDesc.releaseDate,
+                _viewDate: null,
+                _calendarDays: []
+            };
+            ctrl.calendar.init(ctrl.calendarModal.state);
+            
+            $timeout(function() {});
+        };
+
+        ctrl.openFilterCalendar = function () {
+            ctrl.calendarModal.show = true;
+            ctrl.calendarModal.isFilter = true;
+            ctrl.calendarModal.state = {
+                releaseDate: ctrl.selectedReleaseDateFilter,
+                _viewDate: null,
+                _calendarDays: []
+            };
+            ctrl.calendar.init(ctrl.calendarModal.state);
+            
+            $timeout(function() {});
+        };
+
+        ctrl.selectDateFromGlobalCalendar = function(date) {
+            if (ctrl.calendarModal.isFilter) {
+                ctrl.selectedReleaseDateFilter = date;
+            } else {
+                var sub = ctrl.calendarModal.control._subDescriptionsArray[ctrl.calendarModal.subIndex];
+                sub.releaseDate = date;
+                ctrl.saveSubObjectiveUnified(ctrl.calendarModal.control, ctrl.calendarModal.subIndex);
+            }
+            ctrl.calendarModal.show = false;
+        };
+
+        ctrl.clearDateFromGlobalCalendar = function() {
+            if (ctrl.calendarModal.isFilter) {
+                ctrl.selectedReleaseDateFilter = null;
+            } else {
+                var sub = ctrl.calendarModal.control._subDescriptionsArray[ctrl.calendarModal.subIndex];
+                sub.releaseDate = null;
+                ctrl.saveSubObjectiveUnified(ctrl.calendarModal.control, ctrl.calendarModal.subIndex);
+            }
+            ctrl.calendarModal.show = false;
+        };
+
+        // Unified Save function for sub-objective progress matrix
+        ctrl.saveSubObjectiveUnified = function (control, subIndex) {
+            var sub = control._subDescriptionsArray[subIndex];
+            if (!sub) return;
+
+            sub.saving = true;
+
+            // Sync the status progress map to a string for saving
+            sub.statusProgress = JSON.stringify(sub._statusProgressMap || {});
+
+            // Prepare sub-descriptions array for saving
+            var subsPayload = null;
+            if (!sub.isVirtual) {
+                subsPayload = control._subDescriptionsArray.map(function (s) {
+                    return {
+                        description: s.description,
+                        employeeId: s.employeeId,
+                        qaEmployeeId: s.qaEmployeeId,
+                        statusId: s.statusId,
+                        statusName: s.statusName,
+                        progress: s.progress,
+                        releaseId: s.releaseId,
+                        releaseDate: ctrl.formatDateForInput(s.releaseDate),
+                        comments: s.comments,
+                        statusProgress: s._statusProgressMap || {}
+                    };
+                });
+            }
+
+            // Prepare main control payload
+            var payload = {
+                controlId: parseInt(control.controlId),
+                employeeId: control.employeeId,
+                qaEmployeeId: control.qaEmployeeId,
+                typeId: control.typeId,
+                description: control.description,
+                subDescriptions: sub.isVirtual ? null : JSON.stringify(subsPayload),
+                comments: control.comments,
+                statusId: sub.isVirtual ? sub.statusId : control.statusId,
+                progress: sub.isVirtual ? sub.progress : control.progress,
+                statusProgress: sub.isVirtual ? JSON.stringify(sub._statusProgressMap || {}) : control.statusProgress,
+                releaseId: control.releaseId,
+                releaseDate: sub.isVirtual ? (sub.releaseDate ? ctrl.formatDateForInput(sub.releaseDate) : null) : (control.releaseDate ? ctrl.formatDateForInput(control.releaseDate) : null)
+            };
+
+            ApiService.updateControl(control.controlId, payload).then(function (updatedControl) {
+                // Silently update local model for auto-save
+                
+                // Update local model
+                if (sub.isVirtual) {
+                    control.statusId = updatedControl.statusId;
+                    control.progress = updatedControl.progress;
+                    control.statusProgress = updatedControl.statusProgress;
+                    if (control.statusProgress) {
+                        control.statusProgressMap = JSON.parse(control.statusProgress);
+                        sub._statusProgressMap = control.statusProgressMap;
+                    }
+                } else {
+                    // Update the sub-descriptions array from response if available
+                    if (updatedControl.subDescriptions) {
+                        control.subDescriptions = updatedControl.subDescriptions;
+                        control._subDescriptionsArray = ctrl.getSubDescriptionsWithDetails(control.subDescriptions);
+                    }
+                }
+                
+                $rootScope.$broadcast('controlsUpdated');
+            }).catch(function (err) {
+                console.error('Error saving unified progress:', err);
+                NotificationService.show('Error saving progress', 'error');
+            }).finally(function () {
+                sub.saving = false;
+            });
+        };
+
+        // Calendar Helpers for Custom Date Picker
+        ctrl.calendar = {
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            
+            init: function(subDesc) {
+                if (!subDesc._viewDate) {
+                    subDesc._viewDate = subDesc.releaseDate ? new Date(subDesc.releaseDate) : new Date();
+                    // Set to first of month for consistent view
+                    subDesc._viewDate.setDate(1);
+                }
+                this.generateDays(subDesc);
+            },
+            
+            generateDays: function(subDesc) {
+                var viewDate = subDesc._viewDate;
+                var year = viewDate.getFullYear();
+                var month = viewDate.getMonth();
+                
+                var firstDay = new Date(year, month, 1).getDay();
+                var daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                var days = [];
+                // Padding for first week
+                for (var i = 0; i < firstDay; i++) {
+                    days.push(null);
+                }
+                // Actual days
+                for (var d = 1; d <= daysInMonth; d++) {
+                    days.push(new Date(year, month, d));
+                }
+                subDesc._calendarDays = days;
+            },
+            
+            changeMonth: function(subDesc, delta) {
+                var date = subDesc._viewDate || new Date();
+                date.setMonth(date.getMonth() + delta);
+                subDesc._viewDate = new Date(date);
+                this.generateDays(subDesc);
+                
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            },
+            
+            isToday: function(date) {
+                if (!date) return false;
+                var today = new Date();
+                return date.getDate() === today.getDate() && 
+                       date.getMonth() === today.getMonth() && 
+                       date.getFullYear() === today.getFullYear();
+            },
+            
+            isSelected: function(date, selectedDate) {
+                if (!date || !selectedDate) return false;
+                var s = new Date(selectedDate);
+                return date.getDate() === s.getDate() && 
+                       date.getMonth() === s.getMonth() && 
+                       date.getFullYear() === s.getFullYear();
+            }
         };
 
         // Check if a comment is a QA comment
@@ -4459,6 +4844,7 @@ app.component('controlBoard', {
                     qaEmployeeId: c.editQAEmployeeId ? parseInt(c.editQAEmployeeId) : (c.qaEmployeeId ? parseInt(c.qaEmployeeId) : null),
                     typeId: typeId,
                     description: c.editDescription || null,
+                    customId: c.editCustomId !== undefined && c.editCustomId !== null ? c.editCustomId.trim() : "",
                     subDescriptions: subDescriptionsValue,
                     comments: c.editComments || null,
                     progress: progressValue,
@@ -4514,6 +4900,7 @@ app.component('controlBoard', {
                         // Update ALL references to this control - both the passed object and store
                         // Update the control object passed to this function
                         c.description = updatedControl.description;
+                        c.customId = updatedControl.customId;
                         c.subDescriptions = updatedControl.subDescriptions;
                         // Update cached sub descriptions array
                         if (updatedControl.subDescriptions) {
@@ -4554,6 +4941,7 @@ app.component('controlBoard', {
                                     storeControl.statusName = newStatusName;
                                     storeControl.progress = progressNum; // Ensure it's a number
                                     storeControl.description = updatedControl.description;
+                                    storeControl.customId = updatedControl.customId;
                                     storeControl.subDescriptions = updatedControl.subDescriptions;
                                     // Update cached sub descriptions array
                                     if (updatedControl.subDescriptions) {
@@ -5326,4 +5714,5 @@ app.component('controlBoard', {
         });
     }
 });
+
 

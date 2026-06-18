@@ -49,22 +49,8 @@ namespace ControlApp.API.Services
                 throw new ArgumentException("Description is required.");
             }
 
-            // Check for duplicate type name AND description combination (case-insensitive)
-            // Load all control types and check in memory to ensure case-insensitive comparison works correctly
+            // No duplicate check needed — multiple controls of the same type (e.g. multiple L3s) are allowed
             var trimmedTypeName = createControlTypeDto.TypeName.Trim();
-            var trimmedDescription = createControlTypeDto.Description.Trim();
-            
-            var allTypes = await _context.Set<ControlType>().ToListAsync();
-            var existingType = allTypes.FirstOrDefault(t => 
-                t.TypeName != null && 
-                t.TypeName.Trim().Equals(trimmedTypeName, StringComparison.OrdinalIgnoreCase) && 
-                t.Description != null && 
-                t.Description.Trim().Equals(trimmedDescription, StringComparison.OrdinalIgnoreCase));
-            
-            if (existingType != null)
-            {
-                throw new ArgumentException($"A control type with the name '{createControlTypeDto.TypeName}' and description '{createControlTypeDto.Description}' already exists. Please use a different description.");
-            }
 
             var controlType = new ControlType
             {
@@ -95,20 +81,6 @@ namespace ControlApp.API.Services
             }
 
             var trimmedTypeName = updateControlTypeDto.TypeName.Trim();
-            var trimmedDescription = updateControlTypeDto.Description.Trim();
-            
-            var allTypes = await _context.Set<ControlType>().ToListAsync();
-            var existingType = allTypes.FirstOrDefault(t => 
-                t.ControlTypeId != id &&
-                t.TypeName != null && 
-                t.TypeName.Trim().Equals(trimmedTypeName, StringComparison.OrdinalIgnoreCase) && 
-                t.Description != null && 
-                t.Description.Trim().Equals(trimmedDescription, StringComparison.OrdinalIgnoreCase));
-            
-            if (existingType != null)
-            {
-                throw new ArgumentException($"A control type with the name '{updateControlTypeDto.TypeName}' and description '{updateControlTypeDto.Description}' already exists. Please use a different description.");
-            }
 
             controlType.TypeName = updateControlTypeDto.TypeName.Trim();
             controlType.Description = updateControlTypeDto.Description.Trim();

@@ -198,10 +198,26 @@ app.component('qaDefects', {
                                             </div>
 
                                             <!-- Linked Defect -->
-                                            <div ng-if="tc.defectId" class="mt-2 p-2 rounded-3 bg-danger-subtle">
-                                                <small class="text-danger fw-bold">
-                                                    <i class="fas fa-link me-1"></i>Linked to Defect #{{tc.defectId}}
-                                                </small>
+                                            <!-- Linked Defect with Status -->
+                                            <div ng-if="tc.defectId" class="mt-2 p-2 rounded-3" 
+                                                 ng-style="$ctrl.getLinkedDefect(tc).status === 'Fixed' ? {'background':'#f0fdf4', 'border':'1px solid #bbf7d0'} : {'background':'#fef2f2', 'border':'1px solid #fecaca'}">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="fw-bold" ng-class="$ctrl.getLinkedDefect(tc).status === 'Fixed' ? 'text-success' : 'text-danger'">
+                                                        <i class="fas" ng-class="$ctrl.getLinkedDefect(tc).status === 'Fixed' ? 'fa-check-circle' : 'fa-link'"></i>
+                                                        Linked Defect #{{tc.defectId}}
+                                                    </small>
+                                                    <span class="badge rounded-pill shadow-sm" 
+                                                          ng-style="$ctrl.getStatusStyle($ctrl.getLinkedDefect(tc).status)"
+                                                          style="font-size: 0.65rem;">
+                                                        {{$ctrl.getLinkedDefect(tc).status}}
+                                                    </span>
+                                                </div>
+                                                <!-- Visual Indicator for Fixed Bug -->
+                                                <div ng-if="$ctrl.getLinkedDefect(tc).status === 'Fixed'" class="mt-1">
+                                                    <span class="badge bg-success w-100 py-1" style="font-size: 0.7rem; letter-spacing: 1px;">
+                                                        <i class="fas fa-thumbs-up me-1"></i> BUG FIXED: READY FOR RE-TEST
+                                                     </span>
+                                                </div>
                                             </div>
 
                                             <div class="mt-2 small text-muted">
@@ -458,27 +474,39 @@ app.component('qaDefects', {
                                                          <label class="form-label small mb-1">Comment / Resolution Notes <span class="text-muted">(optional)</span></label>
                                                          <textarea class="form-control form-control-sm" ng-model="defect.resolutionNotes" rows="3" placeholder="Add your comments or resolution notes here..."></textarea>
                                                      </div>
-                                                     <!-- Edit Attachments -->
-                                                     <div class="col-12 mt-2" ng-if="!$ctrl.isDeveloper()">
-                                                         <label class="form-label small mb-1 fw-bold">Attachments (Max 5)</label>
-                                                         <div class="d-flex flex-wrap gap-2">
-                                                             <div ng-repeat="slot in [1,2,3,4,5]" class="position-relative" style="width: 50px; height: 50px;">
-                                                                 <div ng-if="!$ctrl.getDefectImages(defect)[slot-1]" 
-                                                                      class="border rounded d-flex align-items-center justify-content-center bg-light cursor-pointer h-100 w-100"
-                                                                      onclick="this.nextElementSibling.click()"
-                                                                      title="Upload Screenshot {{slot}}">
-                                                                     <i class="fas fa-camera text-muted small"></i>
-                                                                 </div>
-                                                                 <input type="file" class="d-none" onchange="angular.element(this).scope().$ctrl.onEditImageSelect(this.files[0], angular.element(this).scope().defect, slot-1)" accept="image/*">
-                                                                 
-                                                                 <div ng-if="$ctrl.getDefectImages(defect)[slot-1]" class="position-relative h-100 w-100">
-                                                                     <img ng-src="{{$ctrl.getDefectImages(defect)[slot-1]}}" class="rounded w-100 h-100" style="object-fit: cover; border: 1px solid #dee2e6;">
-                                                                     <button type="button" class="btn btn-danger btn-xs rounded-circle position-absolute top-0 end-0 translate-middle p-0" 
-                                                                             style="width:14px; height:14px; font-size:8px; line-height:1;"
-                                                                             ng-click="$ctrl.removeEditImage(defect, slot-1)">
-                                                                         <i class="fas fa-times"></i>
-                                                                     </button>
-                                                                 </div>
+                                                     <!-- Attachments (Visible to all, Editable only by QA) -->
+                                                     <div class="col-12 mt-3">
+                                                         <label class="form-label small mb-2 fw-bold text-secondary">
+                                                             <i class="fas fa-paperclip me-1"></i> QA Attachments & Evidence
+                                                         </label>
+                                                         <div class="d-flex flex-wrap gap-3 mt-1">
+                                                             <div ng-repeat="img in $ctrl.getDefectImages(defect) track by $index" class="position-relative attachment-item">
+                                                                 <img ng-src="{{img}}" class="rounded shadow-sm cursor-zoom-in" 
+                                                                      style="width: 120px; height: 75px; object-fit: cover; border: 2px solid #e2e8f0; transition: transform 0.2s;"
+                                                                      ng-click="$ctrl.viewImage(img)"
+                                                                      title="Click to enlarge">
+                                                                 <button type="button" class="btn btn-danger btn-xs rounded-circle position-absolute top-0 end-0 translate-middle shadow-sm" 
+                                                                         style="width: 22px; height: 22px; padding: 0; font-size: 10px; display: flex; align-items: center; justify-content: center;"
+                                                                         ng-if="!$ctrl.isDeveloper()"
+                                                                         ng-click="$ctrl.removeEditImage(defect, $index)">
+                                                                     <i class="fas fa-times"></i>
+                                                                 </button>
+                                                             </div>
+                                                             
+                                                             <!-- Upload slots only for QA -->
+                                                             <div ng-if="!$ctrl.isDeveloper() && $ctrl.getDefectImages(defect).length < 5" 
+                                                                  class="border rounded d-flex flex-column align-items-center justify-content-center bg-light cursor-pointer shadow-sm hover-bg-white"
+                                                                  style="width: 120px; height: 75px; border: 2px dashed #cbd5e1 !important; transition: all 0.2s;"
+                                                                  onclick="this.querySelector('input').click()">
+                                                                 <i class="fas fa-camera-retro text-muted mb-1"></i>
+                                                                 <span style="font-size: 0.65rem;" class="text-muted fw-bold">ADD IMAGE</span>
+                                                                 <input type="file" class="d-none" onchange="angular.element(this).scope().$ctrl.onEditImageSelect(this.files[0], angular.element(this).scope().defect, angular.element(this).scope().$ctrl.getDefectImages(angular.element(this).scope().defect).length)" accept="image/*">
+                                                             </div>
+                                                             
+                                                             <!-- Empty state for Developer if no images -->
+                                                             <div ng-if="$ctrl.isDeveloper() && $ctrl.getDefectImages(defect).length === 0" 
+                                                                  class="w-100 py-3 text-center border rounded bg-light-subtle" style="border: 1px dashed #e2e8f0;">
+                                                                 <p class="text-muted mb-0 small fst-italic">No screenshots attached by QA.</p>
                                                              </div>
                                                          </div>
                                                      </div>
@@ -551,38 +579,67 @@ app.component('qaDefects', {
                                         </div>
 
                                         <!-- Status Timeline with durations -->
-                                        <div ng-if="!defect._editing" class="mt-3">
-                                            <div class="d-flex align-items-center gap-1 flex-wrap">
-                                                <span ng-repeat="step in $ctrl.getStatusTimeline(defect)" class="d-flex align-items-center">
-                                                    <span class="badge px-2 py-1 rounded-pill fw-bold"
-                                                          ng-style="step.active ? {'background': '#2563eb', 'color': '#fff'} : {'background': '#e2e8f0', 'color': '#374151', 'border': '1px solid #cbd5e1'}"
-                                                          style="font-size: 0.72rem;">
-                                                        <i class="fas fa-circle me-1" ng-if="step.active"></i>
-                                                        <i class="fas fa-check-circle me-1" ng-if="step.done && !step.active"></i>
-                                                        {{step.label}}
-                                                    </span>
-                                                    <i class="fas fa-chevron-right mx-1" style="font-size: 0.6rem; color: #94a3b8;" ng-if="!$last"></i>
-                                                </span>
+                                        <div ng-if="!defect._editing" class="mt-4 pt-3 border-top">
+                                            <div class="d-flex align-items-center gap-0 flex-wrap">
+                                                <div ng-repeat="step in $ctrl.getStatusTimeline(defect)" class="d-flex align-items-center mb-2">
+                                                    <!-- Transition duration (before the bubble, except for first) -->
+                                                    <div ng-if="!$first" class="d-flex align-items-center px-1" style="min-width: 60px;">
+                                                        <div class="flex-grow-1 border-bottom" style="border-style: dashed !important; border-color: #cbd5e1 !important; height: 1px;"></div>
+                                                        <div class="mx-2 d-flex flex-column align-items-center">
+                                                            <span class="badge bg-light text-primary border rounded-pill shadow-sm mb-1" 
+                                                                  style="font-size: 0.6rem; padding: 2px 6px;" 
+                                                                  ng-if="step.duration" title="Time to transition">
+                                                                <i class="fas fa-clock me-1" style="font-size: 0.5rem;"></i>{{step.duration}}
+                                                            </span>
+                                                            <i class="fas fa-chevron-right" style="font-size: 0.6rem; color: #94a3b8;"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1 border-bottom" style="border-style: dashed !important; border-color: #cbd5e1 !important; height: 1px;"></div>
+                                                    </div>
+
+                                                    <!-- Status Bubble -->
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <span class="badge px-3 py-2 rounded-pill fw-bold shadow-sm"
+                                                              ng-style="step.active ? (step.label === 'Closed' ? {'background': 'linear-gradient(135deg, #10b981, #059669)', 'color': '#fff', 'transform': 'scale(1.1)'} : {'background': 'linear-gradient(135deg, #2563eb, #1d4ed8)', 'color': '#fff', 'transform': 'scale(1.1)'}) : (step.done ? {'background': '#dcfce7', 'color': '#166534', 'border': '1px solid #bbf7d0'} : {'background': '#f1f5f9', 'color': '#64748b', 'border': '1px solid #e2e8f0'})"
+                                                              style="font-size: 0.75rem; transition: all 0.3s ease;">
+                                                            <i class="fas fa-check-double me-1" ng-if="step.active && step.label === 'Closed'"></i>
+                                                            <i class="fas fa-circle-notch fa-spin me-1" ng-if="step.active && step.label !== 'Closed'"></i>
+                                                            <i class="fas fa-check-circle me-1" ng-if="step.done"></i>
+                                                            {{step.label}}
+                                                        </span>
+                                                        <!-- Current time in status -->
+                                                        <span ng-if="step.active && defect.status !== 'Closed'" 
+                                                              class="text-primary fw-bold mt-1" 
+                                                              style="font-size: 0.65rem;">
+                                                            <i class="fas fa-stopwatch me-1"></i>{{$ctrl.getTimeInActiveStatus(defect)}} active
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <!-- Per-transition durations -->
-                                            <div ng-if="$ctrl.getStatusTransitions(defect).length > 0" class="mt-2 d-flex flex-wrap gap-2">
-                                                <span ng-repeat="t in $ctrl.getStatusTransitions(defect) track by $index"
-                                                      class="badge fw-normal d-inline-flex align-items-center gap-1"
-                                                      style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-size:0.7rem;">
-                                                    <i class="fas fa-clock text-muted"></i>
-                                                    <span ng-bind="t.from"></span>
-                                                    <i class="fas fa-arrow-right" style="font-size:0.55rem;"></i>
-                                                    <span ng-bind="t.to"></span>:
-                                                    <span class="fw-bold text-dark" ng-bind="t.duration"></span>
-                                                </span>
-                                                <!-- Total time if Closed -->
-                                                <span ng-if="defect.status === 'Closed' && $ctrl.getTotalLifetime(defect)"
-                                                      class="badge fw-bold d-inline-flex align-items-center gap-1"
-                                                      style="background:#1e293b; color:#f8fafc; font-size:0.7rem;">
-                                                    <i class="fas fa-flag-checkered"></i>
-                                                    <span>Total:</span>
-                                                    <span ng-bind="$ctrl.getTotalLifetime(defect)"></span>
-                                                </span>
+                                            
+                                            <!-- Summary Durations & Transitions -->
+                                            <div ng-if="$ctrl.getStatusTransitions(defect).length > 0" class="mt-4 p-3 rounded-4" style="background: #fdf2f2; border: 1px solid #fee2e2;">
+                                                <h6 class="extra-small fw-bold text-uppercase text-danger mb-3" style="letter-spacing: 0.5px;">
+                                                    <i class="fas fa-chart-line me-1"></i> Transition Time Analytics
+                                                </h6>
+                                                <div class="row g-2">
+                                                    <div ng-repeat="t in $ctrl.getStatusTransitions(defect) track by $index" class="col-md-6">
+                                                        <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-white border shadow-sm">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <span class="badge bg-light text-dark border extra-small">{{t.from}}</span>
+                                                                <i class="fas fa-long-arrow-alt-right text-muted"></i>
+                                                                <span class="badge bg-light text-dark border extra-small">{{t.to}}</span>
+                                                            </div>
+                                                            <span class="fw-bold text-primary small">{{t.duration}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Total resolution if Closed -->
+                                                <div ng-if="defect.status === 'Closed' && $ctrl.getTotalLifetime(defect)" 
+                                                     class="mt-3 pt-3 border-top d-flex align-items-center justify-content-between">
+                                                    <span class="small fw-bold text-dark">Total Resolution Time:</span>
+                                                    <span class="badge bg-dark px-3 py-2 fs-6">{{$ctrl.getTotalLifetime(defect)}}</span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div ng-if="!defect._editing && defect.resolutionNotes" class="mt-2 p-2 rounded-3" style="background: #f0fdf4;">
@@ -668,7 +725,7 @@ app.component('qaDefects', {
         </div>
     </div>
     `,
-    controller: function (ApiService, NotificationService, AuthService, $scope, $rootScope) {
+    controller: function (ApiService, NotificationService, AuthService, $scope, $rootScope, $interval, $timeout) {
         var ctrl = this;
 
         ctrl.defects = [];
@@ -884,7 +941,7 @@ app.component('qaDefects', {
                 assignedToEmployeeId: defect.assignedToEmployeeId ? parseInt(defect.assignedToEmployeeId) : null,
                 resolutionNotes: defect.resolutionNotes,
                 subDescriptionIndex: defect.subDescriptionIndex,
-                attachmentUrls: $ctrl.getDefectImages(defect)
+                attachmentUrls: ctrl.getDefectImages(defect)
             };
 
             ApiService.updateDefect(defect.defectId, updateData).then(function (updated) {
@@ -964,15 +1021,46 @@ app.component('qaDefects', {
                 'Open':      ['Open', 'In Dev', 'Fixed', 'Closed'],
                 'In Dev':    ['Open', 'In Dev', 'Fixed', 'Closed'],
                 'Fixed':     ['Open', 'In Dev', 'Fixed', 'Closed'],
+                'Resolved':  ['Open', 'In Dev', 'Fixed', 'Closed'],
                 'Closed':    ['Open', 'In Dev', 'Fixed', 'Closed'],
                 'Re-Open':   ['Open', 'Re-Open', 'In Dev', 'Fixed', 'Closed'],
                 'Duplicate': ['Open', 'Duplicate', 'Closed']
             };
             var steps = flows[status] || ['Open', status, 'Closed'];
             var activeIdx = steps.indexOf(status);
+            
             return steps.map(function (label, idx) {
-                return { label: label, active: label === status, done: idx < activeIdx };
+                var duration = null;
+                // If this is a step that has been reached or passed, try to get the time it took to get here from the previous step
+                if (idx > 0 && (idx <= activeIdx)) {
+                    duration = ctrl.getStatusChangeDuration(defect, steps[idx-1], label);
+                }
+                return { 
+                    label: label, 
+                    active: label === status, 
+                    done: idx < activeIdx,
+                    duration: duration
+                };
             });
+        };
+
+        ctrl.getTimeInActiveStatus = function (defect) {
+            if (!ctrl.activityLogs || !ctrl.activityLogs.length) return null;
+            
+            var statusLogs = ctrl.activityLogs
+                .filter(function (l) { 
+                    return l.entityType === 'Defect' && l.entityId === defect.defectId && l.action === 'StatusChanged'; 
+                })
+                .sort(function (a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
+            
+            var startTime = statusLogs.length > 0 ? statusLogs[statusLogs.length - 1].timestamp : defect.reportedDate;
+            var start = ctrl.toUTC(startTime);
+            if (!start) return null;
+            
+            var now = new Date();
+            var diff = now - start;
+            if (diff < 0) diff = 0;
+            return ctrl.formatDuration(diff);
         };
 
         ctrl.toUTC = function (date) {
@@ -989,11 +1077,13 @@ app.component('qaDefects', {
         ctrl.formatDate = function (date) {
             var d = ctrl.toUTC(date);
             if (!d) return '';
-            return d.toLocaleString('en-GB', {
-                timeZone: 'Asia/Colombo',
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: false
-            });
+            var tzDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
+            var year = tzDate.getFullYear().toString().substring(2);
+            var month = ('0' + (tzDate.getMonth() + 1)).slice(-2);
+            var day = ('0' + tzDate.getDate()).slice(-2);
+            var hour = ('0' + tzDate.getHours()).slice(-2);
+            var minute = ('0' + tzDate.getMinutes()).slice(-2);
+            return year + '.' + month + '.' + day + ' ' + hour + ':' + minute;
         };
 
         ctrl.timeAgo = function (date) {
@@ -1387,6 +1477,21 @@ app.component('qaDefects', {
             });
         };
 
+        ctrl.getLinkedDefect = function (testCase) {
+            if (!testCase.defectId || !ctrl.defects) return null;
+            return ctrl.defects.find(function (d) { return d.defectId === testCase.defectId; });
+        };
+
+        ctrl.getStatusStyle = function (status) {
+            switch (status) {
+                case 'Open': return { background: '#ef4444', color: '#fff' };
+                case 'In Dev': return { background: '#f59e0b', color: '#000' };
+                case 'Fixed': return { background: '#10b981', color: '#fff' };
+                case 'Closed': return { background: '#64748b', color: '#fff' };
+                default: return { background: '#e2e8f0', color: '#000' };
+            }
+        };
+
         ctrl.formatDuration = function (ms) {
             if (!ms || ms < 0) return null;
             var mins  = Math.floor(ms / 60000);
@@ -1401,17 +1506,22 @@ app.component('qaDefects', {
         // Returns duration between two status entries in the activity log for a specific defect
         ctrl.getStatusChangeDuration = function (defect, fromStatus, toStatus) {
             if (!ctrl.activityLogs || !ctrl.activityLogs.length) return null;
+            
             var logs = ctrl.activityLogs
                 .filter(function (l) { return l.entityType === 'Defect' && l.entityId === defect.defectId && l.action === 'StatusChanged'; })
                 .sort(function (a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
 
-            var fromEntry = null;
+            // Case 1: First transition from reported date
+            if (fromStatus === 'Open' && logs.length > 0 && logs[0].oldValue === 'Open' && logs[0].newValue === toStatus) {
+                var start = ctrl.toUTC(defect.reportedDate);
+                var end   = ctrl.toUTC(logs[0].timestamp);
+                if (start && end) return ctrl.formatDuration(end - start);
+            }
+
+            // Case 2: Subsequent transitions
             for (var i = 0; i < logs.length; i++) {
-                if (!fromStatus || logs[i].oldValue === fromStatus) {
-                    fromEntry = logs[i];
-                }
-                if (fromEntry && logs[i].newValue === toStatus) {
-                    var start = ctrl.toUTC(fromEntry.timestamp);
+                if (logs[i].oldValue === fromStatus && logs[i].newValue === toStatus) {
+                    var start = (i > 0) ? ctrl.toUTC(logs[i-1].timestamp) : ctrl.toUTC(defect.reportedDate);
                     var end   = ctrl.toUTC(logs[i].timestamp);
                     if (start && end) return ctrl.formatDuration(end - start);
                 }
@@ -1465,11 +1575,13 @@ app.component('qaDefects', {
         ctrl.formatDateTime = function (date) {
             var d = ctrl.toUTC(date);
             if (!d) return '';
-            return d.toLocaleString('en-GB', {
-                timeZone: 'Asia/Colombo',
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: false
-            });
+            var tzDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
+            var year = tzDate.getFullYear().toString().substring(2);
+            var month = ('0' + (tzDate.getMonth() + 1)).slice(-2);
+            var day = ('0' + tzDate.getDate()).slice(-2);
+            var hour = ('0' + tzDate.getHours()).slice(-2);
+            var minute = ('0' + tzDate.getMinutes()).slice(-2);
+            return year + '.' + month + '.' + day + ' ' + hour + ':' + minute;
         };
 
         // Returns all status transitions with durations for a defect
@@ -1601,5 +1713,27 @@ app.component('qaDefects', {
         $scope.$on('$destroy', function () {
             highlightListener();
         });
+        // Timer to refresh "time in status" every minute
+        var statusTimer = $interval(function () {
+            // Just triggers digest cycle to update durations
+        }, 60000);
+
+        // Listen for real-time status changes from SignalR
+        var statusChangeListener = $rootScope.$on('defectStatusChanged', function (event, data) {
+            console.log('Real-time status change received:', data);
+            // If the changed defect belongs to the current control, refresh the list
+            if (ctrl.control && data.controlId === ctrl.control.controlId) {
+                $timeout(function() {
+                    ctrl.loadDefects();
+                    ctrl.loadActivityLogs();
+                }, 500); // Small delay to let DB update finalize
+            }
+        });
+
+        this.$onDestroy = function () {
+            if (statusTimer) $interval.cancel(statusTimer);
+            if (statusChangeListener) statusChangeListener();
+            if (highlightListener) highlightListener();
+        };
     }
 });

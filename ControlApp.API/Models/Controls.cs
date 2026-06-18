@@ -11,6 +11,7 @@ namespace ControlApp.API.Models
 
         
         public string? Description { get; set; } 
+        public string? CustomId { get; set; }
         public string? SubDescriptions { get; set; }
         public string? Comments { get; set; }
 

@@ -79,8 +79,9 @@ app.component('dashboard', {
 
         <!-- RC Matrix Modal -->
         <rc-matrix ng-if="$ctrl.showRcMatrix"
-                   all-test-cases="$ctrl.allTestCases"
+                   all-defects="$ctrl.allDefects"
                    all-controls="$ctrl.store.allControls"
+                   all-releases="$ctrl.store.releases"
                    on-close="$ctrl.showRcMatrix = false">
         </rc-matrix>
 
@@ -189,7 +190,7 @@ app.component('dashboard', {
                                 <i class="fas fa-id-card-clip fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold text-dark mb-0">Personalized Command View</h5>
+                                <h5 class="fw-bold text-dark mb-0"><span ng-if="$ctrl.selectedUserId && $ctrl.selectedUserId !== $ctrl.currentUser.employeeId">{{$ctrl.getSelectedUserName()}}'s </span>Command View</h5>
                                 <span class="role-badge" ng-class="{'bg-indigo text-white': $ctrl.isPM(), 'bg-purple text-white': $ctrl.isQA(), 'bg-success text-white': $ctrl.isDev()}">
                                     {{$ctrl.currentUser.role || 'Contributor'}}
                                 </span>
@@ -291,9 +292,12 @@ app.component('dashboard', {
                             </div>
                         </div>
 
-                        <!-- DEVELOPER VIEW: My Tasks -->
-                        <div ng-if="$ctrl.isDev()">
-                            <p class="text-secondary small mb-3">Your assigned sub-objectives that require attention.</p>
+                        <!-- PERSONALIZED USER VIEW: Tasks & Objectives -->
+                        <div ng-if="$ctrl.isDev() || ($ctrl.selectedUserId && $ctrl.selectedUserId !== $ctrl.currentUser.employeeId)">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="text-secondary small mb-0">{{$ctrl.getSelectedUserName()}}'s assigned sub-objectives that require attention.</p>
+                                <span class="badge bg-indigo-soft text-indigo fw-bold" style="font-size:0.65rem;">{{$ctrl.mySubObjectives.length}} Active Items</span>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
                                     <tbody style="font-size: 0.85rem;">
@@ -401,6 +405,14 @@ app.component('dashboard', {
                                           title="{{sub.description}} - {{sub.status}}"></span>
                                     <span ng-if="!control.subDescriptions || control.subDescriptions === '[]'" class="extra-small text-muted italic">No objectives</span>
                                 </div>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <span class="badge bg-light text-dark border extra-small">
+                                        <i class="fas fa-tag text-muted me-1"></i>{{control.typeName || 'General'}}
+                                    </span>
+                                    <span class="badge bg-light text-dark border extra-small" title="Release Date">
+                                        <i class="fas fa-calendar text-muted me-1"></i>{{$ctrl.getPrimaryReleaseDate(control)}}
+                                    </span>
+                                </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="progress rounded-pill flex-grow-1 me-2" style="height:4px; background:#eee;">
                                         <div class="progress-bar bg-success" ng-style="{'width': control.progress + '%'}"></div>
@@ -419,22 +431,90 @@ app.component('dashboard', {
             </div>
         </div>
 
-        <!-- Active Defects Pool (Role-Based) -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
-            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold text-dark mb-0">
-                    <i class="fas fa-bug me-2 text-danger"></i>
-                    <span ng-if="$ctrl.defectFilter === 'Assigned'">Your Assigned Tasks</span>
-                    <span ng-if="$ctrl.defectFilter === 'QA'">Pending QA Verification</span>
-                    <span ng-if="$ctrl.defectFilter !== 'Assigned' && $ctrl.defectFilter !== 'QA'">Incident Pool</span>
-                </h5>
-                <div class="btn-group btn-group-sm bg-light rounded-pill p-1">
-                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'All' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'All'">All</button>
-                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'Assigned' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'Assigned'">My Work</button>
-                    <button class="btn btn-sm px-3 rounded-pill border-0" ng-if="$ctrl.isQA()" ng-class="$ctrl.defectFilter === 'QA' ? 'btn-danger text-white' : 'btn-light'" ng-click="$ctrl.defectFilter = 'QA'">QA Verification</button>
+            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-danger-soft text-danger d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;">
+                        <i class="fas fa-tasks fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            <span ng-if="$ctrl.defectFilter === 'Assigned'">{{$ctrl.getSelectedUserName()}}'s Operations</span>
+                            <span ng-if="$ctrl.defectFilter === 'QA'">Pending QA Verification</span>
+                            <span ng-if="$ctrl.defectFilter === 'All'">Team Incident Pool</span>
+                        </h5>
+                        <p class="text-muted extra-small mb-0">Tracking individual performance and assigned work items</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- PM/Admin/Architect User Selection Dropdown -->
+                    <div ng-if="$ctrl.isPM() || $ctrl.isLead()" class="d-flex align-items-center gap-2 bg-light p-1 rounded-pill border px-3">
+                        <i class="fas fa-user-gear text-muted small"></i>
+                        <select class="form-select form-select-sm border-0 bg-transparent extra-small fw-bold" 
+                                style="width: 160px; box-shadow: none;"
+                                ng-model="$ctrl.selectedUserId" 
+                                ng-change="$ctrl.onUserChange()"
+                                ng-options="emp.id as emp.employeeName for emp in $ctrl.store.employees">
+                            <option value="">Select Team Member...</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group btn-group-sm bg-light rounded-pill p-1">
+                        <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'All' ? 'btn-danger text-white theme-shadow' : 'btn-light'" ng-click="$ctrl.defectFilter = 'All'; $ctrl.onUserChange()">All</button>
+                        <button class="btn btn-sm px-3 rounded-pill border-0" ng-class="$ctrl.defectFilter === 'Assigned' ? 'btn-danger text-white theme-shadow' : 'btn-light'" ng-click="$ctrl.defectFilter = 'Assigned'; $ctrl.onUserChange()">My Work</button>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-4">
+                <div class="row g-4 mb-4" ng-if="$ctrl.defectFilter === 'Assigned'">
+                    <!-- Performance Chart Column -->
+                    <div class="col-lg-5">
+                        <div class="p-3 rounded-4 border bg-light h-100 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0 x-small text-uppercase"><i class="fas fa-chart-line me-2 text-primary"></i>Activity Profile</h6>
+                                <span class="badge bg-indigo-soft text-indigo x-small">Live Metrics</span>
+                            </div>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="userPerformanceChart"></canvas>
+                                <div ng-if="!$ctrl.mySubObjectives.length && !$ctrl.getMyDefects().length" 
+                                     class="position-absolute top-50 start-50 translate-middle text-center w-100">
+                                    <i class="fas fa-folder-open text-muted mb-2 fs-3 opacity-25"></i>
+                                    <p class="text-muted extra-small">No active tasks for this user</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stats Quick-View -->
+                    <div class="col-lg-7">
+                        <div class="row g-3 h-100">
+                            <div class="col-6" ng-repeat="(key, val) in {
+                                'Total Work': $ctrl.mySubObjectives.length + $ctrl.getMyDefects().length, 
+                                'In Progress': ($ctrl.mySubObjectives | filter:{status:'Development'}).length + ($ctrl.mySubObjectives | filter:{status:'QA'}).length + ($ctrl.getMyDefects() | filter:{status:'Open'}).length + ($ctrl.getMyDefects() | filter:{status:'In Progress'}).length
+                            }">
+                                <div class="p-3 rounded-4 border bg-white h-100 d-flex flex-column justify-content-center shadow-sm hover-translate-y">
+                                    <div class="text-muted extra-small fw-bold text-uppercase mb-1">{{key}}</div>
+                                    <div class="h3 fw-bold mb-0" ng-class="key === 'In Progress' ? 'text-primary' : 'text-dark'">{{val}}</div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <div class="p-3 rounded-4 border bg-indigo-soft text-indigo shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="x-small fw-bold text-uppercase">Completion Velocity</div>
+                                            <div class="small fw-bold">Individual Progress for Current Objectives</div>
+                                        </div>
+                                        <div class="h3 fw-bold mb-0">{{$ctrl.projectReadiness}}%</div>
+                                    </div>
+                                    <div class="progress rounded-pill bg-white mt-2" style="height:6px;">
+                                        <div class="progress-bar bg-indigo shadow-sm" ng-style="{'width': $ctrl.projectReadiness + '%'}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row g-3">
                     <div ng-repeat="defect in $ctrl.getFilteredDefects() | limitTo:6" class="col-md-4">
                         <div class="card border-0 bg-white shadow-sm h-100 p-3 objective-card hover-shadow-lg" 
@@ -532,13 +612,10 @@ app.component('dashboard', {
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 class="fw-bold text-dark mb-0">
-                                                    {{release.releaseName}}
+                                                    <i class="fas fa-calendar-day me-2 text-indigo"></i>
+                                                    {{$ctrl.formatReleaseDate(release.releaseDate)}}
                                                     <i class="fas ms-2 text-muted small" ng-class="release._expanded ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                                                 </h6>
-                                                <span class="badge bg-success rounded-pill px-3 py-2">
-                                                    <i class="fas fa-calendar-check me-1"></i>
-                                                    {{$ctrl.formatReleaseDate(release.releaseDate)}}
-                                                </span>
                                             </div>
                                             <p class="text-muted mb-2" ng-if="release.description">
                                                 <i class="fas fa-align-left me-2 text-indigo"></i>
@@ -574,12 +651,15 @@ app.component('dashboard', {
                                                              ng-click="control._expanded = !control._expanded">
                                                             <div class="rounded-circle me-2 flex-shrink-0" style="width: 8px; height: 8px;"
                                                                  ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}"></div>
-                                                            <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{control.controlName || control.description}}</span>
+                                                            <span class="fw-bold text-dark text-truncate" style="max-width: 50%;">{{control.controlName || control.description}}</span>
                                                             <span class="badge ms-2 rounded-pill x-small" 
                                                                   ng-style="{'background-color': $ctrl.getStatusColor(control.statusName) + '18', 'color': $ctrl.getStatusColor(control.statusName)}">
                                                                 {{control.statusName}}
                                                             </span>
-                                                            <i class="fas ms-auto text-muted x-small" ng-class="control._expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                                            <span class="ms-auto text-muted x-small me-2">
+                                                                <i class="fas fa-calendar-alt me-1 text-indigo opacity-75"></i>{{$ctrl.getPrimaryReleaseDate(control)}}
+                                                            </span>
+                                                            <i class="fas text-muted x-small" ng-class="control._expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                                                         </div>
                                                         
                                                         <div ng-if="control._expanded" class="px-3 pb-3 bg-light-subtle">
@@ -884,12 +964,15 @@ app.component('dashboard', {
                                                      ng-click="control._expanded = !control._expanded">
                                                     <div class="rounded-circle me-2 flex-shrink-0" style="width: 8px; height: 8px;"
                                                          ng-style="{'background-color': $ctrl.getStatusColor(control.statusName)}"></div>
-                                                    <span class="fw-bold text-dark text-truncate" style="font-size: 0.82rem; max-width: 48%;">{{control.controlName || control.description}}</span>
+                                                    <span class="fw-bold text-dark text-truncate" style="font-size: 0.82rem; max-width: 40%;">{{control.controlName || control.description}}</span>
                                                     <span class="badge ms-2 rounded-pill" style="font-size: 0.6rem;"
                                                           ng-style="{'background-color': $ctrl.getStatusColor(control.statusName) + '18', 'color': $ctrl.getStatusColor(control.statusName)}">
                                                         {{control.statusName}}
                                                     </span>
-                                                    <span class="ms-auto text-muted" style="font-size: 0.7rem;">
+                                                    <span class="ms-auto text-muted me-3" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-calendar-alt me-1 text-indigo opacity-75"></i>{{$ctrl.getPrimaryReleaseDate(control)}}
+                                                    </span>
+                                                    <span class="text-muted" style="font-size: 0.7rem;">
                                                         <i class="fas fa-user me-1"></i>{{$ctrl.getEmployeeName(control.employeeId)}}
                                                     </span>
                                                     <i class="fas ms-3" style="font-size:0.75rem; color:#6366f1;"
@@ -1127,8 +1210,12 @@ app.component('dashboard', {
         ctrl.allDefects = [];
         ctrl.allTestCases = [];
         ctrl.loadingDefects = false;
-        ctrl.defectFilter = 'All';
+        ctrl.defectFilter = 'Assigned'; // Default to Assigned for clarity
         ctrl.hubSearch = '';
+        
+        // Selected User tracking for PM/Architect oversight
+        ctrl.selectedUserId = null;
+        ctrl.userPerformanceChart = null;
 
 
         ctrl.goToControl = function (id) {
@@ -1165,14 +1252,19 @@ app.component('dashboard', {
             var mySub = [];
             var qaSub = [];
             
-            var userId = ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null;
+            // Use selectedUserId if available, otherwise fallback to current user
+            var userId = ctrl.selectedUserId ? parseInt(ctrl.selectedUserId) : (ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null);
+            
+            if (!ctrl.selectedUserId && ctrl.currentUser) {
+                ctrl.selectedUserId = parseInt(ctrl.currentUser.employeeId);
+            }
 
             ctrl.store.allControls.forEach(function (control) {
                 if (!control.subDescriptions) return;
                 
                 try {
                     var subs = JSON.parse(control.subDescriptions);
-                    if (!Array.isArray(subs)) return;
+                    if (!Array.isArray(subs)) return; 
 
                     subs.forEach(function (sub, index) {
                         stats.total++;
@@ -1185,12 +1277,19 @@ app.component('dashboard', {
                         else if (status === 'completed' || status === 'done' || status === 'pass') stats.completed++;
                         else if (status === 'on hold') stats.onHold++;
 
+                        // Resolve owner name from real employee list if possible for data integrity
+                        var resolvedOwnerName = sub.employeeName;
+                        if (sub.employeeId && ctrl.store.employees) {
+                            var emp = ctrl.store.employees.find(function(e) { return e.id === parseInt(sub.employeeId); });
+                            if (emp) resolvedOwnerName = emp.employeeName;
+                        }
+
                         var subObj = {
                             controlId: control.controlId,
                             controlName: control.description,
                             text: sub.description || 'Untitled Sub-Objective',
                             ownerId: sub.employeeId,
-                            ownerName: sub.employeeName,
+                            ownerName: resolvedOwnerName,
                             status: sub.status,
                             releaseDate: sub.releaseDate,
                             index: index
@@ -1198,8 +1297,11 @@ app.component('dashboard', {
 
                         if (userId && parseInt(sub.employeeId) === userId) {
                             mySub.push(subObj);
+                        } else if (userId && sub.qaEmployeeId && parseInt(sub.qaEmployeeId) === userId) {
+                            mySub.push(subObj);
                         }
-                        if (status === 'ready for qa') {
+
+                        if (status === 'ready for qa' || status === 'qa') {
                             qaSub.push(subObj);
                         }
                     });
@@ -1212,6 +1314,9 @@ app.component('dashboard', {
             ctrl.mySubObjectives = mySub;
             ctrl.readyForQASubObjectives = qaSub;
             ctrl.projectReadiness = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+            
+            // Redraw performance chart whenever sub-descriptions are processed
+            $timeout(function() { ctrl.drawUserPerformanceChart(); }, 300);
         };
 
         // Main Refresh Function
@@ -1264,7 +1369,8 @@ app.component('dashboard', {
             // 4. Process Sub-Descriptions
             ctrl.processAllSubDescriptions();
 
-
+            // 5. Force roadmap calendar to re-render with latest release dates
+            ctrl.roadmapCache = null;
         };
 
         ctrl.parseSub = function (json) {
@@ -1317,6 +1423,8 @@ app.component('dashboard', {
         });
 
         ctrl.$onInit = function () {
+            ctrl.allDefects = [];
+            ctrl.allTestCases = [];
             ctrl.loadDashboardData();
             ctrl.loadQAChartData();
             ctrl.currentYear = new Date().getFullYear();
@@ -1344,21 +1452,37 @@ app.component('dashboard', {
 
             // Updated date resolver (searches control + related release + sub-objectives)
             ctrl.getControlDates = function (control) {
+                var seen = new Set();
                 var dates = [];
+
+                var addDate = function(d) {
+                    if (!d) return;
+                    var ds = typeof d === 'string' ? d : (d instanceof Date ? d.toISOString() : String(d));
+                    if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
+                    var dateObj = new Date(ds);
+                    if (isNaN(dateObj)) return;
+                    // Deduplicate by UTC day
+                    var key = dateObj.getUTCFullYear() + '-' + dateObj.getUTCMonth() + '-' + dateObj.getUTCDate();
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        dates.push(d);
+                    }
+                };
+
                 // 1. Direct release date
-                if (control.releaseDate) dates.push(control.releaseDate);
-                // 2. Date from linked release
+                addDate(control.releaseDate);
+                // 2. Date from linked release (only if different from direct date)
                 if (control.releaseId && ctrl.store.releases) {
                     var r = ctrl.store.releases.find(function(x) { return x.releaseId === control.releaseId; });
-                    if (r && r.releaseDate) dates.push(r.releaseDate);
+                    if (r && r.releaseDate) addDate(r.releaseDate);
                 }
-                // 3. Dates from test cases / sub-objectives
+                // 3. Dates from sub-objectives
                 if (control.subDescriptions) {
                     try {
                         var subs = typeof control.subDescriptions === 'string' ? JSON.parse(control.subDescriptions) : control.subDescriptions;
                         if (Array.isArray(subs)) {
                             subs.forEach(function(sub) {
-                                if (sub.releaseDate) dates.push(sub.releaseDate);
+                                if (sub.releaseDate) addDate(sub.releaseDate);
                             });
                         }
                     } catch(e) {}
@@ -1383,7 +1507,13 @@ app.component('dashboard', {
             }).then(function () {
                 return ApiService.loadAllControls(teamId);
             }).then(function () {
+                return ApiService.loadDefects(teamId);
+            }).then(function () {
+                return ApiService.loadTestCases(teamId);
+            }).then(function () {
                 console.log('All data loaded, refreshing dashboard');
+                ctrl.allDefects = ApiService.data.allDefects || [];
+                ctrl.allTestCases = ApiService.data.allTestCases || [];
                 ctrl.refreshDashboard();
 
                 // Force roadmap update after a delay
@@ -1408,13 +1538,18 @@ app.component('dashboard', {
         var controlsListener = $rootScope.$on('controlsUpdated', function () {
             console.log('Dashboard received controlsUpdated event, refreshing data');
             ctrl.refreshDashboard();
-            ctrl.forceRoadmapUpdate();
+            // Reload releases to pick up any new release dates added via controls
+            ApiService.loadReleases().then(function () {
+                ctrl.forceRoadmapUpdate();
+            });
         });
 
         var dashboardUpdatedListener = $rootScope.$on('dashboardUpdated', function () {
             console.log('Dashboard received dashboardUpdated event');
             ctrl.refreshDashboard();
-            ctrl.forceRoadmapUpdate();
+            ApiService.loadReleases().then(function () {
+                ctrl.forceRoadmapUpdate();
+            });
         });
 
         // Cleanup
@@ -1495,7 +1630,7 @@ app.component('dashboard', {
             var data = labels.map(function(s) { return statusMap[s]; });
             var colors = labels.map(function(s) { return statusColors[s] || '#6366f1'; });
 
-            if (!labels.length) {
+            if (!labels.length) {  
                 labels = ['No Data']; data = [1]; colors = ['#e5e7eb'];
             }
 
@@ -1574,10 +1709,12 @@ app.component('dashboard', {
                         var matches = allDates.some(function(d) { return matchesMonth(d); });
                         
                         if (matches) {
-                            // If it belongs to a formal release, track the release ID
-                            // Otherwise, track the control ID as a standalone entry
-                            var itemId = control.releaseId ? ('rel_' + control.releaseId) : ('ctrl_' + control.controlId);
-                            uniqueItems.add(itemId);
+                            var firstMatchInMonth = allDates.find(function(d) { return matchesMonth(d); });
+                            if (firstMatchInMonth) {
+                                var dateObj = new Date(firstMatchInMonth);
+                                var dateKey = dateObj.getUTCFullYear() + '-' + dateObj.getUTCMonth() + '-' + dateObj.getUTCDate();
+                                uniqueItems.add(dateKey);
+                            }
                         }
                     }
                 });
@@ -1866,38 +2003,23 @@ app.component('dashboard', {
                         var firstMatchInMonth = allDates.find(function(d) { return matchesMonthYear(d); });
                         
                         if (firstMatchInMonth) {
-                            var rId = control.releaseId;
-                            var mapKey = rId ? rId : ('adhoc_ctrl_' + control.controlId);
+                            var dateObj = new Date(firstMatchInMonth);
+                            // Normalize: use local date parts to avoid UTC offset shifting the day
+                            var ds2 = typeof firstMatchInMonth === 'string' ? firstMatchInMonth : firstMatchInMonth.toISOString();
+                            if (ds2.indexOf('Z') === -1 && ds2.indexOf('+') === -1) ds2 += 'Z';
+                            var normDate = new Date(ds2);
+                            // Group by UTC date to consolidate multiple controls on the same day
+                            var mapKey = 'date_' + normDate.getUTCFullYear() + '-' + normDate.getUTCMonth() + '-' + normDate.getUTCDate();
 
                             if (!releasesMap[mapKey]) {
-                                // If it's a formal release, we might already have it from store.releases (handled below)
-                                // or we create a placeholder if it's not in store.releases but exists on controls
-                                var releaseName = control.releaseName;
-                                if (!releaseName) {
-                                    releaseName = rId ? ('Release ' + rId) : (control.description || 'Ad-Hoc Release');
-                                }
-
                                 releasesMap[mapKey] = {
-                                    releaseId: rId,
-                                    isCustom: !rId,
-                                    controlId: !rId ? control.controlId : null,
-                                    releaseName: releaseName,
-                                    releaseDate: firstMatchInMonth, 
-                                    description: !rId ? 'Scheduled Control: ' + control.description : null
+                                    releaseId: null,
+                                    releaseName: ctrl.formatReleaseDate(firstMatchInMonth),
+                                    releaseDate: firstMatchInMonth,
+                                    description: 'Releases scheduled for this date'
                                 };
                             }
                         }
-                    }
-                });
-            }
-
-            // Sync with formal releases from store to get proper names/dates if available
-            if (ctrl.store.releases) {
-                ctrl.store.releases.forEach(function (r) {
-                    if (releasesMap[r.releaseId]) {
-                        releasesMap[r.releaseId].releaseName = r.releaseName || releasesMap[r.releaseId].releaseName;
-                        releasesMap[r.releaseId].releaseDate = r.releaseDate || releasesMap[r.releaseId].releaseDate;
-                        releasesMap[r.releaseId].description = r.description || releasesMap[r.releaseId].description;
                     }
                 });
             }
@@ -1928,8 +2050,30 @@ app.component('dashboard', {
         ctrl.formatReleaseDate = function (date) {
             if (!date) return 'N/A';
             var d = new Date(date);
-            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+            if (isNaN(d)) return 'N/A';
+            var day = ('0' + d.getDate()).slice(-2);
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
+        };
+
+        ctrl.getPrimaryReleaseDate = function (control) {
+            if (control.releaseDate) return ctrl.formatReleaseDate(control.releaseDate);
+            if (control.releaseId && ctrl.store.releases) {
+                var r = ctrl.store.releases.find(function(x) { return x.releaseId === control.releaseId; });
+                if (r && r.releaseDate) return ctrl.formatReleaseDate(r.releaseDate);
+            }
+            if (control.subDescriptions) {
+                try {
+                    var subs = typeof control.subDescriptions === 'string' ? JSON.parse(control.subDescriptions) : control.subDescriptions;
+                    if (Array.isArray(subs)) {
+                        for (var i = 0; i < subs.length; i++) {
+                            if (subs[i].releaseDate) return ctrl.formatReleaseDate(subs[i].releaseDate);
+                        }
+                    }
+                } catch(e) {}
+            }
+            return 'Not Scheduled';
         };
 
         ctrl._calculateControlProgress = function (control) {
@@ -3042,7 +3186,7 @@ app.component('dashboard', {
             }).length;
         };
 
-                // Defects Management
+        // Defects & Testing Management
         ctrl.loadDefects = function () {
             ctrl.loadingDefects = true;
             var teamId = AuthService.getTeamId();
@@ -3087,7 +3231,7 @@ app.component('dashboard', {
         };
 
         ctrl.getDefectsByStatus = function (status) {
-            return ctrl.allDefects.filter(function (d) {
+            return (ctrl.allDefects || []).filter(function (d) {
                 return d.status === status;
             });
         };
@@ -3105,9 +3249,121 @@ app.component('dashboard', {
         };
 
         ctrl.getMyDefects = function () {
-            if (!ctrl.allDefects || !ctrl.currentUser || !ctrl.currentUser.employeeId) return [];
+            if (!ctrl.allDefects) return [];
+            var userId = ctrl.selectedUserId ? parseInt(ctrl.selectedUserId) : (ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null);
+            if (!userId) return [];
+
             return ctrl.allDefects.filter(function (d) {
-                return parseInt(d.assignedToEmployeeId) === parseInt(ctrl.currentUser.employeeId);
+                return parseInt(d.assignedToEmployeeId) === userId || parseInt(d.employeeId) === userId;
+            });
+        };
+
+        ctrl.getSelectedUserName = function() {
+            var userId = ctrl.selectedUserId ? parseInt(ctrl.selectedUserId) : (ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null);
+            if (!userId || !ctrl.store.employees) return 'User';
+            var emp = ctrl.store.employees.find(function(e) { return e.id === userId; });
+            return emp ? emp.employeeName : 'User';
+        };
+
+        ctrl.onUserChange = function() {
+            console.log('User filter changed to:', ctrl.selectedUserId);
+            ctrl.processAllSubDescriptions();
+            // Chart redrawing is handled by processAllSubDescriptions timeout
+        };
+
+        ctrl.drawUserPerformanceChart = function() {
+            var ctx = document.getElementById('userPerformanceChart');
+            if (!ctx) return;
+            
+            if (ctrl.userPerformanceChart) {
+                ctrl.userPerformanceChart.destroy();
+            }
+
+            // Stats for chart: Combine Sub-Objectives and Defects
+            var statusCounts = {
+                'In Progress': 0,
+                'Pending QA': 0,
+                'Completed': 0,
+                'Analyzing': 0
+            };
+
+            // 1. Process My Sub Objectives
+            (ctrl.mySubObjectives || []).forEach(function(sub) {
+                var s = (sub.status || '').toLowerCase();
+                if (s === 'development') statusCounts['In Progress']++;
+                else if (s === 'ready for qa' || s === 'qa') statusCounts['Pending QA']++;
+                else if (s === 'completed' || s === 'done' || s === 'pass') statusCounts['Completed']++;
+                else if (s === 'analyze') statusCounts['Analyzing']++;
+            });
+
+            // 2. Process My Defects - Use official backend statuses (Defect.cs)
+            var myDefs = ctrl.getMyDefects();
+            myDefs.forEach(function(def) {
+                var s = (def.status || '').toLowerCase();
+                // backend values: Open, In Progress, Fixed, Closed, Rejected
+                if (s === 'open' || s === 're-open') statusCounts['In Progress']++;
+                else if (s === 'in progress' || s === 'in dev') statusCounts['In Progress']++;
+                else if (s === 'fixed' || s === 'resolved' || s === 'ready for qa') statusCounts['Pending QA']++;
+                else if (s === 'closed') statusCounts['Completed']++;
+            });
+
+            // 3. Process My Test Cases (Real-time data from backend models)
+            var userId = ctrl.selectedUserId ? parseInt(ctrl.selectedUserId) : (ctrl.currentUser ? parseInt(ctrl.currentUser.employeeId) : null);
+            (ctrl.allTestCases || []).forEach(function(tc) {
+                if (parseInt(tc.testedByEmployeeId) === userId) {
+                    var s = (tc.status || '').toLowerCase();
+                    if (s === 'pass') statusCounts['Completed']++;
+                    else if (s === 'fail') statusCounts['In Progress']++; // Rethink: or maybe separate category?
+                    else if (s === 'not tested' || s === 'in progress') statusCounts['Analyzing']++;
+                }
+            });
+
+            var labels = Object.keys(statusCounts);
+            var data = Object.values(statusCounts);
+            
+            ctrl.userPerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Work Item Count',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 0.7)',  // Indigo (In Progress)
+                            'rgba(245, 158, 11, 0.7)',   // Amber (Pending QA)
+                            'rgba(16, 185, 129, 0.7)',   // Emerald (Completed)
+                            'rgba(139, 92, 246, 0.7)'    // Violet (Analyzing)
+                        ],
+                        borderColor: [
+                            '#6366f1', '#f59e0b', '#10b981', '#8b5cf6'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 10,
+                            titleFont: { size: 14 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, color: '#64748b' },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#64748b', font: { weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
             });
         };
 
@@ -3152,7 +3408,6 @@ app.component('dashboard', {
                 case 'Not a Defect': return 'bg-info';
                 case 'Deferred': return 'bg-secondary';
                 case 'Duplicate': return 'bg-dark';
-                case 'Fixed': return 'bg-success';
                 case 'Closed': return 'bg-secondary';
                 case 'Re-Open': return 'bg-danger';
                 default: return 'bg-secondary';

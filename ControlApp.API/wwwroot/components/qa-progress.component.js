@@ -467,8 +467,8 @@ app.component('qaProgress', {
             if (isNaN(d.getTime())) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         // Get controls assigned to QA Engineers (status = "QA" AND has QA Employee assigned via qaEmployeeId OR employeeId is QA Engineer)
@@ -995,8 +995,8 @@ app.component('qaProgress', {
             if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         ctrl.formatCommentDate = function (dateStr) {
@@ -1006,8 +1006,8 @@ app.component('qaProgress', {
                 if (isNaN(date.getTime())) return dateStr;
                 var day = String(date.getDate()).padStart(2, '0');
                 var month = String(date.getMonth() + 1).padStart(2, '0');
-                var year = date.getFullYear();
-                return month + '/' + day + '/' + year;
+                var year = date.getFullYear().toString().substring(2);
+                return year + '.' + month + '.' + day;
             } catch (e) { return dateStr; }
         };
 

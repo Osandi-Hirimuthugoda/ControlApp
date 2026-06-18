@@ -32,22 +32,23 @@ app.service('ApiService', function ($http, $q, $rootScope) {
     };
 
     //Initialization
-    self.init = function () {
-        console.log('ApiService.init() called');
-        var p1 = self.loadControlTypes();
+    self.init = function (teamId) {
+        console.log('ApiService.init() started with teamId:', teamId);
+        
+        // Parallelize all independent loads to boost performance
+        var p1 = self.loadControlTypes(teamId);
         var p2 = self.loadStatuses();
-        var p3 = self.loadReleases(); // Load all releases initially
+        var p3 = self.loadReleases(teamId);
         var p4 = self.loadMasterEmployees();
+        var p5 = self.loadEmployees(teamId);
+        var p6 = self.loadAllControls(teamId);
 
-        return $q.all([p1, p2, p3]).then(function (results) {
-            console.log('Initial data loaded. Statuses:', self.data.statuses.length);
-            return self.loadEmployees();
-        }).then(function () {
-            return self.loadAllControls();
-        }).then(function () {
-            console.log('All data initialized. Final status count:', self.data.statuses.length);
+        return $q.all([p1, p2, p3, p4, p5, p6]).then(function () {
+            console.log('✓ All initial data loaded in parallel');
+            return self.data;
         }).catch(function (error) {
-            console.error('Error during initialization:', error);
+            console.error('Error during ApiService parallel initialization:', error);
+            return self.data;
         });
     };
 
@@ -727,9 +728,12 @@ app.service('ApiService', function ($http, $q, $rootScope) {
             url += '?teamId=' + teamId;
         }
         return $http.get(url).then(function (r) {
-            return r.data || [];
+            var data = r.data || [];
+            self.data.allTestCases = data;
+            return data;
         }).catch(function (error) {
             console.error('Error loading test cases:', error);
+            self.data.allTestCases = [];
             return [];
         });
     };

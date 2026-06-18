@@ -28,7 +28,7 @@ app.service('SignalRService', function(AuthService, NotificationService, $rootSc
         // Handle defect assigned
         self.connection.on('DefectAssigned', function(defectTitle, defectId) {
             console.log('Defect assigned:', defectTitle, defectId);
-            NotificationService.show('New defect assigned to you: ' + defectTitle, 'info');
+            NotificationService.show('New defect assigned to you: ' + defectTitle, 'info', { defectId: defectId });
             $rootScope.$broadcast('defectAssigned', { defectId: defectId, title: defectTitle });
             if (!$rootScope.$$phase) {
                 $rootScope.$apply();
@@ -37,7 +37,7 @@ app.service('SignalRService', function(AuthService, NotificationService, $rootSc
         // Handle QA assigned to control
         self.connection.on('QAAssigned', function(controlDescription, controlId) {
             console.log('QA assigned to control:', controlDescription, controlId);
-            NotificationService.show('You have been assigned as QA Engineer for: ' + controlDescription, 'info');
+            NotificationService.show('You have been assigned as QA Engineer for: ' + controlDescription, 'info', { controlId: controlId });
             $rootScope.$broadcast('qaAssigned', { controlId: controlId, description: controlDescription });
             if (!$rootScope.$phase) {
                 $rootScope.$apply();
@@ -47,7 +47,7 @@ app.service('SignalRService', function(AuthService, NotificationService, $rootSc
         // Handle defect status changed
         self.connection.on('DefectStatusChanged', function(defectTitle, defectId, controlId, newStatus) {
             console.log('Defect status changed:', defectTitle, defectId, controlId, newStatus);
-            NotificationService.show('Defect "' + defectTitle + '" status changed to: ' + newStatus, 'success');
+            NotificationService.show('Defect "' + defectTitle + '" status changed to: ' + newStatus, 'success', { defectId: defectId, controlId: controlId });
             $rootScope.$broadcast('defectStatusChanged', { 
                 defectId: defectId, 
                 controlId: controlId,
@@ -62,7 +62,7 @@ app.service('SignalRService', function(AuthService, NotificationService, $rootSc
         // Handle test case failed
         self.connection.on('TestCaseFailed', function(testCaseTitle, testCaseId) {
             console.log('Test case failed:', testCaseTitle, testCaseId);
-            NotificationService.show('Test case failed: ' + testCaseTitle, 'error');
+            NotificationService.show('Test case failed: ' + testCaseTitle, 'error', { testCaseId: testCaseId });
             $rootScope.$broadcast('testCaseFailed', { testCaseId: testCaseId, title: testCaseTitle });
             if (!$rootScope.$$phase) {
                 $rootScope.$apply();

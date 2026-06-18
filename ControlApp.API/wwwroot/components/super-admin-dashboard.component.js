@@ -613,7 +613,7 @@ app.component('superAdminDashboard', {
             canAddEmployee:       { 'Admin': true, 'Software Architecturer': false, 'Team Lead': false, 'Project Manager': true, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
             canEditEmployee:      { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
             canDeleteEmployee:    { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
-            canMarkProgress:      { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': true,  'QA Engineer': false, 'Intern Developer': true,  'Intern QA Engineer': false },
+            canMarkProgress:      { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
             canAddComment:        { 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': false, 'QA Engineer': false, 'Intern Developer': false, 'Intern QA Engineer': false },
             canEditSubDescription:{ 'Admin': true, 'Software Architecturer': true, 'Team Lead': true, 'Project Manager': false, 'Developer': true,  'QA Engineer': true,  'Intern Developer': true,  'Intern QA Engineer': true  }
         };

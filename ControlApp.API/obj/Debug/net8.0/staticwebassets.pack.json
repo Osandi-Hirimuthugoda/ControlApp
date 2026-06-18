@@ -17,10 +17,6 @@
       "PackagePath": "staticwebassets\\components\\control-board.component.js"
     },
     {
-      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-type-sidebar.component.js",
-      "PackagePath": "staticwebassets\\components\\control-type-sidebar.component.js"
-    },
-    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\control-types-list.component.js",
       "PackagePath": "staticwebassets\\components\\control-types-list.component.js"
     },
@@ -53,16 +49,8 @@
       "PackagePath": "staticwebassets\\components\\developer-progress.component.js"
     },
     {
-      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employee-sidebar.component.js",
-      "PackagePath": "staticwebassets\\components\\employee-sidebar.component.js"
-    },
-    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\employees-list.component.js",
       "PackagePath": "staticwebassets\\components\\employees-list.component.js"
-    },
-    {
-      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\latest-insights.component.js",
-      "PackagePath": "staticwebassets\\components\\latest-insights.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\login.component.js",
@@ -81,6 +69,10 @@
       "PackagePath": "staticwebassets\\components\\profile.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-defects.component.js",
+      "PackagePath": "staticwebassets\\components\\qa-defects.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\qa-progress-view.component.js",
       "PackagePath": "staticwebassets\\components\\qa-progress-view.component.js"
     },
@@ -89,12 +81,24 @@
       "PackagePath": "staticwebassets\\components\\qa-progress.component.js"
     },
     {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\rc-matrix.component.js",
+      "PackagePath": "staticwebassets\\components\\rc-matrix.component.js"
+    },
+    {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\sub-objectives-view.component.js",
       "PackagePath": "staticwebassets\\components\\sub-objectives-view.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\super-admin-dashboard.component.js",
       "PackagePath": "staticwebassets\\components\\super-admin-dashboard.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\team-management.component.js",
+      "PackagePath": "staticwebassets\\components\\team-management.component.js"
+    },
+    {
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\components\\test-cases-grid.component.js",
+      "PackagePath": "staticwebassets\\components\\test-cases-grid.component.js"
     },
     {
       "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\index.html",
@@ -113,12 +117,12 @@
       "PackagePath": "staticwebassets\\services\\notification.service.js"
     },
     {
-      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
-      "PackagePath": "staticwebassets\\styles.css"
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\services\\signalr.service.js",
+      "PackagePath": "staticwebassets\\services\\signalr.service.js"
     },
     {
-      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\templates\\controls-view.html",
-      "PackagePath": "staticwebassets\\templates\\controls-view.html"
+      "Id": "C:\\Users\\ASUS\\Desktop\\virtusa\\Control_App\\ControlApp.API\\wwwroot\\styles.css",
+      "PackagePath": "staticwebassets\\styles.css"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ControlApp.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

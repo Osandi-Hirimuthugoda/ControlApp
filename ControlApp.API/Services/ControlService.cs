@@ -101,9 +101,16 @@ namespace ControlApp.API.Services
                 _logger.LogInformation("Using release date from ControlType: {ReleaseDate}", releaseDate);
             }
 
+            string? customId = createControlDto.CustomId;
+            if (string.IsNullOrWhiteSpace(customId))
+            {
+                customId = await GenerateNextCustomIdAsync(createControlDto.TypeId);
+            }
+
             var control = new Controls
             {
                 Description = createControlDto.Description,
+                CustomId = customId,
                 SubDescriptions = createControlDto.SubDescriptions,
                 Comments = createControlDto.Comments,
                 TypeId = createControlDto.TypeId,
@@ -204,6 +211,10 @@ namespace ControlApp.API.Services
 
             // Update main fields
             control.Description = updateControlDto.Description;
+            if (updateControlDto.CustomId != null)
+            {
+                control.CustomId = string.IsNullOrWhiteSpace(updateControlDto.CustomId) ? null : updateControlDto.CustomId;
+            }
             control.SubDescriptions = updateControlDto.SubDescriptions;
             control.Comments = updateControlDto.Comments;
 
@@ -452,9 +463,9 @@ namespace ControlApp.API.Services
 
             var createdControls = new List<Controls>();
 
+            var generatedCustomIds = new List<string>();
             foreach (var employee in employeesWithoutControls)
             {
-
                 ControlType? controlType = null;
                 if (employee.TypeId.HasValue)
                 {
@@ -462,11 +473,32 @@ namespace ControlApp.API.Services
                         .FirstOrDefaultAsync(t => t.ControlTypeId == employee.TypeId.Value);
                 }
 
+                int resolvedTypeId = employee.TypeId ?? 0;
+                // If TypeId is 0, find first available control type
+                if (resolvedTypeId == 0)
+                {
+                    var firstType = await _context.Set<ControlType>().FirstOrDefaultAsync();
+                    if (firstType != null)
+                    {
+                        resolvedTypeId = firstType.ControlTypeId;
+                    }
+                    else
+                    {
+                        // Skip if no control types exist
+                        continue;
+                    }
+                }
+
+                // Generate Custom ID for bulk control
+                string generatedId = await GenerateNextCustomIdAsync(resolvedTypeId, generatedCustomIds);
+                generatedCustomIds.Add(generatedId);
+
                 // Create control for employee
                 var control = new Controls
                 {
                     EmployeeId = employee.Id,
-                    TypeId = employee.TypeId ?? 0, 
+                    TypeId = resolvedTypeId, 
+                    CustomId = generatedId,
                     Description = !string.IsNullOrWhiteSpace(controlType?.Description)
                         ? controlType.Description
                         : (!string.IsNullOrWhiteSpace(employee.Description)
@@ -478,21 +510,6 @@ namespace ControlApp.API.Services
                     Progress = 0,
                     Comments = ""
                 };
-
-                // If TypeId is 0, find first available control type
-                if (control.TypeId == 0)
-                {
-                    var firstType = await _context.Set<ControlType>().FirstOrDefaultAsync();
-                    if (firstType != null)
-                    {
-                        control.TypeId = firstType.ControlTypeId;
-                    }
-                    else
-                    {
-                        // Skip if no control types exist
-                        continue;
-                    }
-                }
 
                 createdControls.Add(control);
             }
@@ -509,6 +526,38 @@ namespace ControlApp.API.Services
             return controlsWithDetails
                 .Where(c => controlIds.Contains(c.ControlId))
                 .Select(MapToDto);
+        }
+
+
+        private async Task<string> GenerateNextCustomIdAsync(int typeId, List<string>? locallyGeneratedIds = null)
+        {
+            var controlType = await _context.Set<ControlType>().FirstOrDefaultAsync(t => t.ControlTypeId == typeId);
+            string typeName = controlType?.TypeName ?? "CTRL";
+            
+            string prefix = typeName.ToUpper().Trim() switch
+            {
+                "L3" => "L3-",
+                "CR" => "CR-",
+                "BUG FIX" => "BUG-",
+                "BUG" => "BUG-",
+                "ENHANCEMENT" => "ENH-",
+                "FEATURE" => "FEAT-",
+                "TASK" => "TASK-",
+                _ => typeName.Length >= 4 ? $"{typeName.Substring(0, 4).ToUpper().Replace(" ", "")}-" : $"{typeName.ToUpper().Replace(" ", "")}-"
+            };
+
+            var count = await _context.Set<Controls>().CountAsync(c => c.TypeId == typeId && !c.IsDeleted);
+            
+            int nextNum = count + 1;
+            string candidateId = $"{prefix}{nextNum}";
+            while (await _context.Set<Controls>().AnyAsync(c => c.CustomId == candidateId && !c.IsDeleted) || 
+                   (locallyGeneratedIds != null && locallyGeneratedIds.Contains(candidateId)))
+            {
+                nextNum++;
+                candidateId = $"{prefix}{nextNum}";
+            }
+            
+            return candidateId;
         }
 
 
@@ -590,6 +639,7 @@ namespace ControlApp.API.Services
             {
                 ControlId = control.ControlId,
                 Description = control.Description,
+                CustomId = control.CustomId,
                 SubDescriptions = control.SubDescriptions,
                 Comments = control.Comments,
                 TypeId = control.TypeId,

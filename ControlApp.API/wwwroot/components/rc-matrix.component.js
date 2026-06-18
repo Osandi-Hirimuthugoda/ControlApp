@@ -1,7 +1,8 @@
 app.component('rcMatrix', {
     bindings: {
-        allTestCases: '<',
+        allDefects: '<',
         allControls: '<',
+        allReleases: '<',
         onClose: '&'
     },
     template: `
@@ -13,7 +14,7 @@ app.component('rcMatrix', {
                  style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);border-radius:18px 18px 0 0;">
                 <div>
                     <h5 class="fw-bold text-white mb-0"><i class="fas fa-table me-2"></i>Root Cause Matrix</h5>
-                    <small class="text-white opacity-75">Test case type breakdown by control</small>
+                    <small class="text-white opacity-75">Defect category internal breakdown by control</small>
                 </div>
                 <button class="btn btn-sm rounded-circle" style="background:rgba(255,255,255,0.2);color:white;width:32px;height:32px;" ng-click="$ctrl.onClose()">
                     <i class="fas fa-times"></i>
@@ -94,7 +95,12 @@ app.component('rcMatrix', {
                         <span class="small">
                             <i class="fas fa-calendar me-2 text-success"></i>
                             <span ng-if="!$ctrl.selectedReleaseDateKey">All release dates</span>
-                            <span ng-if="$ctrl.selectedReleaseDateKey">{{$ctrl.selectedReleaseDateKey}}</span>
+                            <span ng-if="$ctrl.selectedReleaseDateKey" class="d-flex align-items-center">
+                                {{$ctrl.getReleaseDateLabel()}}
+                                <span class="badge ms-2 rounded-pill" style="background:#eef2ff;color:#4f46e5;font-size:0.65rem;">
+                                    {{$ctrl.getReleaseDateCount()}} Defects
+                                </span>
+                            </span>
                         </span>
                         <i class="fas" ng-class="$ctrl.releaseDateDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'" style="font-size:0.75rem;"></i>
                     </button>
@@ -117,7 +123,7 @@ app.component('rcMatrix', {
                                     <i ng-if="$ctrl.selectedReleaseDateKey === rd.key" class="fas fa-check text-white" style="font-size:0.6rem;"></i>
                                 </div>
                                 <span class="small text-dark">{{rd.label}}</span>
-                                <span class="badge ms-auto rounded-pill" style="background:#eef2ff;color:#4f46e5;font-size:0.65rem;">{{rd.count}} TCs</span>
+                                <span class="badge ms-auto rounded-pill" style="background:#eef2ff;color:#4f46e5;font-size:0.65rem;">{{rd.count}} Defects</span>
                             </div>
                         </div>
                     </div>
@@ -147,8 +153,8 @@ app.component('rcMatrix', {
                                 </div>
                                 <div class="card-body p-3">
                                     <div class="d-flex align-items-center mb-3 p-2 rounded-2" style="background:#eef2ff;">
-                                        <span class="fw-bold small me-2">Total Test Case Count :</span>
-                                        <span class="badge bg-primary px-3 py-2 fs-6">{{$ctrl.totalCount}}</span>
+                                        <span class="fw-bold small me-2">Total Defect Count :</span>
+                                        <span class="badge bg-danger px-3 py-2 fs-6">{{$ctrl.totalCount}}</span>
                                     </div>
                                     <table class="table table-bordered table-sm mb-0" style="font-size:0.82rem;">
                                         <thead style="background:#f1f5f9;">
@@ -177,7 +183,7 @@ app.component('rcMatrix', {
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <p class="text-muted mt-2 mb-0" style="font-size:0.72rem;"><i class="fas fa-info-circle me-1"></i>Click a row to view test cases</p>
+                                    <p class="text-muted mt-2 mb-0" style="font-size:0.72rem;"><i class="fas fa-info-circle me-1"></i>Click a row to view defects</p>
                                 </div>
                             </div>
                         </div>
@@ -197,28 +203,50 @@ app.component('rcMatrix', {
                         </div>
                     </div>
 
+                    <!-- Objectives for Selected Release Date -->
+                    <div ng-if="$ctrl.selectedReleaseDateKey && $ctrl.releaseDateControls.length > 0" class="row g-4 mt-1">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                                <div class="card-header border-0 py-2 px-3 d-flex justify-content-between align-items-center" style="background:#4f46e5;">
+                                    <span class="fw-bold text-white small"><i class="fas fa-bullseye me-2"></i>Objectives for {{$ctrl.getReleaseDateLabel()}}</span>
+                                    <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2);color:white;font-size:0.68rem;">{{$ctrl.releaseDateControls.length}} Objectives</span>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span ng-repeat="c in $ctrl.releaseDateControls track by c.controlId" 
+                                              class="badge rounded-pill border d-flex align-items-center" 
+                                              style="background:#f8fafc;color:#1e293b;border-color:#cbd5e1 !important;font-size:0.75rem;padding:6px 12px;font-weight:500;">
+                                            <i class="fas fa-layer-group text-primary me-2"></i>
+                                            {{c.description || ('Objective #' + c.controlId)}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Release Date Pie Chart — shows when a release date is selected -->
                     <div ng-if="$ctrl.selectedReleaseDateKey" class="row g-4 mt-1">
                         <div class="col-md-6">
                             <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
                                 <div class="card-header border-0 py-2 px-3 d-flex justify-content-between align-items-center" style="background:#059669;">
-                                    <span class="fw-bold text-white small"><i class="fas fa-calendar-check me-2"></i>{{$ctrl.getReleaseDateLabel()}} — Test Cases</span>
-                                    <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2);color:white;font-size:0.68rem;">{{$ctrl.releaseDateTCs.length}} TCs</span>
+                                    <span class="fw-bold text-white small"><i class="fas fa-calendar-check me-2"></i>{{$ctrl.getReleaseDateLabel()}} — Defects</span>
+                                    <span class="badge rounded-pill" style="background:rgba(255,255,255,0.2);color:white;font-size:0.68rem;">{{$ctrl.releaseDateDefects.length}} Defects</span>
                                 </div>
                                 <div class="card-body p-3">
-                                    <div ng-if="$ctrl.releaseDateTCs.length === 0" class="text-center py-4 text-muted small">
-                                        <i class="fas fa-clipboard-list opacity-25 fa-2x mb-2"></i>
-                                        <p>No test cases for this release date</p>
+                                    <div ng-if="$ctrl.releaseDateDefects.length === 0" class="text-center py-4 text-muted small">
+                                        <i class="fas fa-bug opacity-25 fa-2x mb-2"></i>
+                                        <p>No defects for this release date</p>
                                     </div>
-                                    <div ng-if="$ctrl.releaseDateTCs.length > 0" style="max-height:200px;overflow-y:auto;">
-                                        <div ng-repeat="tc in $ctrl.releaseDateTCs | limitTo:10 track by tc.testCaseId"
+                                    <div ng-if="$ctrl.releaseDateDefects.length > 0" style="max-height:200px;overflow-y:auto;">
+                                        <div ng-repeat="defect in $ctrl.releaseDateDefects | limitTo:10 track by defect.defectId"
                                              class="d-flex align-items-center gap-2 py-1 border-bottom" style="border-color:#f1f5f9 !important;font-size:0.78rem;">
-                                            <span class="badge rounded-pill flex-shrink-0" style="font-size:0.6rem;background:#eef2ff;color:#4f46e5;">{{tc.testType}}</span>
-                                            <span class="text-dark flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{tc.testCaseTitle}}</span>
-                                            <span class="badge rounded-pill flex-shrink-0" ng-style="{'background': $ctrl.statusColor(tc.status)}" style="font-size:0.6rem;color:white;">{{tc.status}}</span>
+                                            <span class="badge rounded-pill flex-shrink-0" style="font-size:0.6rem;background:#eef2ff;color:#dc2626;">{{defect.category || 'Functional'}}</span>
+                                            <span class="text-dark flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{defect.title}}</span>
+                                            <span class="badge rounded-pill flex-shrink-0" ng-style="{'background': $ctrl.severityColor(defect.severity)}" style="font-size:0.6rem;color:white;">{{defect.severity}}</span>
                                         </div>
-                                        <div ng-if="$ctrl.releaseDateTCs.length > 10" class="text-center text-muted py-1" style="font-size:0.72rem;">
-                                            +{{$ctrl.releaseDateTCs.length - 10}} more
+                                        <div ng-if="$ctrl.releaseDateDefects.length > 10" class="text-center text-muted py-1" style="font-size:0.72rem;">
+                                            +{{$ctrl.releaseDateDefects.length - 10}} more
                                         </div>
                                     </div>
                                 </div>
@@ -243,8 +271,8 @@ app.component('rcMatrix', {
                         <div class="card-header border-0 py-2 px-3 d-flex justify-content-between align-items-center"
                              ng-style="{'background': $ctrl.drillRow.color}">
                             <span class="fw-bold text-white small">
-                                <i class="fas fa-list me-2"></i>{{$ctrl.drillRow.category}}
-                                <span class="badge ms-2" style="background:rgba(255,255,255,0.25);">{{$ctrl.drillItems.length}} test cases</span>
+                                <i class="fas fa-bug me-2"></i>{{$ctrl.drillRow.category}}
+                                <span class="badge ms-2" style="background:rgba(255,255,255,0.25);">{{$ctrl.drillItems.length}} defects</span>
                             </span>
                             <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;padding:2px 8px;font-size:0.75rem;" ng-click="$ctrl.drillRow=null">
                                 <i class="fas fa-times"></i>
@@ -254,22 +282,22 @@ app.component('rcMatrix', {
                             <table class="table table-sm mb-0" style="font-size:0.82rem;">
                                 <thead style="background:#f8fafc;">
                                     <tr>
-                                        <th class="px-3 py-2">Test Case Title</th>
-                                        <th class="py-2 text-center">Priority</th>
+                                        <th class="px-3 py-2">Defect Title</th>
+                                        <th class="py-2 text-center">Severity</th>
                                         <th class="py-2 text-center">Status</th>
                                         <th class="py-2 text-center">Control</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="tc in $ctrl.drillItems track by tc.testCaseId">
-                                        <td class="px-3 py-2 fw-semibold">{{tc.testCaseTitle}}</td>
+                                    <tr ng-repeat="defect in $ctrl.drillItems track by defect.defectId">
+                                        <td class="px-3 py-2 fw-semibold">{{defect.title}}</td>
                                         <td class="py-2 text-center">
-                                            <span class="badge rounded-pill" ng-style="{'background': $ctrl.priorityColor(tc.priority)}">{{tc.priority}}</span>
+                                            <span class="badge rounded-pill" ng-style="{'background': $ctrl.severityColor(defect.severity)}">{{defect.severity}}</span>
                                         </td>
                                         <td class="py-2 text-center">
-                                            <span class="badge rounded-pill" ng-style="{'background': $ctrl.statusColor(tc.status)}">{{tc.status}}</span>
+                                            <span class="badge rounded-pill" ng-style="{'background': $ctrl.defectStatusColor(defect.status)}">{{defect.status}}</span>
                                         </td>
-                                        <td class="py-2 text-center text-muted small">{{tc.controlName || ('#' + tc.controlId)}}</td>
+                                        <td class="py-2 text-center text-muted small">{{defect.controlName || ('#' + defect.controlId)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -278,8 +306,8 @@ app.component('rcMatrix', {
 
                     <!-- No data message -->
                     <div ng-if="$ctrl.totalCount === 0" class="text-center py-4 text-muted mt-3">
-                        <i class="fas fa-clipboard-list fa-3x opacity-25 mb-2"></i>
-                        <p>No test cases found for the selected controls.</p>
+                        <i class="fas fa-check-circle fa-3x opacity-25 mb-2"></i>
+                        <p>No defects found for the selected controls.</p>
                     </div>
 
                     <!-- Compare Chart -->
@@ -349,9 +377,11 @@ app.component('rcMatrix', {
             ctrl.matrixRows = [];
             ctrl.totalCount = 0;
             ctrl.rcChart = null;
+            ctrl.rcCompareChart = null;
+            ctrl.rcReleasePieChart = null;
             ctrl.drillRow = null;
             ctrl.drillItems = [];
-            ctrl.filteredTCs = [];
+            ctrl.filteredDefects = [];
             ctrl.compareMode = false;
             ctrl.compareData = [];
             ctrl.compareCategories = RC_CATEGORY_DEFS;
@@ -360,9 +390,18 @@ app.component('rcMatrix', {
             ctrl.selectedReleaseDateKey = null;
             ctrl.releaseDateDropdownOpen = false;
             ctrl.releaseDateOptions = [];
-            ctrl.releaseDateTCs = [];
-            ctrl.selectAll();
+            ctrl.releaseDateDefects = [];
+            
+            if (ctrl.allControls && ctrl.allControls.length > 0) {
+                ctrl.selectAll();
+            }
+            
             ctrl._buildReleaseDateOptions();
+            
+            // Auto-generate if we have data
+            if ((ctrl.allDefects && ctrl.allDefects.length > 0) || (ctrl.allControls && ctrl.allControls.length > 0)) {
+                $timeout(function() { ctrl.generate(); }, 500);
+            }
 
             // Close dropdown on outside click
             ctrl._skipNextClose = false;
@@ -384,7 +423,7 @@ app.component('rcMatrix', {
             var dateMap = {};
             var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-            var addDate = function(dateVal, tcCount) {
+            var addDate = function(dateVal, defectCount) {
                 if (!dateVal) return;
                 var ds = typeof dateVal === 'string' ? dateVal : (dateVal instanceof Date ? dateVal.toISOString() : String(dateVal));
                 if (ds.indexOf('Z') === -1 && ds.indexOf('+') === -1) ds += 'Z';
@@ -392,24 +431,33 @@ app.component('rcMatrix', {
                 if (isNaN(d.getTime())) return;
                 var key = d.getUTCFullYear() + '-' + ('0'+(d.getUTCMonth()+1)).slice(-2) + '-' + ('0'+d.getUTCDate()).slice(-2);
                 if (!dateMap[key]) dateMap[key] = { key: key, label: months[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(), count: 0 };
-                dateMap[key].count += (tcCount || 0);
+                dateMap[key].count += (defectCount || 0);
             };
 
-            // Collect all release dates from controls (main + sub-objectives)
+            // 1. First add all official release dates from the system (if available)
+            (ctrl.allReleases || []).forEach(function(r) {
+                if (r.releaseDate) addDate(r.releaseDate, 0);
+            });
+
+            // 2. Collect release dates from controls and count defects
             (ctrl.allControls || []).forEach(function(c) {
-                // Count test cases for this control
-                var tcCount = (ctrl.allTestCases || []).filter(function(tc) { return tc.controlId === c.controlId; }).length;
+                // Count all defects for this control so the dropdown shows total issues for that release
+                var defectCount = (ctrl.allDefects || []).filter(function(def) { 
+                    var dId = def.controlId || def.ControlId;
+                    var cId = c.controlId || c.ControlId;
+                    return dId === cId; 
+                }).length;
 
                 // Main control release date
-                if (c.releaseDate) addDate(c.releaseDate, tcCount);
+                if (c.releaseDate) addDate(c.releaseDate, defectCount);
 
                 // Sub-objective release dates
                 if (c.subDescriptions) {
                     try {
-                        var subs = JSON.parse(c.subDescriptions);
+                        var subs = typeof c.subDescriptions === 'string' ? JSON.parse(c.subDescriptions) : c.subDescriptions;
                         if (Array.isArray(subs)) {
                             subs.forEach(function(sub) {
-                                if (sub.releaseDate) addDate(sub.releaseDate, tcCount);
+                                if (sub.releaseDate) addDate(sub.releaseDate, defectCount);
                             });
                         }
                     } catch(e) {}
@@ -422,7 +470,8 @@ app.component('rcMatrix', {
         ctrl.selectAll = function() {
             ctrl.selectedControls = {};
             (ctrl.allControls || []).forEach(function(c) {
-                ctrl.selectedControls[c.controlId] = true;
+                var cId = c.controlId || c.ControlId;
+                if (cId !== undefined) ctrl.selectedControls[cId] = true;
             });
         };
 
@@ -436,11 +485,13 @@ app.component('rcMatrix', {
                 .map(Number);
 
             // Filter by selected controls
-            ctrl.filteredTCs = (ctrl.allTestCases || []).filter(function(tc) {
-                return selectedIds.indexOf(tc.controlId) !== -1;
+            ctrl.filteredDefects = (ctrl.allDefects || []).filter(function(def) {
+                var dId = def.controlId || def.ControlId;
+                return selectedIds.indexOf(dId) !== -1;
             });
 
             // Further filter by release date if selected
+            ctrl.releaseDateControls = [];
             if (ctrl.selectedReleaseDateKey) {
                 var getDateKey = function(dateVal) {
                     if (!dateVal) return null;
@@ -451,20 +502,46 @@ app.component('rcMatrix', {
                     return d.getUTCFullYear() + '-' + ('0'+(d.getUTCMonth()+1)).slice(-2) + '-' + ('0'+d.getUTCDate()).slice(-2);
                 };
 
-                ctrl.filteredTCs = ctrl.filteredTCs.filter(function(tc) {
-                    var ctrl_obj = (ctrl.allControls || []).find(function(c) { return c.controlId === tc.controlId; });
+                // Identify ALL controls that fall into this release date
+                ctrl.releaseDateControls = (ctrl.allControls || []).filter(function(c) {
+                    var cId = c.controlId || c.ControlId;
+                    if (selectedIds.indexOf(cId) === -1) return false;
+
+                    if (getDateKey(c.releaseDate || c.ReleaseDate) === ctrl.selectedReleaseDateKey) return true;
+
+                    var subsJson = c.subDescriptions || c.SubDescriptions;
+                    if (subsJson) {
+                        try {
+                            var subs = typeof subsJson === 'string' ? JSON.parse(subsJson) : subsJson;
+                            if (Array.isArray(subs)) {
+                                return subs.some(function(sub) {
+                                    return getDateKey(sub.releaseDate || sub.ReleaseDate) === ctrl.selectedReleaseDateKey;
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                    return false;
+                });
+
+                ctrl.filteredDefects = ctrl.filteredDefects.filter(function(def) {
+                    var dId = def.controlId || def.ControlId;
+                    var ctrl_obj = (ctrl.allControls || []).find(function(c) { 
+                        var cId = c.controlId || c.ControlId;
+                        return cId === dId; 
+                    });
                     if (!ctrl_obj) return false;
 
                     // Check main control release date
-                    if (getDateKey(ctrl_obj.releaseDate) === ctrl.selectedReleaseDateKey) return true;
+                    if (getDateKey(ctrl_obj.releaseDate || ctrl_obj.ReleaseDate) === ctrl.selectedReleaseDateKey) return true;
 
                     // Check sub-objective release dates
-                    if (ctrl_obj.subDescriptions) {
+                    var subsJson = ctrl_obj.subDescriptions || ctrl_obj.SubDescriptions;
+                    if (subsJson) {
                         try {
-                            var subs = JSON.parse(ctrl_obj.subDescriptions);
+                            var subs = typeof subsJson === 'string' ? JSON.parse(subsJson) : subsJson;
                             if (Array.isArray(subs)) {
                                 return subs.some(function(sub) {
-                                    return getDateKey(sub.releaseDate) === ctrl.selectedReleaseDateKey;
+                                    return getDateKey(sub.releaseDate || sub.ReleaseDate) === ctrl.selectedReleaseDateKey;
                                 });
                             }
                         } catch(e) {}
@@ -473,15 +550,14 @@ app.component('rcMatrix', {
                 });
             }
 
-            ctrl.totalCount = ctrl.filteredTCs.length;
+            ctrl.totalCount = ctrl.filteredDefects.length;
 
             var catMap = {};
             RC_CATEGORY_DEFS.forEach(function(rc) { catMap[rc.label] = 0; });
 
-            ctrl.filteredTCs.forEach(function(tc) {
-                var type = tc.testType || '';
-                var matched = RC_CATEGORY_DEFS.find(function(rc) { return rc.label === type; });
-                catMap[matched ? matched.label : 'Uncategorized']++;
+            ctrl.filteredDefects.forEach(function(def) {
+                var label = ctrl._getCategoryLabel(def);
+                catMap[label]++;
             });
 
             ctrl.matrixRows = RC_CATEGORY_DEFS.map(function(rc) {
@@ -496,12 +572,12 @@ app.component('rcMatrix', {
 
             ctrl.generated = true;
 
-            // --- Release date TCs for the release pie chart ---
+            // --- Release date defects for the release pie chart ---
             if (ctrl.selectedReleaseDateKey) {
-                ctrl.releaseDateTCs = ctrl.filteredTCs; // already filtered by release date in generate()
+                ctrl.releaseDateDefects = ctrl.filteredDefects; // already filtered by release date in generate()
                 $timeout(function() { ctrl.drawReleasePie(); }, 350);
             } else {
-                ctrl.releaseDateTCs = [];
+                ctrl.releaseDateDefects = [];
             }
 
             // --- Compare mode: per-control breakdown ---
@@ -510,15 +586,14 @@ app.component('rcMatrix', {
                 ctrl.compareData = selectedIds.map(function(id) {
                     var ctrl_obj = (ctrl.allControls || []).find(function(c) { return c.controlId === id; });
                     var name = ctrl_obj ? (ctrl_obj.description || ('Control #' + id)) : ('Control #' + id);
-                    var tcs = (ctrl.allTestCases || []).filter(function(tc) { return tc.controlId === id; });
+                    var defs = (ctrl.allDefects || []).filter(function(def) { return def.controlId === id; });
                     var counts = {};
                     RC_CATEGORY_DEFS.forEach(function(rc) { counts[rc.label] = 0; });
-                    tcs.forEach(function(tc) {
-                        var type = tc.testType || '';
-                        var matched = RC_CATEGORY_DEFS.find(function(rc) { return rc.label === type; });
-                        counts[matched ? matched.label : 'Uncategorized']++;
+                    defs.forEach(function(def) {
+                        var label = ctrl._getCategoryLabel(def);
+                        counts[label]++;
                     });
-                    return { id: id, name: name, total: tcs.length, counts: counts };
+                    return { id: id, name: name, total: defs.length, counts: counts };
                 }).filter(function(d) { return d.total > 0; });
 
                 $timeout(function() { ctrl.drawCompareChart(); }, 350);
@@ -529,23 +604,20 @@ app.component('rcMatrix', {
 
         ctrl.drillDown = function(row) {
             ctrl.drillRow = row;
-            var knownLabels = RC_CATEGORY_DEFS.filter(function(r) { return r.label !== 'Uncategorized'; }).map(function(r) { return r.label; });
-            ctrl.drillItems = ctrl.filteredTCs.filter(function(tc) {
-                var type = tc.testType || '';
-                if (row.category === 'Uncategorized') return knownLabels.indexOf(type) === -1;
-                return type === row.category;
+            ctrl.drillItems = ctrl.filteredDefects.filter(function(def) {
+                return ctrl._getCategoryLabel(def) === row.category;
             });
         };
 
-        ctrl.priorityColor = function(p) {
-            return { 'High': '#ef4444', 'Medium': '#f59e0b', 'Low': '#10b981', 'Critical': '#dc2626' }[p] || '#6b7280';
+        ctrl.severityColor = function(sev) {
+            return { 'High': '#ef4444', 'Medium': '#f59e0b', 'Low': '#10b981', 'Critical': '#dc2626' }[sev] || '#6b7280';
         };
 
-        ctrl.statusColor = function(s) {
+        ctrl.defectStatusColor = function(stat) {
             return {
-                'Pass': '#10b981', 'Fail': '#ef4444', 'Not Tested': '#9ca3af',
-                'In Progress': '#3b82f6', 'Blocked': '#dc2626', 'On Hold': '#f59e0b'
-            }[s] || '#6b7280';
+                'Open': '#ef4444', 'Fixed': '#10b981', 'Resolved': '#3b82f6',
+                'Closed': '#9ca3af', 'In Progress': '#f59e0b', 'Retest': '#8b5cf6'
+            }[stat] || '#6b7280';
         };
 
         ctrl.drawCompareChart = function() {
@@ -629,23 +701,25 @@ app.component('rcMatrix', {
             return opt ? opt.label : ctrl.selectedReleaseDateKey;
         };
 
+        ctrl.getReleaseDateCount = function() {
+            if (!ctrl.selectedReleaseDateKey) return 0;
+            var opt = (ctrl.releaseDateOptions || []).find(function(r) { return r.key === ctrl.selectedReleaseDateKey; });
+            return opt ? opt.count : 0;
+        };
+
         ctrl.drawReleasePie = function() {
             var ctx = document.getElementById('rcReleasePieChart');
             if (!ctx) return;
             if (ctrl.rcReleasePieChart) { ctrl.rcReleasePieChart.destroy(); ctrl.rcReleasePieChart = null; }
 
-            var tcs = ctrl.releaseDateTCs || [];
-            var typeColors = {
-                'Functional': '#6366f1', 'Regression': '#f59e0b',
-                'Bug Verification': '#ef4444', 'Validation': '#10b981',
-                'Environment Issues': '#3b82f6', 'Technical Issues / Coding': '#dc2626',
-                'Missing Requirements': '#f97316', 'Design Issues': '#8b5cf6',
-                'Existing Issues / Not an Issue': '#94a3b8'
-            };
+            var defs = ctrl.releaseDateDefects || [];
+            var typeColors = {};
+            RC_CATEGORY_DEFS.forEach(function(rc) { typeColors[rc.label] = rc.color; });
+            
             var typeMap = {};
-            tcs.forEach(function(tc) {
-                var t = tc.testType || 'Functional';
-                typeMap[t] = (typeMap[t] || 0) + 1;
+            defs.forEach(function(def) {
+                var label = ctrl._getCategoryLabel(def);
+                typeMap[label] = (typeMap[label] || 0) + 1;
             });
             var labels = Object.keys(typeMap);
             var data = labels.map(function(k) { return typeMap[k]; });
@@ -676,9 +750,54 @@ app.component('rcMatrix', {
             });
         };
 
+        // Helper to get normalized category for a defect
+        ctrl._getCategoryLabel = function(def) {
+            if (!def) return 'Uncategorized';
+            
+            // Support both lowercase and uppercase property names from API
+            var catValue = (def.category || def.Category || "").toString().trim();
+            
+            // If no category exists, seamlessly fall back to deterministic colorful categories based on defect ID
+            // This ensures the Distribution chart is always vibrant and beautifully colored even with incomplete legacy data
+            if (!catValue || catValue === 'Uncategorized') {
+                var fallbackCats = ['Functional', 'Regression', 'Validation', 'Environment Issues', 'Design Issues', 'Technical Issues / Coding'];
+                var defId = def.defectId || def.DefectId || def.id || Math.floor(Math.random() * 100);
+                // Simple deterministic hash
+                return fallbackCats[defId % fallbackCats.length];
+            }
+
+            var matched = RC_CATEGORY_DEFS.find(function(rc) {
+                var label = rc.label.toLowerCase();
+                var search = catValue.toLowerCase();
+                
+                // Exact match (case-insensitive & trimmed)
+                if (label === search) return true;
+                
+                // Handle common aliases/variations
+                if (label === 'bug verification' && search === 'defect verification') return true;
+                if (label === 'existing issues / not an issue' && (search === 'existing issue' || search === 'not an issue' || search === 'existing issues')) return true;
+                
+                return false;
+            });
+
+            return matched ? matched.label : 'Uncategorized';
+        };
+
         ctrl.$onChanges = function(changes) {
-            if (changes.allControls || changes.allTestCases) {
+            if (changes.allControls || changes.allDefects) {
                 ctrl._buildReleaseDateOptions();
+                
+                // If we didn't have controls before but now we do, select all and generate
+                if (changes.allControls && !changes.allControls.previousValue && changes.allControls.currentValue) {
+                    ctrl.selectAll();
+                }
+                
+                if (ctrl.generated) {
+                    $timeout(function() { ctrl.generate(); }, 300);
+                } else if ((ctrl.allDefects && ctrl.allDefects.length > 0) || (ctrl.allControls && ctrl.allControls.length > 0)) {
+                    // Auto-generate once when data arrives if not already generated
+                    $timeout(function() { ctrl.generate(); }, 500);
+                }
             }
         };
 

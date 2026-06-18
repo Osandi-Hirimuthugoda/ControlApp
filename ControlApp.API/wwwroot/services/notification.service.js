@@ -6,10 +6,10 @@ app.service('NotificationService', function($timeout) {
         callback = cb;
     };
 
-    self.show = function(msg, type) {
-        if(callback) callback(msg, type);
+    self.show = function(msg, type, metadata) {
+        if(callback) callback(msg, type, metadata);
         $timeout(function() {
-            if(callback) callback('', '');
-        }, 4000);
+            if(callback) callback('', '', null);
+        }, 8000); // Keep longer for better UX
     };
 });

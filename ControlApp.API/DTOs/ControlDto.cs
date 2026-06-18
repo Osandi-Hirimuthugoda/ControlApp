@@ -7,6 +7,7 @@ namespace ControlApp.API.DTOs
     {
         public int ControlId { get; set; }
         public string? Description { get; set; }
+        public string? CustomId { get; set; }
         public string? SubDescriptions { get; set; }
         public string? Comments { get; set; }
         public int TypeId { get; set; }
@@ -30,6 +31,7 @@ namespace ControlApp.API.DTOs
     public class CreateControlDto
     {
         public string? Description { get; set; }
+        public string? CustomId { get; set; }
         public string? SubDescriptions { get; set; }
         public string? Comments { get; set; }
         

@@ -140,7 +140,7 @@ app.service('AuthService', function($http, $q, $rootScope, $window, $location, $
             canAddEmployee:        self.isAdmin() || self.isSuperAdmin(),
             canEditEmployee:       self.isAdmin() || self.isSuperAdmin(),
             canDeleteEmployee:     self.isAdmin() || self.isSuperAdmin(),
-            canMarkProgress:       isPrivileged || isDev || isInternDev,
+            canMarkProgress:       isPrivileged,
             canAddComment:         isPrivileged,
             canEditSubDescription: isPrivileged || isDev || isQA || isInternDev || isInternQA
         };

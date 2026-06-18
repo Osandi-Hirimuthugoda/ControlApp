@@ -301,8 +301,23 @@ app.component('testCasesGrid', {
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Assign To</label>
                                     <select class="form-select" ng-model="$ctrl.defectData.assignedToEmployeeId">
-                                        <option value=\"\">Unassigned</option>
-                                        <option ng-repeat=\"emp in $ctrl.getDevelopers()\" value=\"{{emp.id}}\">{{emp.employeeName}}</option>
+                                        <option value="">Unassigned</option>
+                                        <option ng-repeat="emp in $ctrl.getDevelopers()" value="{{emp.id}}">{{emp.employeeName}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">RC Category <span class="text-secondary small">(Determines RC Matrix placement)</span></label>
+                                    <select class="form-select" ng-model="$ctrl.defectData.category">
+                                        <option value="">Select Category</option>
+                                        <option value="Functional">Functional</option>
+                                        <option value="Regression">Regression</option>
+                                        <option value="Bug Verification">Bug Verification</option>
+                                        <option value="Validation">Validation</option>
+                                        <option value="Environment Issues">Environment Issues</option>
+                                        <option value="Technical Issues / Coding">Technical Issues / Coding</option>
+                                        <option value="Missing Requirements">Missing Requirements</option>
+                                        <option value="Design Issues">Design Issues</option>
+                                        <option value="Existing Issues / Not an Issue">Existing Issues / Not an Issue</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
@@ -848,8 +863,8 @@ app.component('testCasesGrid', {
             if (isNaN(d)) return '';
             var day = ('0' + d.getDate()).slice(-2);
             var month = ('0' + (d.getMonth() + 1)).slice(-2);
-            var year = d.getFullYear();
-            return month + '/' + day + '/' + year;
+            var year = d.getFullYear().toString().substring(2);
+            return year + '.' + month + '.' + day;
         };
 
         // Defect helper functions
@@ -959,6 +974,7 @@ app.component('testCasesGrid', {
                 severity: testCase.priority === 'High' ? 'High' : testCase.priority === 'Low' ? 'Low' : 'Medium',
                 priority: testCase.priority || 'Medium',
                 assignedToEmployeeId: ctrl.control.employeeId ? ctrl.control.employeeId.toString() : '',
+                category: (testCase.testType === 'Defect Verification') ? 'Bug Verification' : (testCase.testType || 'Functional'),
                 attachmentUrl: null,
                 attachmentUrls: []
             };
@@ -976,6 +992,7 @@ app.component('testCasesGrid', {
                 severity: 'Medium',
                 priority: 'Medium',
                 assignedToEmployeeId: ctrl.control.employeeId ? ctrl.control.employeeId.toString() : '',
+                category: 'Functional',
                 attachmentUrl: null,
                 attachmentUrls: []
             };
@@ -1112,6 +1129,7 @@ app.component('testCasesGrid', {
                     severity: ctrl.defectData.severity,
                     priority: ctrl.defectData.priority,
                     assignedToEmployeeId: ctrl.defectData.assignedToEmployeeId ? parseInt(ctrl.defectData.assignedToEmployeeId) : null,
+                    category: ctrl.defectData.category || 'Functional',
                     attachmentUrls: ctrl.defectData.attachmentUrls || [],
                     attachmentUrl: ctrl.defectData.attachmentUrls.length > 0 ? ctrl.defectData.attachmentUrls[0] : null
                 };

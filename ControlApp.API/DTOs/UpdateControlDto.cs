@@ -15,6 +15,7 @@ namespace ControlApp.API.DTOs
 
         public int? TypeId { get; set; }
         public string? Description { get; set; }
+        public string? CustomId { get; set; }
         public string? SubDescriptions { get; set; }
         public string? Comments { get; set; }
         

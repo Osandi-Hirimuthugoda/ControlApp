@@ -199,7 +199,7 @@ app.component('subObjectivesView', {
                                 <label class="form-label small fw-bold text-secondary text-uppercase mb-0">Progress</label>
                                 <span class="badge bg-primary rounded-pill">{{$ctrl.modalData.progress}}%</span>
                             </div>
-                            <input type="range" class="form-range" ng-model="$ctrl.modalData.progress" min="0" max="100">
+                            <input type="range" class="form-range" ng-model="$ctrl.modalData.progress" min="0" max="100" ng-disabled="!$ctrl.canMarkProgress()">
                         </div>
                     </form>
                 </div>
@@ -215,9 +215,17 @@ app.component('subObjectivesView', {
         </div>
     </div>
     `,
-    controller: function (ApiService, NotificationService, $scope, $timeout) {
+    controller: function (ApiService, NotificationService, AuthService, $scope, $timeout) {
         var ctrl = this;
         ctrl.store = ApiService.data;
+
+        ctrl.canMarkProgress = function () {
+            try {
+                return AuthService.canMarkProgress();
+            } catch (e) {
+                return false;
+            }
+        };
         ctrl.groupedObjectives = []; // Array of Controls with a 'subs' property
         ctrl.isLoading = false;
 

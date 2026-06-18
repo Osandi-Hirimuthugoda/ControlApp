@@ -16,21 +16,48 @@ app.component('addControlType', {
                 <!-- 1. Type Name -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Controller Type Name *</label>
-                    <input type="text"
-                           class="form-control"
-                           ng-model="$ctrl.newControlType.typeName"
-                           placeholder="e.g. L3, CR"
-                           required>
+                    <select class="form-select"
+                            ng-model="$ctrl.newControlType.typeName"
+                            ng-change="$ctrl.onTypeNameChange()"
+                            required>
+                        <option value="">-- Select Type --</option>
+                        <option value="L3">L3</option>
+                        <option value="CR">CR</option>
+                        <option value="Bug Fix">Bug Fix</option>
+                        <option value="Enhancement">Enhancement</option>
+                        <option value="Feature">Feature</option>
+                        <option value="Task">Task</option>
+                    </select>
+                    <small class="text-muted">L3 controls do not require sub-objectives.</small>
                 </div>
 
                 <!-- 2. Description -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Description *</label>
+                    <label class="form-label fw-bold">Description *
+                        <small class="text-muted fw-normal ms-2" ng-if="$ctrl.newControlType.typeName === 'L3'">
+                            — this will appear as the objective name on the control board
+                        </small>
+                    </label>
                     <textarea class="form-control"
                               rows="3"
                               ng-model="$ctrl.newControlType.description"
                               placeholder="Enter control task details..."
                               required></textarea>
+                </div>
+
+                <!-- Custom ID for all control types -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ticket ID (e.g. Jira ID)</label>
+                    <input type="text" class="form-control"
+                           ng-model="$ctrl.newControlType.customId"
+                           placeholder="Enter ID (e.g., L3-1234, CR-987)">
+                </div>
+
+                <!-- Release Date -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Release Date</label>
+                    <input type="date" class="form-control"
+                           ng-model="$ctrl.newControlType.releaseDate">
                 </div>
 
                 <!-- 3. Assign Employee (Owner) -->
@@ -45,8 +72,8 @@ app.component('addControlType', {
                     <small class="text-muted">Only employees with registered accounts are shown. Leave empty to add control type only.</small>
                 </div>
 
-                <!-- 4. Sub-Objectives & Key Results -->
-                <div class="mb-4">
+                <!-- 4. Sub-Objectives & Key Results (hidden for L3) -->
+                <div class="mb-4" ng-if="$ctrl.newControlType.typeName !== 'L3'">
                     <label class="form-label fw-bold d-flex justify-content-between align-items-center">
                         Sub-Objectives / Key Results
                         <button type="button" class="btn btn-sm btn-outline-primary rounded-pill border-dashed" ng-click="$ctrl.addSubDescription()">
@@ -74,7 +101,7 @@ app.component('addControlType', {
                                                     <option value="">- Owner (Optional) -</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <select class="form-select form-select-sm border-0 bg-light" 
                                                         ng-model="sub.statusId" 
                                                         ng-options="s.id as s.statusName for s in $ctrl.store.statuses">
@@ -82,6 +109,10 @@ app.component('addControlType', {
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
+                                                 <input type="date" class="form-control form-control-sm border-0 bg-light" 
+                                                        ng-model="sub.releaseDate" title="Release Date">
+                                            </div>
+                                            <div class="col-md-2">
                                                  <div class="input-group input-group-sm">
                                                     <input type="number" class="form-control border-0 bg-light" 
                                                            ng-model="sub.progress" min="0" max="100" placeholder="%">
@@ -130,10 +161,28 @@ app.component('addControlType', {
         ctrl.store = ApiService.data;
 
         // Models
-        ctrl.newControlType = { typeName: '', description: '' };
+        ctrl.newControlType = { typeName: '', description: '', customId: '', releaseDate: null };
         ctrl.assignedEmployeeId = null;
         ctrl.isSaving = false;
         ctrl.newSubDescriptions = [];
+
+        ctrl.formatDateForApi = function(dateObj) {
+            if (!dateObj) return null;
+            var d = new Date(dateObj);
+            var month = '' + (d.getMonth() + 1);
+            var day = '' + d.getDate();
+            var year = d.getFullYear();
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            return [year, month, day].join('-');
+        };
+
+        // Clear sub-descriptions when L3 is selected (L3 has no sub-objectives)
+        ctrl.onTypeNameChange = function () {
+            if (ctrl.newControlType.typeName === 'L3') {
+                ctrl.newSubDescriptions = [];
+            }
+        };
 
         // Get only registered developer employees (those with User accounts, excluding QA/PM/Architect)
         ctrl.getRegisteredEmployees = function () {
@@ -170,6 +219,7 @@ app.component('addControlType', {
                 employeeId: null,
                 statusId: 1, // Default to 'Pending' or first status if available
                 progress: 0,
+                releaseDate: null,
                 comments: []
             });
         };
@@ -191,7 +241,7 @@ app.component('addControlType', {
             var typePayload = {
                 typeName: ctrl.newControlType.typeName.trim(),
                 description: ctrl.newControlType.description.trim(),
-                releaseDate: null
+                releaseDate: ctrl.formatDateForApi(ctrl.newControlType.releaseDate)
             };
 
             // 1. Add Control Type
@@ -221,14 +271,25 @@ app.component('addControlType', {
                         // Filter out empty ones to be safe
                         var validSubs = ctrl.newSubDescriptions.filter(function (s) { return s.description && s.description.trim() !== ''; });
                         if (validSubs.length > 0) {
-                            // Map to ensure cleaner object structure if needed, but the UI model matches perfectly
-                            subDescriptionsJson = JSON.stringify(validSubs);
+                            // Format dates before stringifying
+                            var formattedSubs = validSubs.map(function(s) {
+                                return {
+                                    description: s.description,
+                                    employeeId: s.employeeId,
+                                    statusId: s.statusId,
+                                    progress: s.progress,
+                                    releaseDate: ctrl.formatDateForApi(s.releaseDate),
+                                    comments: s.comments || []
+                                };
+                            });
+                            subDescriptionsJson = JSON.stringify(formattedSubs);
                         }
                     }
 
                     var controlPayload = {
                         typeId: typeId,
                         employeeId: employeeIdValue, // can be null -> backend handles as 'Unassigned'
+                        customId: ctrl.newControlType.customId, // Add customId
                         description: addedType.description,
                         statusId: 1,
                         progress: 0,
@@ -259,7 +320,7 @@ app.component('addControlType', {
                     });
 
                     // Reset Form
-                    ctrl.newControlType = { typeName: '', description: '' };
+                    ctrl.newControlType = { typeName: '', description: '', customId: '', releaseDate: null };
                     ctrl.assignedEmployeeId = null;
                     ctrl.newSubDescriptions = []; // Reset subs
 
